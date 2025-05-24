@@ -1,11 +1,17 @@
 from datetime import timezone
 from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.conf import settings
+from weasyprint import HTML
+from datetime import datetime
+from django.core.files import File
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo
 from django.contrib.auth.hashers import make_password
 from collections import defaultdict
+import os, shutil
 
 # Vista de inicio
 @login_required
@@ -126,7 +132,7 @@ def inventario(request):
 def perfil_usuario(request):
     usuario = request.user
     
-    if usuario.is_staff:  # Asumiendo que el admin tiene `is_staff=True`
+    if usuario.rol == "admin":  # Asumiendo que el admin tiene `is_staff=True`
         template_name = "admin/perfil.html"
     elif usuario.rol == "estudiante":  # Ajusta el nombre del campo `rol` si es diferente
         template_name = "estudiante/perfil.html"
@@ -136,6 +142,56 @@ def perfil_usuario(request):
         template_name = "perfil.html"  # Un fallback por si acaso
 
     return render(request, template_name, {'usuario': usuario})
+
+@login_required
+def subir_firma(request):
+    if request.method == 'POST':
+        firma = request.FILES.get('firma')
+        if firma:
+            if not firma.name.endswith('.png'):
+                messages.error(request, 'La firma debe estar en formato PNG.')
+                return redirect('perfil_usuario')  # ajusta con tu nombre de URL
+            usuario = request.user
+            if not usuario.firma:
+                usuario.firma = firma
+                usuario.save()
+                messages.success(request, 'Firma subida correctamente.')
+            else:
+                messages.warning(request, 'Ya has subido una firma.')
+    return redirect('perfil_usuario')
+
+@login_required
+def subir_foto(request):
+    usuario = request.user
+    if request.method == 'POST' and request.FILES.get('foto'):
+        nueva_foto = request.FILES['foto']
+        
+        # Eliminar foto anterior si existe
+        if usuario.foto:
+            if os.path.isfile(usuario.foto.path):
+                os.remove(usuario.foto.path)
+
+        usuario.foto = nueva_foto
+        usuario.save()
+        return redirect('perfil_usuario')  # Asegúrate de tener una URL llamada 'perfil'
+
+    return redirect('perfil_usuario')
+
+@login_required
+def guardar_cedula_telefono(request):
+    if request.method == 'POST':
+        usuario = request.user
+        cedula = request.POST.get('cedula')
+        telefono = request.POST.get('telefono')
+
+        if cedula and not usuario.cedula:
+            usuario.cedula = cedula
+        if telefono and not usuario.telefono:
+            usuario.telefono = telefono
+
+        usuario.save()
+        messages.success(request, "Información actualizada correctamente.")
+    return redirect('perfil_usuario')  # Asegúrate que esta URL apunte al perfil
 
 @login_required
 def agregar_recurso(request):
@@ -288,6 +344,7 @@ def crear_prestamo(request, recurso_id):
 def prestamos_pendientes(request):
     prestamos = Prestamo.objects.filter(usuario=request.user, devuelto=False)
     return render(request, 'prestamos_pendientes.html', {'prestamos': prestamos})
+
 
 #####################################################################################
 
@@ -484,27 +541,77 @@ def aprobar_solicitud(request, solicitud_id):
 
     solicitud = get_object_or_404(SolicitudPrestamo, id=solicitud_id)
 
-    # Verificar que el recurso aún esté disponible
     if not solicitud.recurso.disponible:
         messages.error(request, "El recurso no está disponible.")
         return redirect('lista_solicitudes')
 
-    # Crear el préstamo
-    Prestamo.objects.create(
-        usuario=solicitud.usuario,
-        recurso=solicitud.recurso,
-        fecha_devolucion=solicitud.fecha_devolucion
-    )
+    recurso = solicitud.recurso
+    dependencia = recurso.dependencia
+    admin_dependencia = dependencia.administrador
 
-    # Cambiar estado de la solicitud a aprobado
+    # NUEVO: Obtener la dependencia administrada por el administrador (por si no coincide con la del recurso)
+    dependencia_admin = admin_dependencia.dependencia_administrada if admin_dependencia else None
+
+    # Firmas en formato absoluto
+    firma_usuario_path = solicitud.usuario.firma.path if solicitud.usuario.firma else None
+    firma_admin_path = admin_dependencia.firma.path if admin_dependencia and admin_dependencia.firma else None
+
+    # Ruta absoluta del escudo para WeasyPrint
+    escudo_path = os.path.join(settings.MEDIA_ROOT, 'encabezado_contratos', 'escudo.png')
+    escudo_url = f'file://{escudo_path}'
+
+    context = {
+        'solicitud': solicitud,
+        'usuario': solicitud.usuario,
+        'recurso': recurso,
+        'administrador': admin_dependencia,
+        'dependencia': dependencia_admin,  # ← Esta línea es clave
+        'firma_usuario_path': f'file://{firma_usuario_path}' if firma_usuario_path else None,
+        'firma_admin_path': f'file://{firma_admin_path}' if firma_admin_path else None,
+        'escudo_path': escudo_url,
+        'fecha': datetime.now(),
+    }
+
+    html_string = render_to_string('contrato/contrato_prestamo.html', context)
+    html = HTML(string=html_string)
+
+    nombre_archivo = f'contrato_prestamo_{solicitud.id}.pdf'
+
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_contratos')
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_path = os.path.join(temp_dir, nombre_archivo)
+
+    html.write_pdf(temp_path)
+
+    with open(temp_path, 'rb') as pdf_file:
+        solicitud.contrato_solicitud.save(nombre_archivo, File(pdf_file), save=False)
+
     solicitud.estado = SolicitudPrestamo.APROBADO
     solicitud.save()
 
-    # Marcar el recurso como no disponible
-    solicitud.recurso.disponible = False
-    solicitud.recurso.save()
+    destino_prestamo = os.path.join(settings.MEDIA_ROOT, 'contratos_prestamo', nombre_archivo)
+    os.makedirs(os.path.dirname(destino_prestamo), exist_ok=True)
+    shutil.copyfile(temp_path, destino_prestamo)
+
+    Prestamo.objects.create(
+        usuario=solicitud.usuario,
+        recurso=recurso,
+        fecha_devolucion=solicitud.fecha_devolucion,
+        contrato_prestamo=f'contratos_prestamo/{nombre_archivo}'
+    )
+
+    recurso.disponible = False
+    recurso.save()
+
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
+
+    if os.path.isdir(temp_dir) and not os.listdir(temp_dir):
+        os.rmdir(temp_dir)
 
     return redirect('lista_solicitudes')
+
+
 
 
 @login_required

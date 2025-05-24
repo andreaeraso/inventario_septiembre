@@ -32,18 +32,30 @@
                                     {% if recurso.foto %}
                                         <p><img src="{{ recurso.foto.url }}" alt="{{ recurso.nombre }}" class="img-fluid" style="max-width: 150px;"></p>
                                     {% endif %}
+                                    
                                     {% if recurso.disponible %}
-    <p>
-        <button class="btn btn-success btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#solicitudForm{{ recurso.id }}" aria-expanded="false" aria-controls="solicitudForm{{ recurso.id }}">
-            Solicitar Préstamo
-        </button>
-    </p>   
-{% endif %}  
+                                        <p>
+                                            <button class="btn btn-success btn-sm"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#solicitudForm{{ recurso.id }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="solicitudForm{{ recurso.id }}"
+                                                    {% if not request.user.firma or not request.user.cedula or not request.user.telefono %}disabled{% endif %}>
+                                                Solicitar Préstamo
+                                            </button>
+                                        </p>
+                                            {% if not request.user.firma or not request.user.cedula or not request.user.telefono %}
+                                                <p class="text-muted" style="font-size: 0.9em;">
+                                                    Solo se pueden solicitar préstamos con el perfil completo (firma, cédula y teléfono).
+                                                </p>
+                                            {% endif %}
+                                    {% endif %}
 
                                     <div class="collapse mt-2" id="solicitudForm{{ recurso.id }}">
                                         <form method="post" action="{% url 'solicitar_prestamo' recurso.id %}">
                                             {% csrf_token %}
-                                            <label for="fecha_devolucion_{{ recurso.id }}" class="form-label">Fecha de Devolución:</label>
+                                            <label for="fecha_devolucion_{{ recurso.id }}" class="form-label">Fecha Estimada de Devolución:</label>
                                             <input type="date" name="fecha_devolucion" id="fecha_devolucion_{{ recurso.id }}" class="form-control" required>
                                     
                                             <div class="mt-2">

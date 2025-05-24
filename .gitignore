@@ -1,1 +1,7 @@
 ./entorno
+__pycache__/
+*.pyc
+
+# Archivos temporales o del entorno
+*.log
+*.sqlite3

@@ -38,7 +38,7 @@ class Dependencia(models.Model):
 
 # Modelo de Usuario (Extiende AbstractUser para roles personalizados)
 class Usuario(AbstractUser):
-    objects = UsuarioManager()  # Usar el nuevo UserManager
+    objects = UsuarioManager()
 
     ADMIN = 'admin'
     ESTUDIANTE = 'estudiante'
@@ -48,30 +48,28 @@ class Usuario(AbstractUser):
         (ESTUDIANTE, 'Estudiante'),
         (PROFESOR, 'Profesor'),
     ]
-    
-    username = None  # Elimina el campo username
+
+    username = None
     rol = models.CharField(max_length=20, choices=ROLES, default=ESTUDIANTE)
-    codigo = models.CharField(
-        max_length=20, 
-        unique=True,  # Asegura que sea único para autenticación
-        null=False, 
-        blank=False, 
-        help_text="Código estudiantil o número de identificación"
-    )
+    codigo = models.CharField(max_length=20, unique=True, null=False, blank=False, help_text="Código estudiantil o número de identificación")
     programa = models.CharField(max_length=100, null=True, blank=True, help_text="Programa o facultad a la que pertenece")
     foto = models.ImageField(upload_to='usuarios/', null=True, blank=True, help_text="Foto de perfil")
+    firma = models.ImageField(upload_to='usuarios/firmas/', null=True, blank=True, help_text="Firma del usuario (formato PNG)")
+    #Nuevos campos
+    cedula = models.CharField(max_length=20, unique=True, null=True, blank=True, help_text="Número de cédula")
+    telefono = models.CharField(max_length=20, null=True, blank=True, help_text="Número de teléfono de contacto")
 
-    USERNAME_FIELD = 'codigo'  # Define el campo usado para autenticación
-    REQUIRED_FIELDS = []  # No se requiere username ni email
+    USERNAME_FIELD = 'codigo'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return f"{self.get_rol_display()} - {self.first_name} {self.last_name} ({self.programa})"
 
     def save(self, *args, **kwargs):
-        # Verifica que solo los administradores puedan ser asignados a una dependencia
         if self.rol != self.ADMIN and hasattr(self, 'dependencia_administrada'):
             self.dependencia_administrada = None
         super().save(*args, **kwargs)
+
 
 # Modelo de Recurso
 class Recurso(models.Model):
@@ -94,6 +92,7 @@ class Prestamo(models.Model):
     fecha_devolucion = models.DateTimeField()
     firmado = models.ImageField(upload_to='firmas/', blank=True, null=True)
     devuelto = models.BooleanField(default=False)
+    contrato_prestamo = models.FileField(upload_to='contratos_prestamo/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.usuario.codigo} -> {self.recurso.nombre} ({'Devuelto' if self.devuelto else 'Pendiente'})"
@@ -114,6 +113,7 @@ class SolicitudPrestamo(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)  # Estudiante que solicita
     fecha_devolucion = models.DateField(help_text="Fecha estimada de devolución")
     estado = models.CharField(max_length=20, choices=ESTADOS, default=PENDIENTE)
+    contrato_solicitud = models.FileField(upload_to='contratos_solicitud/', null=True, blank=True)
 
     def __str__(self):
         return f"Solicitud de {self.usuario.codigo} para {self.recurso.nombre} - {self.get_estado_display()}"

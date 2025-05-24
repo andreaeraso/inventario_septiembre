@@ -1,0 +1,44 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Establece la zona horaria a Colombia
+ENV TZ=America/Bogota
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Instala cron y dependencias necesarias (incluyendo WeasyPrint)
+RUN apt-get install -y \
+    cron \
+    build-essential \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libffi-dev \
+    libssl-dev \
+    libjpeg-dev \
+    libxml2 \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
+    libpangocairo-1.0-0 \
+    libgirepository1.0-dev \
+    libglib2.0-dev \
+    && apt-get clean
+
+# Copia el código del proyecto Django
+COPY . /app
+
+# Instala dependencias Python del proyecto
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia y registra el cronjob
+COPY cronjob /app/cronjob
+RUN chmod 0644 /app/cronjob && crontab /app/cronjob
+
+# Prepara el archivo de logs para cron
+RUN touch /var/log/cron.log
+
+# Ejecuta cron en primer plano (modo Docker)
+CMD ["cron", "-f"]

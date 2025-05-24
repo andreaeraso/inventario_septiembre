@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrato de Préstamo</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 4.5cm 1cm 2.5cm 1cm;
+            @top-center {
+                content: element(header);
+            }
+        }
+
+        body {
+            font-family: sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            text-align: justify;
+        }
+
+        #header {
+            display: block;
+            width: 100%;
+            position: running(header);
+            padding-bottom: 5px;
+            border-bottom: 1.5px solid #666;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            font-size: 10pt;
+            border: 1.5px solid #666;
+        }
+
+        .header-left,
+        .header-center,
+        .header-right {
+            border-left: 1.5px solid #666;
+            padding: 5px;
+        }
+
+        .header-left {
+            width: 22%;
+            text-align: center;
+            border-left: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-left img {
+            max-width: 90px;
+            max-height: 90px;
+        }
+
+        .header-center {
+            width: 48%;
+            text-align: center;
+        }
+
+        .header-center h2,
+        .header-center h3 {
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-right {
+            width: 30%;
+            font-size: 9pt;
+        }
+
+        .header-right div {
+            border-bottom: 1.5px solid #666;
+            padding: 2px 0;
+        }
+
+        .page-number::before {
+            content: counter(page);
+        }
+
+        .total-pages::before {
+            content: counter(pages);
+        }
+
+        .contenido {
+            margin-top: 20px;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            padding-left: 0;
+        }
+
+        .firma {
+            margin-top: 30px;
+        }
+
+        .firma img {
+            max-height: 80px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Encabezado de cada página -->
+<div id="header">
+    <div class="header-container">
+        <div class="header-left">
+            <img src="{{ escudo_path }}" alt="Escudo Universidad de Nariño">
+        </div>
+        <div class="header-center">
+            <h2>DEPARTAMENTO DE CONTRATACIÓN</h2>
+            <h3><strong>CONTRATO COMODATO PRECARIO</strong></h3>
+        </div>
+        <div class="header-right">
+            <div><strong>Código:</strong> CYC-GEF-FR-65</div>
+            <div><strong>Página:</strong> <span class="page-number"></span> de <span class="total-pages"></span></div>
+            <div><strong>Versión:</strong> 1</div>
+            <div><strong>Vigente a partir de:</strong> 2020-03-12</div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido del contrato -->
+<div class="contenido">
+    <p><strong>CONTRATO DE COMODATO PRECARIO SUSCRITO ENTRE LA UNIVERSIDAD DE NARIÑO Y EL ESTUDIANTE BENEFICIARIO DEL PROGRAMA DE PRÉSTAMO DE USO DE EQUIPOS ACADÉMICOS.</strong></p>
+
+    <p>
+        Entre los suscritos <strong>{{ administrador.get_full_name }}</strong>, mayor de edad y vecino de la ciudad de Pasto (N), identificado con la Cédula de Ciudadanía No <strong>{{ administrador.cedula }}</strong>, actuando en calidad de Director del Departamento de <strong>{{ dependencia.nombre|default:"[Dependencia no asignada]" }}</strong> de la UNIVERSIDAD DE NARIÑO, ente universitario autónomo de carácter Oficial del orden Departamental, domiciliado en Pasto y quien en adelante se llamará <strong>EL COMODANTE</strong> y por la otra, <strong>{{ usuario.get_full_name }}</strong>, mayor de edad, identificado con cédula de ciudadanía número <strong>{{ usuario.cedula }}</strong> quien, en lo sucesivo, y para todos los efectos de este contrato, se denominará <strong>EL COMODATARIO</strong>, hemos celebrado el contrato de comodato precario que se regirá por las cláusulas que a continuación se enuncian y en lo no previsto en ellas por las disposiciones legales aplicables a la materia de qué trata el presente acto jurídico, en especial por las prescripciones contenidas en los artículos 2200 y siguientes del Código Civil.
+    </p>
+
+    <h3><strong>CONSIDERANDO:</strong></h3>
+
+    <p>
+        Que en aras de garantizar los procesos académicos y optimizar la interacción por medios, teniendo ello incidencia directa en la prestación del servicio educativo para el desarrollo de actividades prácticas, se encontró necesario facilitar en la medida de la disposición de recursos de la Universidad de Nariño, el préstamo de componentes académicos a los estudiantes de la Universidad de Nariño.
+    </p>
+
+    <p>A continuación, los requisitos para acceder al préstamo:</p>
+
+    <ul>
+        <li>Ser estudiante de la Universidad de Nariño.</li>
+        <li>Portar Carnet que acredite la identificación de la persona o recibo de matrícula más un documento que lo identifique.</li>
+    </ul>
+
+    <p>Se pactaron las siguientes cláusulas:</p>
+
+    <h4><strong>PRIMERA: OBJETO DEL CONTRATO.</strong></h4>
+    <p>
+        EL COMODANTE entrega al COMODATARIO, y éste recibe, a título de COMODATO PRECARIO, el siguiente mueble: <strong>{{ recurso.nombre }}</strong>:
+    </p>
+
+    <ol>
+        <li><strong>QR:</strong> {{ recurso.id }}</li>
+        <li><strong>TIPO:</strong> {{ recurso.tipo }}</li>
+        <li><strong>NOMBRE:</strong> {{ recurso.nombre }}</li>
+        <li><strong>DESCRIPCIÓN:</strong> {{ recurso.descripcion }}</li>
+    </ol>
+
+    <h4><strong>SEGUNDA: PROPIEDAD Y USO PERMITIDO.</strong></h4>
+    <p>
+    EL COMODANTE es propietario del mueble anteriormente descrito, el cual fue adquirido, y EL COMODATARIO utilizará exclusivamente el bien mueble antes mencionado y entregado para el desarrollo de actividades académicas propuestas en su plan de estudios.
+    </p>
+
+    <p><strong>PARÁGRAFO:</strong> Al momento de la firma del presente contrato las partes manifiestan que el bien mueble descrito se encuentra en perfecto estado para el uso que EL COMODATARIO le dará al mismo.</p>
+
+    <h4><strong>TERCERA: COMODATO PRECARIO.</strong></h4>
+    <p>
+    EL COMODANTE podrá solicitar la restitución del mueble entregado en comodato en cualquier momento. EL COMODATARIO dispondrá en este caso de un plazo de diez (10) días hábiles para proceder de conformidad con la solicitud de EL COMODANTE.
+    </p>
+
+    <p><strong>PARÁGRAFO:</strong> EL COMODANTE deberá tener en cuenta y así respetar el tiempo de duración establecido en el contrato.</p>
+
+    <h4><strong>CUARTA: OBLIGACIONES GENERALES DEL COMODATARIO.</strong></h4>
+    <p>El Comodatario se obliga a:</p>
+    <ol>
+        <li>No darle uso diferente al propuesto en el comodato al mueble, ni cederlo a cualquier título o entregarlo en arrendamiento sin la autorización estricta de EL COMODANTE. Cuidar y mantener el bien recibido en comodato, respondiendo por todo daño o deterioro que sufra, salvo los que se deriven de su uso legítimo.</li>
+        <li>Notificar al COMODANTE de cualquier hecho que pueda atentar contra su derecho de dominio o libre disfrute de la tenencia, por parte de cualquier tercero.</li>
+        <li>Cuidar, vigilar, custodiar y mantener el bien recibido en comodato, respondiendo por todo daño o deterioro que sufra, salvo los que se deriven de su uso legítimo.</li>
+        <li>Responder por los daños que se causen a terceros como consecuencia de las actividades que se desarrollen con el mueble entregado en comodato, durante la vigencia del presente contrato de comodato.</li>
+        <li>Restituir el mueble a EL COMODANTE cuando éste lo solicite, teniendo en cuenta lo establecido en el Parágrafo de la Cláusula Tercera del presente contrato.</li>
+        <li>Utilizar el bien de acuerdo al uso autorizado en este contrato, es decir, Única y exclusivamente para ejecución de actividades académicas propuestas en el plan de estudios correspondiente.</li>
+        <li>Indemnizar y/o asumir todo daño que se cause a terceros, por causa o con ocasión del desarrollo de las actividades que se desarrollen con este.</li>
+        <li>Permitir que EL COMODANTE o el funcionario designado, inspeccione en cualquier momento el estado en que se encuentran los bienes objeto del presente contrato.</li>
+        <li>Las demás propias de la naturaleza del presente contrato.</li>
+    </ol>
+
+    <p><strong>PARÁGRAFO: OBLIGACIONES ESPECÍFICAS DEL COMODATARIO:</strong></p>
+    <ol>
+        <li>El comodatario deberá velar por el uso adecuado y la conservación del recurso y sus accesorios.</li>
+        <li>El comodatario responderá a La Universidad por el deterioro que no provenga de la naturaleza o del uso legítimo del recurso prestado.</li>
+        <li>El recurso dado en préstamo es para uso personal e intransferible.</li>
+        <li>Se prohíbe la manipulación, el desmontaje o la modificación total o parcial del recurso, cualquier anomalía que se presente deberá informarse ante los funcionarios de la Universidad de Nariño encargados del programa.</li>
+        <li>El comodatario exclusivamente podrá instalar aplicativos o programas requeridos para las clases y autorizados por el correspondiente docente quien considere necesaria la instalación de aquellas.</li>
+        <li>El procedimiento de entrega del equipo se realizará directamente al director del departamento y se le entregará con su documento de identificación.</li>
+        <li>El comodatario se encuentra sometido al cumplimiento de todas las obligaciones contenidas en los Artículos 2200 y siguientes del Código Civil, atinentes al préstamo de uso.</li>
+    </ol>
+
+    <h4><strong>QUINTA: OBLIGACIONES DEL COMODANTE.</strong></h4>
+    <p>El Comodante se obliga a:</p>
+    <ol>
+        <li>Entregar el mueble al COMODATARIO en las condiciones necesarias para el ejercicio de actividades académicas atinentes al plan de estudios correspondiente.</li>
+        <li>Entregar el bien mueble estrictamente determinado en sus características.</li>
+        <li>Las demás propias de la naturaleza del presente contrato.</li>
+    </ol>
+
+    <h4><strong>SEXTA: RESPONSABILIDAD DEL COMODATARIO.</strong></h4>
+    <p>
+    En virtud del presente comodato, el COMODATARIO se constituye en guardián del bien objeto del mismo, y por ende en el responsable por la realización, la dirección, manejo y control de todas las actividades que se realicen con dicho bien. El COMODATARIO responderá hasta por la culpa levísima en el uso que dé al bien objeto de comodato, ante el COMODANTE, por los daños o perjuicios, y en general por cualquier reclamación que puedan derivarse del desarrollo de las citadas actividades, o del descuido en la custodia o el mal uso que a dicho bien se les dé.
+    </p>
+
+    <h4><strong>SÉPTIMA: PLAZO.</strong></h4>
+    <p>
+    El término de duración del presente contrato de comodato precario será desde la fecha de suscripción del presente contrato hasta la fecha del <strong>{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</strong>.
+    </p>
+
+    <h4><strong>OCTAVA: RESTITUCIÓN DEL BIEN MUEBLE ENTREGADO EN COMODATO.</strong></h4>
+    <p>
+    El COMODATARIO deberá restituir el mueble objeto del presente contrato a la finalización del plazo establecido o en cualquier momento que sea requerido por EL COMODANTE.
+    </p>
+
+    <p><strong>PARÁGRAFO:</strong> En el evento de incumplimiento por parte del COMODATARIO, EL COMODANTE podrá acudir a la jurisdicción ordinaria, sin que sea necesario la constitución en mora o presentación de requerimiento alguno por parte de EL COMODANTE.</p>
+
+    <h4><strong>NOVENA: INDEMNIDAD.</strong></h4>
+    <p>
+    EL COMODATARIO mantendrá indemne AL COMODANTE, de todo daño y/o perjuicio que puedan llegar a causar a terceros el uso del bien entregado.
+    </p>
+
+    <h4><strong>DÉCIMA: VALOR.</strong></h4>
+    <p>
+    El presente contrato no genera erogaciones para las partes, por lo que EL COMODATARIO no está obligado al pago de precio alguno.
+    </p>
+
+    <h4><strong>DÉCIMA PRIMERA: RÉGIMEN LEGAL.</strong></h4>
+    <p>
+    El presente contrato se rige por las normas civiles y comerciales, según lo establecido en el artículo 2200 y siguientes del Código Civil colombiano y por lo señalado en el presente contrato.
+    </p>
+
+    <h4><strong>DÉCIMA SEGUNDA: DOMICILIO CONTRACTUAL.</strong></h4>
+    <p>
+    Para todos los efectos legales y contractuales se fija el domicilio en el Municipio de San Juan de Pasto – Nariño.
+    </p>
+
+    <h4><strong>DÉCIMA TERCERA: NOTIFICACIONES.</strong></h4>
+    <p>Las notificaciones, comunicaciones y correspondencia entre las partes se enviarán a las siguientes:</p>
+    <ul>
+        <li><strong>COMODANTE:</strong> {{ administrador.telefono|default:"[Teléfono no disponible]" }}</li>
+        <li><strong>COMODATARIO:</strong> {{ usuario.telefono|default:"[Teléfono no disponible]" }}</li>
+    </ul>
+
+    <h4><strong>DÉCIMA CUARTA:</strong></h4>
+    <p>
+    La supervisión del presente contrato será ejercida por el director del departamento de <strong>{{ dependencia.nombre|default:"[Dependencia no asignada]" }}</strong> de la UNIVERSIDAD DE NARIÑO, dando aplicación a las funciones propias de la supervisión, quien cumplirá entre otras con las siguientes funciones:
+    </p>
+    <ol>
+        <li>Vigilar y constatar la ejecución y cumplimiento de las obligaciones a cargo de COMODATARIO.</li>
+        <li>Impartir instrucciones y recomendaciones al COMODATARIO sobre asuntos de responsabilidad, que sean necesarias para la correcta ejecución del presente contrato.</li>
+        <li>Certificar el cumplimiento a satisfacción del objeto contractual y de las obligaciones originadas de este contrato.</li>
+    </ol>
+    <p>
+        Las partes se obligan a informar oportunamente por escrito, el cambio de su dirección o correo electrónico y en todo caso a mantener actualizada dicha información.
+    </p>
+    
+    <p style="margin-top: 30px;">
+        Para constancia se firma en la ciudad de Pasto en la fecha del <strong>{{ fecha|date:"d/m/Y" }}</strong>
+    </p>
+    
+    <br><br>
+    <p><strong>EL COMODANTE</strong></p>
+    
+    {% if firma_admin_path %}
+        <div class="firma">
+            <img src="{{ firma_admin_path }}" alt="Firma del administrador">
+        </div>
+    {% else %}
+        <p><em>No se adjuntó firma del COMODANTE.</em></p>
+    {% endif %}
+    
+    <p><strong>{{ administrador.get_full_name }}</strong><br>
+    Cédula: {{ administrador.cedula }}<br>
+    Director del departamento de {{ dependencia.nombre|default:"[Dependencia no asignada]" }}<br>
+    UNIVERSIDAD DE NARIÑO</p>
+    
+    <br><br>
+    <p><strong>EL COMODATARIO</strong></p>
+    
+    {% if firma_usuario_path %}
+        <div class="firma">
+            <img src="{{ firma_usuario_path }}" alt="Firma del usuario">
+        </div>
+    {% else %}
+        <p><em>No se adjuntó firma del COMODATARIO.</em></p>
+    {% endif %}
+    
+    <p><strong>{{ usuario.get_full_name }}</strong><br>
+    Cédula: {{ usuario.cedula }}<br>
+    Código Estudiantil: {{ usuario.codigo }}<br>
+    UNIVERSIDAD DE NARIÑO</p>
+</div>
+
+</body>
+</html>

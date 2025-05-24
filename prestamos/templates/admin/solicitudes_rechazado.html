@@ -13,6 +13,8 @@
                     <th>Usuario</th>
                     <th>Fecha de Solicitud</th>
                     <th>Fecha de Devolución</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,6 +25,12 @@
                     <td>{{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}</td>
                     <td>{{ solicitud.fecha_solicitud }}</td>
                     <td>{{ solicitud.fecha_devolucion }}</td>
+                    <td>
+                        <span class="badge bg-danger">{{ solicitud.get_estado_display }}</span>
+                    </td>
+                    <td>
+                        <span class="text-muted">No disponible</span>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

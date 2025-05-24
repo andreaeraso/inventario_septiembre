@@ -2,24 +2,88 @@
 {% block content %}
 <div class="container mt-4">
     <div class="card">
-        <div class="card-header">
-            <h3>Perfil de Usuario</h3>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Perfil de Usuario</h3>
         </div>
         <div class="card-body">
-            <div class="text-center">
+            <div class="text-center mb-3">
                 {% if usuario.foto %}
                     <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="rounded-circle" width="150">
                 {% else %}
                     <img src="/static/img/default-user.png" alt="Foto de perfil" class="rounded-circle" width="150">
                 {% endif %}
             </div>
-            <table class="table mt-3">
+
+            <table class="table">
                 <tr><th>Nombre:</th><td>{{ usuario.first_name }} {{ usuario.last_name }}</td></tr>
                 <tr><th>Código:</th><td>{{ usuario.codigo }}</td></tr>
                 <tr><th>Dependencia:</th><td>{{ usuario.dependencia_administrada.nombre|default:"No asignada" }}</td></tr>
                 <tr><th>Rol:</th><td>{{ usuario.get_rol_display }}</td></tr>
                 <tr><th>Programa:</th><td>{{ usuario.programa|default:"No especificado" }}</td></tr>
+
+                <!-- Cédula -->
+                <tr>
+                    <th>Cédula:</th>
+                    <td>
+                        {% if usuario.cedula %}
+                            {{ usuario.cedula }}
+                        {% else %}
+                            <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <input type="text" name="cedula" class="form-control me-2" required placeholder="Ingrese su cédula">
+                                <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <!-- Teléfono -->
+                <tr>
+                    <th>Teléfono:</th>
+                    <td>
+                        {% if usuario.telefono %}
+                            {{ usuario.telefono }}
+                        {% else %}
+                            <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <input type="text" name="telefono" class="form-control me-2" required placeholder="Ingrese su teléfono">
+                                <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
             </table>
+
+            <!-- Subir foto -->
+            <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="foto">Actualizar foto de perfil:</label>
+                    <input type="file" name="foto" id="foto" accept="image/*" class="form-control-file" required>
+                </div>
+                <button type="submit" class="btn btn-secondary mt-2">
+                    {% if usuario.foto %}Cambiar Foto{% else %}Subir Foto{% endif %}
+                </button>
+            </form>
+
+            <!-- Firma -->
+            {% if not usuario.firma %}
+                <hr>
+                <form action="{% url 'subir_firma' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="firma">Subir firma (formato PNG solamente):</label>
+                        <input type="file" name="firma" id="firma" accept="image/png" class="form-control-file" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Subir firma</button>
+                </form>
+            {% else %}
+                <hr>
+                <div class="text-center">
+                    <p><strong>Firma registrada:</strong></p>
+                    <img src="{{ usuario.firma.url }}" alt="Firma del usuario" style="max-height: 100px;">
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

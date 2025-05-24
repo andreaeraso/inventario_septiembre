@@ -16,7 +16,8 @@ from .views import (
     recursos_no_disponibles, prestamos_lista, nuevo_prestamo, prestamos_activos,
     historial_prestamos, editar_prestamo, marcar_devuelto, lista_dependencias, 
     recursos_por_dependencia, lista_solicitudes, aprobar_solicitud, rechazar_solicitud,
-    mis_solicitudes, solicitudes_por_estado, perfil_usuario, pwa_inicio,pwa_login,pwa_registro
+    mis_solicitudes, solicitudes_por_estado, perfil_usuario, pwa_inicio,pwa_login,pwa_registro,
+    subir_firma, subir_foto, guardar_cedula_telefono
 )
 
 # Configuración de las rutas de la API REST con Django Rest Framework
@@ -63,6 +64,10 @@ urlpatterns = [
     
     # Perfil de usuario
     path('perfil/', perfil_usuario, name='perfil_usuario'),
+    path('perfil/subir-firma/', subir_firma, name='subir_firma'), #subir firma
+    path('perfil/subir-foto/', subir_foto, name='subir_foto'),
+    path('perfil/guardar-cedula-telefono/', guardar_cedula_telefono, name='guardar_cedula_telefono'),
+
     
     # Gestión de préstamos
     path('prestamos/', prestamos_lista, name='prestamos_lista'),
