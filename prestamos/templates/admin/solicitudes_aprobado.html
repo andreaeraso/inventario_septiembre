@@ -1,45 +1,155 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Solicitudes Aprobadas</h2>
-    
-    {% if solicitudes %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Recurso</th>
-                    <th>Usuario</th>
-                    <th>Fecha Solicitud</th>
-                    <th>Fecha Devolución</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for solicitud in solicitudes %}
-                <tr>
-                    <td>{{ solicitud.id }}</td>
-                    <td>{{ solicitud.recurso.nombre }}</td>
-                    <td>{{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}</td>
-                    <td>{{ solicitud.fecha_solicitud }}</td>
-                    <td>{{ solicitud.fecha_devolucion }}</td>
-                    <td>
-                        <span class="badge bg-success">{{ solicitud.get_estado_display }}</span>
-                    </td>
-                    <td>
-                        {% if solicitud.estado == 'aprobado' and solicitud.archivo_contrato %}
-                            <a href="{{ solicitud.archivo_contrato.url }}" class="btn btn-outline-primary btn-sm" download>Descargar Contrato</a>
-                        {% else %}
-                            <span class="text-muted">No disponible</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No tienes solicitudes aprobadas.</p>
-    {% endif %}
+<style>
+    .perfil-wrapper {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        color: #333;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+
+    .perfil-header {
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .perfil-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .perfil-info-box {
+        background-color: #f8f8f8;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #0c7c3c;
+        overflow-x: auto;
+    }
+
+    .tabla-solicitudes {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+    .tabla-solicitudes thead {
+        background-color: #0c7c3c;
+        color: white;
+    }
+
+    .tabla-solicitudes th,
+    .tabla-solicitudes td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .tabla-solicitudes tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .tabla-solicitudes tbody tr:hover {
+        background-color: #e6f5ea;
+    }
+
+    .badge-success {
+        background-color: #27ae60;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .mensaje-vacio {
+        text-align: center;
+        padding: 1rem;
+        color: #999;
+    }
+
+    .icon-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    @media (max-width: 576px) {
+        .tabla-solicitudes th,
+        .tabla-solicitudes td {
+            font-size: 0.85rem;
+            padding: 8px;
+        }
+        .perfil-wrapper {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="perfil-wrapper mx-auto">
+        <div class="perfil-header">
+            <h3><i class='bx bx-check-circle'></i> Solicitudes Aprobadas</h3>
+        </div>
+
+        <div class="perfil-info-box">
+            {% if solicitudes %}
+                <div style="overflow-x: auto;">
+                    <table class="tabla-solicitudes">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th><span class="icon-title"><i class='bx bx-cube'></i> Recurso</span></th>
+                                <th><span class="icon-title"><i class='bx bx-user'></i> Usuario</span></th>
+                                <th><span class="icon-title"><i class='bx bx-calendar'></i> Fecha Solicitud</span></th>
+                                <th><span class="icon-title"><i class='bx bx-calendar-check'></i> Fecha Devolución</span></th>
+                                <th><span class="icon-title"><i class='bx bx-badge-check'></i> Estado</span></th>
+                                <th><span class="icon-title"><i class='bx bx-download'></i> Acciones</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for solicitud in solicitudes %}
+                            <tr>
+                                <td>{{ solicitud.id }}</td>
+                                <td>{{ solicitud.recurso.nombre }}</td>
+                                                                <td>
+                                    <a href="{% url 'perfil_usuario_detalle' solicitud.usuario.id %}" 
+                                    style="color: #0c7c3c; text-decoration: underline; font-weight: 600;">
+                                        {{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}
+                                    </a>
+                                </td>
+                                <td>{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
+                                <td>{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
+                                <td><span class="badge-success">{{ solicitud.get_estado_display }}</span></td>
+                                <td>
+                                    {% if solicitud.estado == 'aprobado' and solicitud.archivo_contrato %}
+                                        <a href="{{ solicitud.archivo_contrato.url }}" class="btn btn-outline-primary btn-sm" download>
+                                            <i class='bx bx-download'></i> Descargar
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">No disponible</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-vacio">
+                    <i class='bx bx-info-circle'></i> No tienes solicitudes aprobadas.
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

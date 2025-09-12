@@ -1,34 +1,66 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Agregar Recurso</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">Agregar Recurso</h2>
 
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li style="color: red;">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    
-    <label for="id">ID:</label>
-    <input type="text" name="id" required><br>
+    <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
+        {% csrf_token %}
 
-    <label for="tipo">Tipo:</label>
-    <input type="text" name="tipo" required><br>
+        <div class="mb-3">
+            <label for="id" class="form-label">ID:</label>
+            <input type="text" class="form-control" name="id" required>
+        </div>
 
-    <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" required><br>
+        <div class="mb-3">
+            <label for="tipo" class="form-label">Tipo:</label>
+            <select name="tipo" id="tipo-select" class="form-select" required onchange="toggleNuevoTipo(this)">
+                <option value="" disabled selected>Seleccione un tipo</option>
+                {% for tipo in tipos_existentes %}
+                    <option value="{{ tipo }}">{{ tipo }}</option>
+                {% endfor %}
+                <option value="nuevo">Otro (especificar nuevo tipo)</option>
+            </select>
+        </div>
 
-    <label for="foto">Foto:</label>
-    <input type="file" name="foto"><br>
+        <div id="nuevo-tipo-div" class="mb-3" style="display: none;">
+            <label for="nuevo_tipo" class="form-label">Nuevo tipo:</label>
+            <input type="text" class="form-control" name="nuevo_tipo" id="nuevo_tipo">
+        </div>
 
-    <label for="descripcion">Descripción:</label>
-    <textarea name="descripcion" required></textarea><br>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre:</label>
+            <input type="text" class="form-control" name="nombre" required>
+        </div>
 
-    <button type="submit">Guardar</button>
-</form>
+        <div class="mb-3">
+            <label for="foto" class="form-label">Foto:</label>
+            <input type="file" class="form-control" name="foto">
+        </div>
+
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción:</label>
+            <textarea class="form-control" name="descripcion" rows="4" required></textarea>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function toggleNuevoTipo(select) {
+        const nuevoTipoDiv = document.getElementById('nuevo-tipo-div');
+        const nuevoTipoInput = document.getElementById('nuevo_tipo');
+        if (select.value === 'nuevo') {
+            nuevoTipoDiv.style.display = 'block';
+            nuevoTipoInput.required = true;
+        } else {
+            nuevoTipoDiv.style.display = 'none';
+            nuevoTipoInput.required = false;
+        }
+    }
+</script>
 {% endblock %}

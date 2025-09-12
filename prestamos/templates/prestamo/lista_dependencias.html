@@ -1,22 +1,141 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Selecciona una Dependencia</h2>
-    <div class="row">
-        {% for dependencia in dependencias %}
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ dependencia.nombre }}</h5>
-                    <p class="card-text">{{ dependencia.descripcion }}</p>
-                    <a href="{% url 'recursos_por_dependencia' dependencia.id %}" class="btn btn-primary">Ver Recursos</a>
+<style>
+    .dependencias-wrapper {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        color: #333;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .dependencias-header {
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 0.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .dependencias-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+    }
+
+    .dependency-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .dependency-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-img-top {
+        height: 180px;
+        object-fit: cover;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .dependency-card .card-body {
+        min-height: 230px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.2rem;
+    }
+
+    .card-title {
+        font-weight: bold;
+        color: #0c7c3c;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .card-text {
+        color: #666;
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+    }
+
+    .btn-ver-recursos {
+        background-color: #0c7c3c;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem;
+        font-weight: 500;
+        transition: background 0.3s ease;
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-ver-recursos:hover {
+        background-color: #095b2c;
+        color: #fff;
+    }
+
+    .no-data-alert {
+        background-color: #f9f9f9;
+        border-left: 4px solid #0c7c3c;
+        padding: 1.5rem;
+        text-align: center;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #555;
+    }
+</style>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="dependencias-wrapper mx-auto">
+        <div class="dependencias-header">
+            <h3><i class="bi bi-diagram-3-fill"></i> Dependencias Académicas</h3>
+        </div>
+
+        {% if dependencias %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for dependencia in dependencias %}
+            <div class="col">
+                <div class="card dependency-card h-100">
+                    {% if dependencia.imagen %}
+                        <img src="{{ dependencia.imagen.url }}" class="card-img-top" alt="{{ dependencia.nombre }}">
+                    {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center card-img-top">
+                            <i class="bi bi-image fs-1"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div>
+                            <h5 class="card-title"><i class="bi bi-building"></i> {{ dependencia.nombre }}</h5>
+                            <p class="card-text">{{ dependencia.descripcion|default:"(Sin descripción)" }}</p>
+                        </div>
+                        <a href="{% url 'recursos_por_dependencia' dependencia.id %}" class="btn-ver-recursos mt-3">
+                            <i class="bi bi-box-arrow-up-right"></i> Ver Recursos
+                        </a>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <p>No hay dependencias registradas.</p>
-        {% endfor %}
+        {% else %}
+        <div class="no-data-alert mt-5">
+            <i class="bi bi-info-circle-fill"></i> No hay dependencias registradas.
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

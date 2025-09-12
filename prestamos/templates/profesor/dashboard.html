@@ -1,26 +1,174 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="content-header">
-    <div class="container-fluid">
-        <h1 class="m-0">Panel de Estudiante</h1>
-    </div>
-</div>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-<section class="content">
-    <div class="container-fluid">
+    .panel-wrapper {
+        background-color: #ffffff;
+        padding: 2.5rem 2rem;
+        border-radius: 16px;
+        color: #333;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+        width: 100%;
+    }
+
+    .panel-header {
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .panel-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+        font-size: 1.9rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .recurso-card {
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        overflow: hidden;
+        height: 100%;
+        border: none;
+    }
+
+    .recurso-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .recurso-card img {
+        height: 170px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .recurso-card .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+    }
+
+    .btn-solicitar {
+        background-color: #0c7c3c;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: background-color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-solicitar:hover {
+        background-color: #095b2c;
+        color: white;
+    }
+
+    .prestamos-card {
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border: none;
+    }
+
+    .prestamos-card .card-header {
+        background-color: #0c7c3c;
+        color: white;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .badge-success {
+        background-color: #0c7c3c;
+        font-size: 0.85rem;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: black;
+        font-size: 0.85rem;
+    }
+
+    .no-prestamos {
+        text-align: center;
+        background-color: #f9f9f9;
+        border-left: 4px solid #0c7c3c;
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    table th, table td {
+        vertical-align: middle !important;
+    }
+
+    @media (max-width: 768px) {
+        .panel-wrapper {
+            padding: 1rem;
+        }
+
+        .recurso-card img {
+            height: 140px;
+        }
+
+        .btn-solicitar {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table {
+            font-size: 0.9rem;
+        }
+
+        .panel-header h3 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="panel-wrapper mx-auto">
+        <!-- Encabezado -->
+        <div class="panel-header">
+            <h3><i class="bi bi-person-badge-fill"></i> Panel de Profesor</h3>
+        </div>
+
         <!-- Recursos Disponibles -->
-        <div class="row">
+        <div class="row g-4">
             {% for recurso in recursos_disponibles %}
-            <div class="col-md-4">
-                <div class="card">
+            <div class="col-md-4 col-sm-6">
+                <div class="card recurso-card h-100">
                     {% if recurso.foto %}
-                    <img src="{{ recurso.foto.url }}" class="card-img-top" alt="{{ recurso.nombre }}">
+                        <img src="{{ recurso.foto.url }}" alt="{{ recurso.nombre }}">
                     {% endif %}
                     <div class="card-body">
-                        <h5 class="card-title">{{ recurso.nombre }}</h5>
-                        <p class="card-text">{{ recurso.descripcion }}</p>
-                        <a href="{% url 'solicitar_prestamo' recurso.id %}" class="btn btn-primary">Solicitar Préstamo</a>
+                        <h5 class="card-title text-success"><i class="bi bi-box"></i> {{ recurso.nombre }}</h5>
+                        <p class="card-text text-muted small">{{ recurso.descripcion }}</p>
+                        <a href="{% url 'solicitar_prestamo' recurso.id %}" class="btn-solicitar mt-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Solicitar Préstamo
+                        </a>
                     </div>
                 </div>
             </div>
@@ -28,47 +176,49 @@
         </div>
 
         <!-- Mis Préstamos -->
-        <div class="row mt-4">
+        <div class="row mt-5">
             <div class="col-12">
-                <div class="card">
+                <div class="card prestamos-card">
                     <div class="card-header">
-                        <h3 class="card-title">Mis Préstamos Aprobados</h3>
+                        <i class="bi bi-clipboard-check"></i> Mis Préstamos Aprobados
                     </div>
                     <div class="card-body">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Recurso</th>
-                                    <th>Fecha Préstamo</th>
-                                    <th>Fecha Devolución</th>
-                                    <th>Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for prestamo in mis_prestamos %}
-                                <tr>
-                                    <td>{{ prestamo.recurso.nombre }}</td>
-                                    <td>{{ prestamo.fecha_prestamo }}</td>
-                                    <td>{{ prestamo.fecha_devolucion }}</td>
-                                    <td>
-                                        {% if prestamo.devuelto %}
-                                            <span class="badge badge-success">Devuelto</span>
-                                        {% else %}
-                                            <span class="badge badge-warning">Pendiente</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center">No tienes préstamos aprobados</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Recurso</th>
+                                        <th>Fecha Préstamo</th>
+                                        <th>Fecha Devolución</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prestamo in mis_prestamos %}
+                                    <tr>
+                                        <td>{{ prestamo.recurso.nombre }}</td>
+                                        <td>{{ prestamo.fecha_prestamo }}</td>
+                                        <td>{{ prestamo.fecha_devolucion }}</td>
+                                        <td>
+                                            {% if prestamo.devuelto %}
+                                                <span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Devuelto</span>
+                                            {% else %}
+                                                <span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="no-prestamos">No tienes préstamos aprobados</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 {% endblock %}

@@ -9,15 +9,14 @@ from django.views.generic import TemplateView
 from .views_api import UsuarioViewSet, DependenciaViewSet, RecursoViewSet, PrestamoViewSet
 
 # Importación de vistas para la interfaz web
-from .views import (
-    login_view, logout_view, registro_view,
-    inicio, inventario, crear_prestamo, prestamos_pendientes,
+from .views import ( logout_view, inicio, login_registro_view, inventario, crear_prestamo, prestamos_pendientes,
     solicitar_prestamo, agregar_recurso, editar_recurso, eliminar_recurso,
     recursos_no_disponibles, prestamos_lista, nuevo_prestamo, prestamos_activos,
     historial_prestamos, editar_prestamo, marcar_devuelto, lista_dependencias, 
     recursos_por_dependencia, lista_solicitudes, aprobar_solicitud, rechazar_solicitud,
     mis_solicitudes, solicitudes_por_estado, perfil_usuario, pwa_inicio,pwa_login,pwa_registro,
-    subir_firma, subir_foto, guardar_cedula_telefono
+    subir_firma, subir_foto, guardar_cedula_telefono, perfil_usuario_detalle, obtener_notificaciones, 
+    marcar_notificacion_leida, estadisticas,
 )
 
 # Configuración de las rutas de la API REST con Django Rest Framework
@@ -36,8 +35,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     
     # Autenticación de usuarios
-    path('', login_view, name='login'),
-    path('registro/', registro_view, name='registro'),
+    path('', login_registro_view, name='home'),
+    path('cuenta/', login_registro_view, name='login_registro'),
     path('logout/', logout_view, name='logout'),
     
     # Página de inicio
@@ -67,6 +66,13 @@ urlpatterns = [
     path('perfil/subir-firma/', subir_firma, name='subir_firma'), #subir firma
     path('perfil/subir-foto/', subir_foto, name='subir_foto'),
     path('perfil/guardar-cedula-telefono/', guardar_cedula_telefono, name='guardar_cedula_telefono'),
+    path('perfil/<int:usuario_id>/', perfil_usuario_detalle, name='perfil_usuario_detalle'),
+    
+    
+    path("notificaciones/", obtener_notificaciones, name="obtener_notificaciones"),
+    path("notificaciones/leida/", marcar_notificacion_leida, name="marcar_notificacion_leida"),
+    path("estadisticas/", estadisticas, name="estadisticas"),
+
 
     
     # Gestión de préstamos

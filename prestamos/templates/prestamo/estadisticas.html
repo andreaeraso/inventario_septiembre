@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="mb-4 text-center text-gradient fw-bold" 
+        style="color:#00ff99; text-shadow:0 0 10px #00ff99;">
+        <i class="fas fa-chart-bar"></i> Panel de Estadísticas
+    </h2>
+
+    <!-- KPIs principales -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-lg rounded-4" style="background:#0c7c3c; color:#fff;">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                    <h6>Total préstamos este mes</h6>
+                    <h2 class="fw-bold">{{ prestamos_mes }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4 mt-2">
+        <!-- Recursos más prestados -->
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
+                <div class="card-header border-0" style="background:transparent;">
+                    <h5 class="fw-bold" style="color:#7494ec;">
+                        <i class="fas fa-box"></i> Recursos más prestados
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartRecursos" style="max-height:280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dependencias -->
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
+                <div class="card-header border-0" style="background:transparent;">
+                    <h5 class="fw-bold" style="color:#1cc88a;">
+                        <i class="fas fa-building"></i> Dependencias más activas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartDependencias" style="max-height:280px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios -->
+    <div class="row g-4 mt-2">
+        <div class="col-md-12">
+            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
+                <div class="card-header border-0" style="background:transparent;">
+                    <h5 class="fw-bold" style="color:#f6c23e;">
+                        <i class="fas fa-users"></i> Usuarios más activos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartUsuarios" style="max-height:300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Config global: modo oscuro
+    Chart.defaults.color = "#ddd";
+    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+    const recursosLabels = [{% for r in recursos_populares %}"{{ r.recurso__nombre }}",{% endfor %}];
+    const recursosData = [{% for r in recursos_populares %}{{ r.total }},{% endfor %}];
+
+    const dependenciasLabels = [{% for d in dependencias_populares %}"{{ d.recurso__dependencia__nombre }}",{% endfor %}];
+    const dependenciasData = [{% for d in dependencias_populares %}{{ d.total }},{% endfor %}];
+
+    const usuariosLabels = [{% for u in usuarios_activos %}"{{ u.usuario__first_name }} {{ u.usuario__last_name }}",{% endfor %}];
+    const usuariosData = [{% for u in usuarios_activos %}{{ u.total }},{% endfor %}];
+
+    // Recursos - Barras horizontales
+    new Chart(document.getElementById('chartRecursos'), {
+        type: 'bar',
+        data: {
+            labels: recursosLabels,
+            datasets: [{
+                label: 'Préstamos',
+                data: recursosData,
+                backgroundColor: '#7494ec',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Dependencias - Dona
+    new Chart(document.getElementById('chartDependencias'), {
+        type: 'doughnut',
+        data: {
+            labels: dependenciasLabels,
+            datasets: [{
+                data: dependenciasData,
+                backgroundColor: ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Usuarios - Línea suave
+    new Chart(document.getElementById('chartUsuarios'), {
+        type: 'line',
+        data: {
+            labels: usuariosLabels,
+            datasets: [{
+                label: 'Préstamos realizados',
+                data: usuariosData,
+                borderColor: '#00ff99',
+                backgroundColor: 'rgba(0,255,153,0.15)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#00ff99'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+</script>
+{% endblock %}

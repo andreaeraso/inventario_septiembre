@@ -20,10 +20,11 @@ class UsuarioManager(BaseUserManager):
         return self.create_user(codigo=codigo, password=password, **extra_fields)
 
 
-# Modelo de Dependencia
 class Dependencia(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True)
+    imagen = models.ImageField(upload_to='dependencias/', null=True, blank=True, help_text="Imagen representativa de la dependencia")
+    
     administrador = models.OneToOneField(
         'Usuario', 
         on_delete=models.SET_NULL, 
@@ -117,3 +118,17 @@ class SolicitudPrestamo(models.Model):
 
     def __str__(self):
         return f"Solicitud de {self.usuario.codigo} para {self.recurso.nombre} - {self.get_estado_display()}"
+
+
+# prestamos/models.py
+class Notificacion(models.Model):
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name="notificaciones")
+    tipo = models.CharField(max_length=50)  # "SOLICITUD", "APROBADA", "RECHAZADA"
+    mensaje = models.TextField()
+    url = models.CharField(max_length=255, blank=True, null=True)  # ➕ nuevo campo
+    leida = models.BooleanField(default=False)
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario.codigo} - {self.tipo} - {'Leída' if self.leida else 'No leída'}"
+

@@ -1,62 +1,203 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-    <h2>Solicitudes de Préstamo</h2>
+<style>
+    .perfil-wrapper {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        color: #333;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
 
-    {% if solicitudes %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Recurso</th>
-                    <th>Usuario</th>
-                    <th>Fecha Solicitud</th>
-                    <th>Fecha Devolución</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for solicitud in solicitudes %}
-                <tr>
-                    <td>{{ solicitud.id }}</td>
-                    <td>{{ solicitud.recurso.nombre }}</td>
-                    <td>{{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}</td>
-                    <td>{{ solicitud.fecha_solicitud }}</td>
-                    <td>{{ solicitud.fecha_devolucion }}</td>
-                    <td>
-                        {% if solicitud.estado == 'pendiente' %}
-                            <span class="badge bg-warning text-dark">{{ solicitud.get_estado_display }}</span>
-                        {% elif solicitud.estado == 'rechazado' %}
-                            <span class="badge bg-danger">{{ solicitud.get_estado_display }}</span>
-                        {% elif solicitud.estado == 'aprobado' %}
-                            <span class="badge bg-success">{{ solicitud.get_estado_display }}</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ solicitud.get_estado_display }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if solicitud.estado == 'pendiente' %}
-                            <a href="{% url 'aprobar_solicitud' solicitud.id %}" class="btn btn-primary btn-sm">Aprobar</a>
-                            <a href="{% url 'rechazar_solicitud' solicitud.id %}" class="btn btn-danger btn-sm">Rechazar</a>
-                        {% else %}
-                            {% if solicitud.contrato_solicitud %}
-                                <a href="{{ solicitud.contrato_solicitud.url }}" class="btn btn-outline-success btn-sm" download>
-                                    Descargar contrato
-                                </a>
-                            {% else %}
-                                <span class="text-muted">Contrato no disponible</span>
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No hay solicitudes de préstamo registradas.</p>
-    {% endif %}
+    .perfil-header {
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .perfil-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .perfil-info-box {
+        background-color: #f8f8f8;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 4px solid #0c7c3c;
+        overflow-x: auto;
+    }
+
+    .tabla-solicitudes {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 750px;
+    }
+
+    .tabla-solicitudes thead {
+        background-color: #0c7c3c;
+        color: white;
+    }
+
+    .tabla-solicitudes th,
+    .tabla-solicitudes td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .tabla-solicitudes tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .tabla-solicitudes tbody tr:hover {
+        background-color: #e6f5ea;
+    }
+
+    /* BADGES */
+    .badge-pendiente {
+        background-color: #ffc107;
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .badge-aprobado {
+        background-color: #28a745;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .badge-rechazado {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .badge-otro {
+        background-color: #6c757d;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    /* BOTONES */
+    .btn-accion {
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: 0.2s ease-in-out;
+    }
+
+    .btn-accion:hover {
+        transform: scale(1.05);
+    }
+
+    .mensaje-vacio {
+        text-align: center;
+        padding: 1rem;
+        color: #999;
+    }
+
+    @media (max-width: 576px) {
+        .tabla-solicitudes th,
+        .tabla-solicitudes td {
+            font-size: 0.85rem;
+            padding: 8px;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="perfil-wrapper mx-auto">
+        <div class="perfil-header">
+            <h3><i class='bx bx-list-check'></i> Solicitudes de Préstamo</h3>
+        </div>
+
+        <div class="perfil-info-box">
+            {% if solicitudes %}
+                <div style="overflow-x: auto;">
+                    <table class="tabla-solicitudes">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Recurso</th>
+                                <th>Usuario</th>
+                                <th>Fecha Solicitud</th>
+                                <th>Fecha Devolución</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for solicitud in solicitudes %}
+                            <tr>
+                                <td>{{ solicitud.id }}</td>
+                                <td>{{ solicitud.recurso.nombre }}</td>
+                                <td>
+                                    <a href="{% url 'perfil_usuario_detalle' solicitud.usuario.id %}" 
+                                    style="color: #0c7c3c; text-decoration: underline; font-weight: 600;">
+                                        {{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}
+                                    </a>
+                                </td>
+                                <td>{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
+                                <td>{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if solicitud.estado == 'pendiente' %}
+                                        <span class="badge-pendiente"><i class='bx bx-hourglass'></i> Pendiente</span>
+                                    {% elif solicitud.estado == 'rechazado' %}
+                                        <span class="badge-rechazado"><i class='bx bx-x'></i> Rechazado</span>
+                                    {% elif solicitud.estado == 'aprobado' %}
+                                        <span class="badge-aprobado"><i class='bx bx-check'></i> Aprobado</span>
+                                    {% else %}
+                                        <span class="badge-otro">{{ solicitud.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if solicitud.estado == 'pendiente' %}
+                                        <a href="{% url 'aprobar_solicitud' solicitud.id %}" class="btn btn-success btn-accion">
+                                            <i class='bx bx-check'></i> Aprobar
+                                        </a>
+                                        <a href="{% url 'rechazar_solicitud' solicitud.id %}" class="btn btn-danger btn-accion">
+                                            <i class='bx bx-x'></i> Rechazar
+                                        </a>
+                                    {% else %}
+                                        {% if solicitud.contrato_solicitud %}
+                                            <a href="{{ solicitud.contrato_solicitud.url }}" class="btn btn-outline-success btn-accion" download>
+                                                <i class='bx bx-download'></i> Descargar contrato
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Contrato no disponible</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="mensaje-vacio">
+                    <i class='bx bx-info-circle'></i> No hay solicitudes de préstamo registradas.
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-
 {% endblock %}

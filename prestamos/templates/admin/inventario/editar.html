@@ -1,40 +1,131 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Editar Recurso</h2>
+<div class="content p-4">
+    <div class="container">
+        <div class="card shadow-lg border-0 rounded-4" style="background:#ffffff; color:#333;">
+            <div class="card-header border-0" style="background:linear-gradient(90deg,#14a34d,#28c76f); border-radius:1rem 1rem 0 0;">
+                <h3 class="card-title text-white m-0">
+                    <i class="fas fa-edit me-2"></i> Editar Recurso
+                </h3>
+            </div>
 
-{% if messages %}
-    <ul>
-        {% for message in messages %}
-            <li style="color: red;">{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
+            <div class="card-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-warning rounded-3">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-    <label for="id">ID:</label>
-    <input type="number" name="id" value="{{ recurso.id }}" required><br>
+                    <!-- ID -->
+                    <div class="mb-3">
+                        <label for="id" class="form-label fw-bold text-success">
+                            <i class="fas fa-key me-1"></i> ID
+                        </label>
+                        <input type="number" class="form-control border-success rounded-3 shadow-sm" 
+                               name="id" value="{{ recurso.id }}" required>
+                    </div>
 
-    <label for="tipo">Tipo:</label>
-    <input type="text" name="tipo" value="{{ recurso.tipo }}" required><br>
+                    <!-- Tipo -->
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label fw-bold text-success">
+                            <i class="fas fa-tag me-1"></i> Tipo
+                        </label>
+                        <select name="tipo" id="tipo-select" class="form-select border-success rounded-3 shadow-sm" required onchange="toggleNuevoTipo(this)">
+                            <option value="" disabled>Seleccione un tipo</option>
+                            {% for tipo in tipos_existentes %}
+                                <option value="{{ tipo }}" {% if recurso.tipo == tipo %}selected{% endif %}>{{ tipo }}</option>
+                            {% endfor %}
+                            <option value="nuevo">Otro (especificar nuevo tipo)</option>
+                        </select>
+                    </div>
 
-    <label for="nombre">Nombre:</label>
-    <input type="text" name="nombre" value="{{ recurso.nombre }}" required><br>
+                    <!-- Nuevo Tipo -->
+                    <div class="mb-3" id="nuevo-tipo-div" style="display:none;">
+                        <label for="nuevo_tipo" class="form-label fw-bold text-success">
+                            <i class="fas fa-plus-circle me-1"></i> Nuevo tipo
+                        </label>
+                        <input type="text" class="form-control border-success rounded-3 shadow-sm" name="nuevo_tipo" id="nuevo_tipo">
+                    </div>
 
-    <label for="descripcion">Descripción:</label>
-    <textarea name="descripcion" required>{{ recurso.descripcion }}</textarea><br>
+                    <!-- Nombre -->
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label fw-bold text-success">
+                            <i class="fas fa-box me-1"></i> Nombre
+                        </label>
+                        <input type="text" class="form-control border-success rounded-3 shadow-sm" name="nombre" value="{{ recurso.nombre }}" required>
+                    </div>
 
-    <label for="foto">Foto actual:</label><br>
-    {% if recurso.foto %}
-        <img src="{{ recurso.foto.url }}" alt="Foto del recurso" width="150"><br>
-    {% endif %}
-    <label for="foto">Subir nueva foto:</label>
-    <input type="file" name="foto"><br>
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label fw-bold text-success">
+                            <i class="fas fa-align-left me-1"></i> Descripción
+                        </label>
+                        <textarea class="form-control border-success rounded-3 shadow-sm" name="descripcion" rows="3" required>{{ recurso.descripcion }}</textarea>
+                    </div>
 
-    <button type="submit">Guardar Cambios</button>
-</form>
+                    <!-- Foto actual -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-success">
+                            <i class="fas fa-image me-1"></i> Foto actual
+                        </label><br>
+                        {% if recurso.foto %}
+                            <img src="{{ recurso.foto.url }}" alt="Foto del recurso" class="img-thumbnail rounded-3 shadow-sm mb-2" style="max-width:200px; border:2px solid #14a34d;">
+                        {% else %}
+                            <p class="text-muted">Este recurso no tiene imagen.</p>
+                        {% endif %}
+                    </div>
 
-<a href="{% url 'inventario' %}">Volver al Inventario</a>
+                    <!-- Nueva foto -->
+                    <div class="mb-3">
+                        <label for="foto" class="form-label fw-bold text-success">
+                            <i class="fas fa-upload me-1"></i> Subir nueva foto
+                        </label>
+                        <input type="file" class="form-control border-success rounded-3 shadow-sm" name="foto">
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'inventario' %}" class="btn btn-outline-success rounded-3 px-4">
+                            ⬅ Volver
+                        </a>
+                        <button type="submit" class="btn btn-success rounded-3 px-4 shadow-sm">
+                            <i class="fas fa-save me-1"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleNuevoTipo(select) {
+        const nuevoTipoDiv = document.getElementById('nuevo-tipo-div');
+        const nuevoTipoInput = document.getElementById('nuevo_tipo');
+        if (select.value === 'nuevo') {
+            nuevoTipoDiv.style.display = 'block';
+            nuevoTipoInput.required = true;
+        } else {
+            nuevoTipoDiv.style.display = 'none';
+            nuevoTipoInput.required = false;
+        }
+    }
+
+    // Mostrar el campo de nuevo tipo si el tipo original no está en la lista
+    document.addEventListener('DOMContentLoaded', function () {
+        const select = document.getElementById('tipo-select');
+        const currentTipo = "{{ recurso.tipo }}";
+        const opciones = Array.from(select.options).map(o => o.value);
+
+        if (!opciones.includes(currentTipo)) {
+            select.value = "nuevo";
+            toggleNuevoTipo(select);
+            document.getElementById('nuevo_tipo').value = currentTipo;
+        }
+    });
+</script>
 {% endblock %}

@@ -1,37 +1,99 @@
+# prestamos/management/commands/notificar_devolucion.py
+
 from django.core.management.base import BaseCommand
 from django.utils.timezone import localdate
 from django.core.mail import send_mail
+from django.urls import reverse
 from datetime import timedelta
-from prestamos.models import Prestamo
+from prestamos.models import Prestamo, Notificacion
+
 
 class Command(BaseCommand):
-    help = 'Envía notificaciones un día antes de la fecha de devolución del recurso'
+    help = 'Envía notificaciones de recordatorio y vencimiento de préstamos'
 
     def handle(self, *args, **kwargs):
-        mañana = localdate() + timedelta(days=1)
-        prestamos = Prestamo.objects.filter(
+        hoy = localdate()
+        mañana = hoy + timedelta(days=1)
+
+        # 📌 1. Recordatorios (un día antes)
+        prestamos_manana = Prestamo.objects.filter(
             fecha_devolucion__date=mañana,
             devuelto=False
         )
 
-        for prestamo in prestamos:
+        for prestamo in prestamos_manana:
             usuario = prestamo.usuario
             recurso = prestamo.recurso
+            admin_dependencia = recurso.dependencia.administrador
 
+            # Notificación en campanita (usuario y admin)
+            Notificacion.objects.create(
+                usuario=usuario,
+                tipo="VENCIMIENTO",
+                mensaje=f"El recurso '{recurso.nombre}' debe devolverse mañana ({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).",
+                url=reverse("lista_solicitudes")
+            )
+            if admin_dependencia:
+                Notificacion.objects.create(
+                    usuario=admin_dependencia,
+                    tipo="VENCIMIENTO",
+                    mensaje=f"El recurso '{recurso.nombre}' prestado a {usuario.get_full_name()} vence mañana ({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).",
+                    url=reverse("lista_solicitudes")
+                )
+
+            # Correo
             if usuario.email:
                 send_mail(
                     subject='Recordatorio de devolución de recurso',
                     message=(
                         f"Hola {usuario.get_full_name()},\n\n"
-                        f"Este es un recordatorio de que debes devolver el recurso '{recurso.nombre}' "
-                        f"el día {prestamo.fecha_devolucion.strftime('%d/%m/%Y')}.\n"
-                        "Por favor acércate al punto de entrega para evitar inconvenientes.\n\n"
+                        f"Recuerda devolver el recurso '{recurso.nombre}' mañana "
+                        f"({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).\n\n"
                         "Universidad de Nariño."
                     ),
-                    from_email='noreply@unad.edu.co',  # asegúrate que esté configurado correctamente
+                    from_email='noreply@unad.edu.co',
                     recipient_list=[usuario.email],
                     fail_silently=False,
                 )
-                self.stdout.write(self.style.SUCCESS(f"Correo enviado a {usuario.email}"))
-            else:
-                self.stdout.write(self.style.WARNING(f"El usuario {usuario} no tiene correo registrado."))
+
+        # 📌 2. Vencidos (hoy)
+        prestamos_hoy = Prestamo.objects.filter(
+            fecha_devolucion__date=hoy,
+            devuelto=False
+        )
+
+        for prestamo in prestamos_hoy:
+            usuario = prestamo.usuario
+            recurso = prestamo.recurso
+            admin_dependencia = recurso.dependencia.administrador
+
+            # Notificación en campanita (usuario y admin)
+            Notificacion.objects.create(
+                usuario=usuario,
+                tipo="VENCIDO",
+                mensaje=f"⚠️ El recurso '{recurso.nombre}' vence hoy ({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).",
+                url=reverse("lista_solicitudes")
+            )
+            if admin_dependencia:
+                Notificacion.objects.create(
+                    usuario=admin_dependencia,
+                    tipo="VENCIDO",
+                    mensaje=f"⚠️ El recurso '{recurso.nombre}' prestado a {usuario.get_full_name()} vence hoy ({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).",
+                    url=reverse("lista_solicitudes")
+                )
+
+            # Correo
+            if usuario.email:
+                send_mail(
+                    subject='⚠️ Recurso vencido',
+                    message=(
+                        f"Hola {usuario.get_full_name()},\n\n"
+                        f"El recurso '{recurso.nombre}' vence HOY "
+                        f"({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).\n\n"
+                        "Por favor devuélvelo cuanto antes.\n\n"
+                        "Universidad de Nariño."
+                    ),
+                    from_email='noreply@unad.edu.co',
+                    recipient_list=[usuario.email],
+                    fail_silently=False,
+                )

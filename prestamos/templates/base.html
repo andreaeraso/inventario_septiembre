@@ -9,20 +9,172 @@
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <!-- FontAwesome para los iconos -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- AdminLTE -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/css/adminlte.min.css">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    {% block extra_css %}{% endblock %}
+    <!-- Boxicons y Bootstrap Icons -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    {% block extra_css %}
+<style>
+    body {
+        background-color: #111;
+        color: #f0f0f0;
+    }
+
+    .main-sidebar {
+        background-color: #0c7c3c;
+    }
+
+    .brand-link {
+        background-color: #0c7c3c;
+        border-bottom: 1px solid #0e9146;
+        color: #ffffff !important;
+        font-weight: bold;
+    }
+
+    .user-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem 0;
+    }
+
+    .user-panel .image img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #00ff88;
+        box-shadow: 0 0 15px #00ff88;
+    }
+
+    .user-panel .info a {
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 1rem;
+    }
+
+    .user-panel .info small {
+        color: #b4ffca;
+        font-size: 0.85rem;
+    }
+
+    .nav-sidebar .nav-link {
+        color: #e0e0e0;
+        background-color: transparent;
+        border-radius: 10px;
+        margin: 4px 8px;
+        transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-sidebar .nav-link:hover,
+    .nav-sidebar .nav-link.active {
+        background: linear-gradient(90deg, #0c7c3c, #14a34d);
+        color: #ffffff !important;
+        font-weight: bold;
+    }
+
+    .nav-icon {
+        color: #b4ffca !important;
+    }
+
+    .main-header {
+        background-color: #0a5c2e;
+        border-bottom: 1px solid #14a34d;
+        color: white;
+    }
+
+    .main-header .nav-link {
+        color: #ffffff !important;
+    }
+
+    .main-header .nav-link:hover {
+        color: #b4ffca !important;
+    }
+
+    .main-footer {
+        background-color: #0c7c3c;
+        color: #b4ffca;
+        border-top: 1px solid #14a34d;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #0c7c3c;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #14a34d;
+        border-radius: 4px;
+    }
+
+    /* 🔔 Notificaciones */
+    #noti-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        background: #ffffff;
+    }
+
+    #noti-list .dropdown-item {
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 6px;
+        font-size: 0.95rem;
+        color: #333; /* texto normal */
+        background: #f9f9f9;
+        transition: all 0.2s ease;
+        white-space: normal !important;
+    }
+
+    /* ✅ Hover: texto se pone más negro, no azul */
+    #noti-list .dropdown-item:hover {
+        color: #000 !important; /* negro sólido */
+        background: #f9f9f9;    /* fondo igual */
+    }
+
+    #noti-list small {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: #666;
+    }
+
+    #noti-list::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    #noti-list::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #0c7c3c, #14a34d);
+        border-radius: 10px;
+    }
+
+    #noti-list::-webkit-scrollbar-track {
+        background: #eaeaea;
+        border-radius: 10px;
+    }
+</style>
+
+
+    {% endblock %}
 </head>
 
 <body class="hold-transition sidebar-mini">
     <div class="wrapper">
+
         <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <nav class="main-header navbar navbar-expand navbar-dark">
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button">
@@ -30,7 +182,20 @@
                     </a>
                 </li>
             </ul>
-            <ul class="navbar-nav ml-auto">
+
+            <ul class="navbar-nav ms-auto">
+                <!-- 🔔 Notificaciones -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span id="noti-count" class="badge bg-danger navbar-badge">0</span>
+                    </a>
+                    <ul id="noti-list" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
+                        <li><span class="dropdown-header">No tienes notificaciones</span></li>
+                    </ul>
+                </li>
+
+                <!-- 🔒 Cerrar sesión -->
                 <li class="nav-item">
                     <a href="{% url 'logout' %}" class="nav-link">
                         <i class="fas fa-sign-out-alt"></i> Cerrar sesión
@@ -46,13 +211,23 @@
             </a>
 
             <div class="sidebar">
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <!-- User panel -->
+                <div class="user-panel">
+                    <div class="image mb-2">
+                        {% if request.user.foto %}
+                        <img src="{{ request.user.foto.url }}" alt="Usuario">
+                        {% else %}
+                        <img src="{% static 'img/default-user.png' %}" alt="Usuario">
+                        {% endif %}
+                    </div>
                     <div class="info">
-                        <a href="#" class="d-block">{{ request.user.get_full_name }}</a>
-                        <small class="text-muted">{{ request.user.get_rol_display }}</small>
+                        <a href="#">{{ request.user.get_full_name }}</a>
+                        <br>
+                        <small>{{ request.user.get_rol_display }}</small>
                     </div>
                 </div>
 
+                <!-- Menú lateral -->
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
                         <li class="nav-item">
@@ -106,10 +281,17 @@
                                     </a>
                                 </li>
                             </ul>
+                            <li class="nav-item">
+    <a href="{% url 'estadisticas' %}" class="nav-link">
+        <i class="nav-icon fas fa-chart-bar"></i>
+        <p>Estadísticas</p>
+    </a>
+</li>
+
                         </li>
                         {% endif %}
 
-                        {% if request.user.rol in 'profesor' or request.user.rol == 'estudiante' %}
+                        {% if user.rol in 'profesor estudiante' %}
                         <li class="nav-item">
                             <a href="{% url 'lista_dependencias' %}" class="nav-link">
                                 <i class="nav-icon fas fa-book"></i>
@@ -148,6 +330,7 @@
             </div>
         </aside>
 
+        <!-- Contenido -->
         <div class="content-wrapper">
             {% block content %}{% endblock %}
         </div>
@@ -160,9 +343,68 @@
         </footer>
     </div>
 
+    <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+    <script>
+function cargarNotificaciones() {
+    $.get("{% url 'obtener_notificaciones' %}", function(data) {
+        let badge = $("#noti-count");
+        let lista = $("#noti-list");
+        badge.text(data.total);
+
+        lista.empty();
+        if (data.notificaciones.length === 0) {
+            lista.append('<li><span class="dropdown-header">No tienes notificaciones</span></li>');
+        } else {
+            data.notificaciones.forEach(n => {
+                // 🔗 Redirección según tipo
+                let url = "#";
+                if (n.tipo === "SOLICITUD") {
+                    url = "{% url 'solicitudes_por_estado' 'pendiente' %}";
+                } else if (n.tipo === "APROBADA") {
+                    url = "{% url 'solicitudes_por_estado' 'aprobado' %}";
+                } else if (n.tipo === "RECHAZADA") {
+                    url = "{% url 'solicitudes_por_estado' 'rechazado' %}";
+                } else if (n.tipo === "VENCIMIENTO" || n.tipo === "VENCIDO") {
+                    url = "{% url 'lista_solicitudes' %}";
+                }
+
+                // 👁️ Estilo leída/no leída
+                let clase = n.leida ? "text-muted" : "fw-bold text-dark";
+
+                lista.append(`
+                    <li>
+                        <a class="dropdown-item noti-item ${clase}" data-id="${n.id}" href="${url}">
+                            ${n.mensaje}
+                            <br><small class="text-secondary">${n.fecha}</small>
+                        </a>
+                    </li>
+                `);
+            });
+        }
+    });
+}
+
+// 📌 Marcar como leída
+$(document).on("click", ".noti-item", function(e) {
+    let notiId = $(this).data("id");
+    $.post("{% url 'marcar_notificacion_leida' %}", {
+        id: notiId,
+        csrfmiddlewaretoken: "{{ csrf_token }}"
+    }, function() {
+        cargarNotificaciones();
+    });
+});
+
+// 🔄 Actualizar cada 5s
+setInterval(cargarNotificaciones, 5000);
+cargarNotificaciones();
+</script>
+
+
 
     {% block extra_js %}{% endblock %}
 </body>

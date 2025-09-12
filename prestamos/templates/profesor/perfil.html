@@ -1,26 +1,287 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h3>Perfil de Usuario</h3>
+<style>
+    .perfil-wrapper {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 12px;
+        color: #333;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+
+    .perfil-header {
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .perfil-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .perfil-foto {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #0c7c3c;
+        box-shadow: 0 0 10px rgba(12, 124, 60, 0.3);
+    }
+
+    .perfil-label {
+        font-weight: bold;
+        color: #0c7c3c;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 130px;
+    }
+
+    .perfil-label i {
+        font-size: 18px;
+    }
+
+    .perfil-dato {
+        color: #333;
+    }
+
+    .perfil-linea {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .form-control, .form-control-file {
+        background-color: #f9f9f9;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+
+    .perfil-info-box {
+        background-color: #f8f8f8;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #0c7c3c;
+    }
+
+    .firma-box img {
+        max-height: 100px;
+        background-color: #fff;
+        padding: 8px;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .btn-success,
+    .btn-primary,
+    .btn-outline-success {
+        background-color: #0c7c3c !important;
+        border-color: #0c7c3c !important;
+        color: white !important;
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-outline-success {
+        background-color: transparent !important;
+        color: #0c7c3c !important;
+    }
+
+    .btn-success:hover,
+    .btn-primary:hover,
+    .btn-outline-success:hover {
+        background-color: #095b2c !important;
+        border-color: #095b2c !important;
+        color: white !important;
+    }
+
+    /* Animación de carga */
+    .overlay-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255,255,255,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+    }
+
+    .spinner {
+        border: 6px solid #ccc;
+        border-top: 6px solid #0c7c3c;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        color: #0c7c3c;
+        font-weight: bold;
+    }
+
+    @media screen and (max-width: 768px) {
+        .perfil-foto {
+            width: 120px;
+            height: 120px;
+        }
+    }
+</style>
+
+<!-- Overlay de carga -->
+<div class="overlay-loading" id="overlay-loading">
+    <div class="text-center">
+        <div class="spinner"></div>
+        <div class="loading-text">Subiendo imagen...</div>
+    </div>
+</div>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="perfil-wrapper mx-auto">
+        <!-- Encabezado -->
+        <div class="perfil-header">
+            <h3><i class='bx bxs-user-account'></i> Perfil de Usuario</h3>
         </div>
-        <div class="card-body">
-            <div class="text-center">
+
+        <div class="row g-4 align-items-start">
+            <!-- Foto + Firma -->
+            <div class="col-md-4 text-center">
                 {% if usuario.foto %}
-                    <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="rounded-circle" width="150">
+                    <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="perfil-foto">
                 {% else %}
-                    <img src="/static/img/default-user.png" alt="Foto de perfil" class="rounded-circle" width="150">
+                    <img src="/static/img/default-user.png" alt="Foto de perfil" class="perfil-foto">
                 {% endif %}
+
+                <!-- Subir foto -->
+                <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data" class="mt-3" id="form-foto">
+                    {% csrf_token %}
+                    <input type="file" name="foto" accept="image/*" id="input-foto" hidden required>
+                    <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('input-foto').click();">
+                        <i class='bx bx-upload'></i> {% if usuario.foto %}Cambiar Foto{% else %}Subir Foto{% endif %}
+                    </button>
+                </form>
+
+                <!-- Firma -->
+                <div class="mt-4">
+                    {% if not usuario.firma %}
+                        <form action="{% url 'subir_firma' %}" method="post" enctype="multipart/form-data" class="perfil-info-box" id="form-firma">
+                            {% csrf_token %}
+                            <label class="perfil-label" for="firma"><i class='bx bxs-pen'></i> Subir firma (PNG):</label>
+                            <input type="file" name="firma" id="input-firma" accept="image/png" hidden required>
+                            <button type="button" class="btn btn-success btn-sm mt-2" onclick="document.getElementById('input-firma').click();">
+                                <i class='bx bx-upload'></i> Subir firma
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="perfil-info-box firma-box">
+                            <div class="perfil-linea">
+                                <span class="perfil-label"><i class='bx bxs-pen'></i> Firma registrada:</span>
+                            </div>
+                            <img src="{{ usuario.firma.url }}" alt="Firma del usuario">
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-            <table class="table mt-3">
-                <tr><th>Nombre:</th><td>{{ usuario.first_name }} {{ usuario.last_name }}</td></tr>
-                <tr><th>Código:</th><td>{{ usuario.codigo }}</td></tr>
-                <tr><th>Dependencia:</th><td>{{ usuario.dependencia_administrada.nombre|default:"No asignada" }}</td></tr>
-                <tr><th>Rol:</th><td>{{ usuario.get_rol_display }}</td></tr>
-                <tr><th>Programa:</th><td>{{ usuario.programa|default:"No especificado" }}</td></tr>
-            </table>
+
+            <!-- Datos -->
+            <div class="col-md-8">
+                <div class="perfil-info-box">
+                    <div class="perfil-linea">
+                        <span class="perfil-label"><i class='bx bxs-user'></i> Nombre:</span>
+                        <span class="perfil-dato">{{ usuario.first_name }} {{ usuario.last_name }}</span>
+                    </div>
+                    <div class="perfil-linea">
+                        <span class="perfil-label"><i class='bx bxs-id-card'></i> Código:</span>
+                        <span class="perfil-dato">{{ usuario.codigo }}</span>
+                    </div>
+                    <div class="perfil-linea">
+                        <span class="perfil-label"><i class='bx bxs-user-badge'></i> Rol:</span>
+                        <span class="perfil-dato">{{ usuario.get_rol_display }}</span>
+                    </div>
+                    <div class="perfil-linea">
+                        <span class="perfil-label"><i class='bx bxs-graduation'></i> Programa:</span>
+                        <span class="perfil-dato">{{ usuario.programa|default:"No especificado" }}</span>
+                    </div>
+                </div>
+
+                <div class="perfil-info-box">
+                    <!-- Cédula -->
+                    <div class="perfil-linea mb-2">
+                        <span class="perfil-label"><i class='bx bxs-file'></i> Cédula:</span>
+                        {% if usuario.cedula %}
+                            <span class="perfil-dato">{{ usuario.cedula }}</span>
+                        {% else %}
+                            <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="d-flex w-100">
+                                {% csrf_token %}
+                                <input type="text" name="cedula" class="form-control me-2" required placeholder="Ingrese su cédula">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class='bx bx-save'></i> Guardar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="perfil-linea mt-3">
+                        <span class="perfil-label"><i class='bx bxs-phone'></i> Teléfono:</span>
+                        {% if usuario.telefono %}
+                            <span class="perfil-dato">{{ usuario.telefono }}</span>
+                        {% else %}
+                            <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="d-flex w-100">
+                                {% csrf_token %}
+                                <input type="text" name="telefono" class="form-control me-2" required placeholder="Ingrese su teléfono">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class='bx bx-save'></i> Guardar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- JS: Spinner de carga -->
+<script>
+    const overlay = document.getElementById('overlay-loading');
+    const inputFoto = document.getElementById('input-foto');
+    const inputFirma = document.getElementById('input-firma');
+
+    inputFoto?.addEventListener('change', () => {
+        if (inputFoto.files.length > 0) {
+            overlay.style.display = 'flex';
+            document.getElementById('form-foto').submit();
+        }
+    });
+
+    inputFirma?.addEventListener('change', () => {
+        if (inputFirma.files.length > 0) {
+            overlay.style.display = 'flex';
+            document.getElementById('form-firma').submit();
+        }
+    });
+</script>
 {% endblock %}

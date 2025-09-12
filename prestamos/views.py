@@ -1,17 +1,25 @@
-from datetime import timezone
+import os
+import shutil
+from collections import defaultdict, OrderedDict
+from datetime import datetime, timezone
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
-from django.conf import settings
-from weasyprint import HTML
-from datetime import datetime
+from django.core.mail import send_mail
 from django.core.files import File
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo
-from django.contrib.auth.hashers import make_password
-from collections import defaultdict
-import os, shutil
+from django.http import JsonResponse
+from django.utils.timezone import now
+from django.db.models import Count
+from weasyprint import HTML
+from django.utils import timezone
+
+
+
+from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo, Notificacion, Recurso
 
 # Vista de inicio
 @login_required
@@ -41,76 +49,64 @@ def inicio(request):
             return render(request, 'profesor/dashboard.html', context)
         else:
             return render(request, 'estudiante/dashboard.html', context)
-
-
-
-# 🔐 NUEVAS VISTAS PARA LOGIN/LOGOUT
-def registro_view(request):  # Registro de un usuario
+        
+        
+def login_registro_view(request):
     if request.method == 'POST':
-        first_name = request.POST.get('first_name')
-        last_name = request.POST.get('last_name')
-        email = request.POST.get('email')
-        codigo = request.POST.get('codigo')
-        programa = request.POST.get('programa')
-        rol = request.POST.get('rol')
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
-        foto = request.FILES.get('foto')  # Capturar la imagen
+        if 'form_type' in request.POST and request.POST['form_type'] == 'registro':
+            # -------- REGISTRO --------
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            email = request.POST.get('email')
+            codigo = request.POST.get('codigo')
+            programa = request.POST.get('programa')
+            rol = request.POST.get('rol')
+            password1 = request.POST.get('password1')
+            password2 = request.POST.get('password2')
+            foto = request.FILES.get('foto')
 
-        if password1 != password2:
-            messages.error(request, "Las contraseñas no coinciden")
-            return redirect('registro')
+            if password1 != password2:
+                messages.error(request, "Las contraseñas no coinciden")
+            elif Usuario.objects.filter(email=email).exists():
+                messages.error(request, "El correo electrónico ya está registrado")
+            elif Usuario.objects.filter(codigo=codigo).exists():
+                messages.error(request, "El código ya está registrado")
+            else:
+                try:
+                    usuario = Usuario.objects.create(
+                        email=email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        codigo=codigo,
+                        programa=programa,
+                        rol=rol,
+                        foto=foto,
+                    )
+                    usuario.set_password(password1)
+                    usuario.save()
+                    messages.success(request, "Registro exitoso. Ahora inicia sesión.")
+                except Exception as e:
+                    messages.error(request, f"Error al crear el usuario: {str(e)}")
 
-        if Usuario.objects.filter(email=email).exists():
-            messages.error(request, "El correo electrónico ya está registrado")
-            return redirect('registro')
+        elif 'form_type' in request.POST and request.POST['form_type'] == 'login':
+            # -------- LOGIN --------
+            codigo = request.POST.get('codigo')
+            password = request.POST.get('password')
+            user = authenticate(request, username=codigo, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Inicio de sesión exitoso")
+                return redirect("inicio")
+            else:
+                messages.error(request, "Código o contraseña incorrectos")
 
-        if Usuario.objects.filter(codigo=codigo).exists():
-            messages.error(request, "El código ya está registrado")
-            return redirect('registro')
-
-        try:
-            usuario = Usuario.objects.create(
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                codigo=codigo,
-                programa=programa,
-                rol=rol,
-                foto=foto,  # Guardar la imagen
-            )
-            usuario.set_password(password1)  # Encriptar la contraseña
-            usuario.save()
-            messages.success(request, "Registro exitoso. Por favor inicia sesión.")
-            return redirect('login')
-        except Exception as e:
-            messages.error(request, f"Error al crear el usuario: {str(e)}")
-            return redirect('registro')
-
-    return render(request, 'registro.html')
-
-
-# Vista para iniciar sesión
-def login_view(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, "Inicio de sesión exitoso")
-            return redirect("inicio")  # Redirige al inicio después de iniciar sesión
-        else:
-            messages.error(request, "Usuario o contraseña incorrectos")
-
-    return render(request, "login.html")
+    return render(request, 'login_registro.html')
 
 # Vista para cerrar sesión
 def logout_view(request):
     logout(request)
     messages.success(request, "Has cerrado sesión correctamente")
-    return redirect("login")  # Redirige al login después de cerrar sesión
+    return redirect("login_registro")  # Redirige al login después de cerrar sesión
 
 # Vista de recursos por dependencia
 @login_required
@@ -121,12 +117,21 @@ def inventario(request):
 
     recursos_queryset = Recurso.objects.filter(dependencia=request.user.dependencia_administrada)
 
-    # Agrupar los recursos por tipo
+    # Agrupar y ordenar
     recursos_agrupados = defaultdict(list)
     for recurso in recursos_queryset:
         recursos_agrupados[recurso.tipo].append(recurso)
 
-    return render(request, 'admin/inventario/lista.html', {'recursos': dict(recursos_agrupados)})
+    # Ordenar los recursos dentro de cada tipo por nombre
+    for tipo in recursos_agrupados:
+        recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
+
+    # Ordenar los tipos de recurso alfabéticamente
+    recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
+
+    return render(request, 'admin/inventario/lista.html', {
+        'recursos': recursos_ordenados
+    })
 
 @login_required
 def perfil_usuario(request):
@@ -142,6 +147,23 @@ def perfil_usuario(request):
         template_name = "perfil.html"  # Un fallback por si acaso
 
     return render(request, template_name, {'usuario': usuario})
+
+
+@login_required
+def perfil_usuario_detalle(request, usuario_id):
+    usuario = get_object_or_404(Usuario, id=usuario_id)
+
+    if usuario.rol == "admin":
+        template_name = "admin/perfil.html"
+    elif usuario.rol == "estudiante":
+        template_name = "estudiante/perfil.html"
+    elif usuario.rol == "profesor":
+        template_name = "profesor/perfil.html"
+    else:
+        template_name = "perfil.html"
+
+    return render(request, template_name, {'usuario': usuario})
+
 
 @login_required
 def subir_firma(request):
@@ -202,12 +224,16 @@ def agregar_recurso(request):
     if request.method == 'POST':
         id_recurso = request.POST.get('id', '').strip()
         tipo = request.POST.get('tipo', '').strip()
+
+        # Si seleccionaron "nuevo", usar el valor del campo nuevo_tipo
+        if tipo == "nuevo":
+            tipo = request.POST.get('nuevo_tipo', '').strip()
+
         nombre = request.POST.get('nombre', '').strip()
         foto = request.FILES.get('foto', None)
         descripcion = request.POST.get('descripcion', '').strip()
-        dependencia = request.user.dependencia_administrada  # Se asocia a la dependencia del usuario
+        dependencia = request.user.dependencia_administrada
 
-        # Validar que los campos obligatorios no estén vacíos
         if not (id_recurso and tipo and nombre and descripcion):
             messages.error(request, 'Todos los campos son obligatorios excepto la foto')
             return redirect('agregar_recurso')
@@ -226,7 +252,13 @@ def agregar_recurso(request):
         except Exception as e:
             messages.error(request, f'Error al crear el recurso: {str(e)}')
 
-    return render(request, 'admin/inventario/agregar.html')
+    # Obtener tipos ya existentes
+    tipos_existentes = Recurso.objects.values_list('tipo', flat=True).distinct().order_by('tipo')
+
+    return render(request, 'admin/inventario/agregar.html', {
+        'tipos_existentes': tipos_existentes
+    })
+
 
 @login_required
 def editar_recurso(request, recurso_id):
@@ -240,48 +272,52 @@ def editar_recurso(request, recurso_id):
         try:
             nuevo_id = request.POST.get('id', '').strip()
             tipo = request.POST.get('tipo', '').strip()
+
+            # Si se seleccionó "nuevo", usar el campo nuevo_tipo
+            if tipo == "nuevo":
+                tipo = request.POST.get('nuevo_tipo', '').strip()
+
             nombre = request.POST.get('nombre', '').strip()
             descripcion = request.POST.get('descripcion', '').strip()
             foto = request.FILES.get('foto', None)
 
-            # Si el usuario intenta cambiar el ID
+            # Validaciones mínimas
+            if not (nuevo_id and tipo and nombre and descripcion):
+                messages.error(request, 'Todos los campos obligatorios deben ser completados.')
+                return redirect('editar_recurso', recurso_id=recurso.id)
+
+            # Si el usuario cambia el ID
             if nuevo_id and str(nuevo_id) != str(recurso.id):
                 if Recurso.objects.filter(id=nuevo_id).exists():
                     messages.error(request, 'El ID ya está en uso por otro recurso.')
                     return redirect('editar_recurso', recurso_id=recurso.id)
 
-                # Crear un nuevo recurso con el nuevo ID
                 nuevo_recurso = Recurso(
                     id=nuevo_id,
                     tipo=tipo,
                     nombre=nombre,
                     descripcion=descripcion,
-                    dependencia=recurso.dependencia,  # Mantiene la dependencia
-                    disponible=recurso.disponible,  # Mantiene el estado
+                    dependencia=recurso.dependencia,
+                    disponible=recurso.disponible,
                 )
 
-                # Si hay una nueva foto, usarla; de lo contrario, mantener la existente
                 if foto:
                     nuevo_recurso.foto = foto
                 else:
                     nuevo_recurso.foto = recurso.foto
 
-                # Guardar el nuevo recurso
                 nuevo_recurso.save()
-
-                # Eliminar el recurso antiguo
                 recurso.delete()
 
                 messages.success(request, 'Recurso actualizado exitosamente con un nuevo ID.')
                 return redirect('inventario')
 
-            # Si no se cambia el ID, solo actualizar los datos
+            # Si no cambia el ID, solo actualiza los campos
             recurso.tipo = tipo
             recurso.nombre = nombre
             recurso.descripcion = descripcion
             if foto:
-                recurso.foto = foto  # Si se sube una nueva foto, actualizarla
-
+                recurso.foto = foto
             recurso.save()
 
             messages.success(request, 'Recurso actualizado exitosamente.')
@@ -290,7 +326,14 @@ def editar_recurso(request, recurso_id):
         except Exception as e:
             messages.error(request, f'Error al actualizar el recurso: {str(e)}')
 
-    return render(request, 'admin/inventario/editar.html', {'recurso': recurso})
+    # Enviar tipos únicos al template
+    tipos_existentes = Recurso.objects.values_list('tipo', flat=True).distinct().order_by('tipo')
+
+    return render(request, 'admin/inventario/editar.html', {
+        'recurso': recurso,
+        'tipos_existentes': tipos_existentes
+    })
+
 
 @login_required
 def eliminar_recurso(request, recurso_id):
@@ -447,46 +490,21 @@ def editar_prestamo(request, prestamo_id):
     
     return render(request, 'admin/prestamos/editar.html', {'prestamo': prestamo})
 
-@login_required
-def marcar_devuelto(request, prestamo_id):
-    if request.user.rol != 'admin':
-        messages.error(request, 'No tienes permiso para acceder a esta página')
-        return redirect('inicio')
-    
-    prestamo = get_object_or_404(
-        Prestamo,
-        id=prestamo_id,
-        recurso__dependencia=request.user.dependencia_administrada,
-        devuelto=False
-    )
-    
-    try:
-        prestamo.devuelto = True
-        prestamo.fecha_devuelto = timezone.now()
-        prestamo.save()
-        
-        prestamo.recurso.disponible = True
-        prestamo.recurso.save()
-        
-        messages.success(request, 'Préstamo marcado como devuelto exitosamente')
-    except Exception as e:
-        messages.error(request, f'Error al marcar el préstamo como devuelto: {str(e)}')
-    
-    return redirect('prestamos_lista')
 
-## Visualizacion de los recursos y las dependecias
+
 @login_required
-def lista_dependencias(request): #Esta lista es la que se muestra en la pagina del estudiante al darle solicitar prestamo
-    if request.user.rol != 'estudiante':
+def lista_dependencias(request):
+    # Esta lista se muestra en la página del profesor/estudiante al darle solicitar préstamo
+    if request.user.rol not in ['estudiante', 'profesor']:
         messages.error(request, 'No tienes permiso para acceder a esta página')
         return redirect('inicio')
 
-    dependencias = Dependencia.objects.all()
+    dependencias = Dependencia.objects.all().order_by('nombre')  # ordenadas A-Z
     return render(request, 'prestamo/lista_dependencias.html', {'dependencias': dependencias})
+
 
 @login_required
 def recursos_por_dependencia(request, dependencia_id): 
-
     dependencia = get_object_or_404(Dependencia, id=dependencia_id)
     recursos_queryset = Recurso.objects.filter(dependencia=dependencia)
 
@@ -495,15 +513,25 @@ def recursos_por_dependencia(request, dependencia_id):
     for recurso in recursos_queryset:
         recursos_agrupados[recurso.tipo].append(recurso)
 
+    # Ordenar los recursos dentro de cada tipo por nombre
+    for tipo in recursos_agrupados:
+        recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
+
+    # Ordenar los tipos de recurso alfabéticamente
+    recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
+
     return render(request, 'prestamo/recursos_dependencia.html', {
-    'dependencia': dependencia,
-    'recursos': dict(recursos_agrupados)
+        'dependencia': dependencia,
+        'recursos': recursos_ordenados
     })
 
 ##########################################################################################
 
+from django.core.mail import send_mail
+from .models import Notificacion, SolicitudPrestamo, Prestamo, Recurso
 
-## Solicitudes de los prestamos
+
+# Crear solicitud de préstamo (estudiante/profesor)
 @login_required
 def solicitar_prestamo(request, recurso_id):
     recurso = get_object_or_404(Recurso, id=recurso_id)
@@ -512,28 +540,44 @@ def solicitar_prestamo(request, recurso_id):
         fecha_devolucion = request.POST.get('fecha_devolucion')
 
         # Crear la solicitud de préstamo
-        SolicitudPrestamo.objects.create(
+        solicitud = SolicitudPrestamo.objects.create(
             recurso=recurso,
-            usuario=request.user,  # Suponiendo que el usuario autenticado es un estudiante
+            usuario=request.user,
             fecha_devolucion=fecha_devolucion,
             estado=SolicitudPrestamo.PENDIENTE
         )
-    return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)  # Cambia esto al nombre correcto de tu vista
 
-#Lista para que el administrador pueda ver las solicitudes
-@login_required
-def lista_solicitudes(request):
-    if request.user.rol != 'admin':  # Asegurar que solo los administradores accedan
-        return redirect('inicio')
+        # Buscar administrador de la dependencia
+        admin_user = recurso.dependencia.administrador
 
-    # Filtrar solicitudes de préstamo solo de la dependencia administrada por el usuario
-    solicitudes = SolicitudPrestamo.objects.select_related('recurso', 'usuario').filter(
-        recurso__dependencia=request.user.dependencia_administrada
-    ).order_by('-fecha_solicitud')
+        if admin_user:
+            # 📌 Notificación en el sistema
+            Notificacion.objects.create(
+                usuario=admin_user,
+                tipo="SOLICITUD",
+                mensaje=f"El usuario {request.user.get_full_name()} ha solicitado el préstamo del recurso '{recurso.nombre}'."
+            )
 
-    return render(request, 'admin/solicitudes_prestamo.html', {'solicitudes': solicitudes})
+            # 📌 Notificación por correo
+            if admin_user.email:
+                send_mail(
+                    subject="Nueva solicitud de préstamo de recurso",
+                    message=(
+                        f"Estimado {admin_user.get_full_name()},\n\n"
+                        f"El usuario {request.user.get_full_name()} ha registrado una solicitud de préstamo "
+                        f"para el recurso: '{recurso.nombre}'.\n\n"
+                        "Por favor, revise la plataforma para aprobar o rechazar esta solicitud.\n\n"
+                        "Atentamente,\nSistema de Préstamos UNAD"
+                    ),
+                    from_email="noreply@unad.edu.co",
+                    recipient_list=[admin_user.email],
+                    fail_silently=True
+                )
+
+    return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)
 
 
+# Aprobar solicitud (administrador)
 @login_required
 def aprobar_solicitud(request, solicitud_id):
     if request.user.rol != "admin":
@@ -549,14 +593,10 @@ def aprobar_solicitud(request, solicitud_id):
     dependencia = recurso.dependencia
     admin_dependencia = dependencia.administrador
 
-    # NUEVO: Obtener la dependencia administrada por el administrador (por si no coincide con la del recurso)
+    # Firmas y PDF (igual que lo tienes)
     dependencia_admin = admin_dependencia.dependencia_administrada if admin_dependencia else None
-
-    # Firmas en formato absoluto
     firma_usuario_path = solicitud.usuario.firma.path if solicitud.usuario.firma else None
     firma_admin_path = admin_dependencia.firma.path if admin_dependencia and admin_dependencia.firma else None
-
-    # Ruta absoluta del escudo para WeasyPrint
     escudo_path = os.path.join(settings.MEDIA_ROOT, 'encabezado_contratos', 'escudo.png')
     escudo_url = f'file://{escudo_path}'
 
@@ -565,7 +605,7 @@ def aprobar_solicitud(request, solicitud_id):
         'usuario': solicitud.usuario,
         'recurso': recurso,
         'administrador': admin_dependencia,
-        'dependencia': dependencia_admin,  # ← Esta línea es clave
+        'dependencia': dependencia_admin,
         'firma_usuario_path': f'file://{firma_usuario_path}' if firma_usuario_path else None,
         'firma_admin_path': f'file://{firma_admin_path}' if firma_admin_path else None,
         'escudo_path': escudo_url,
@@ -576,7 +616,6 @@ def aprobar_solicitud(request, solicitud_id):
     html = HTML(string=html_string)
 
     nombre_archivo = f'contrato_prestamo_{solicitud.id}.pdf'
-
     temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_contratos')
     os.makedirs(temp_dir, exist_ok=True)
     temp_path = os.path.join(temp_dir, nombre_archivo)
@@ -609,11 +648,32 @@ def aprobar_solicitud(request, solicitud_id):
     if os.path.isdir(temp_dir) and not os.listdir(temp_dir):
         os.rmdir(temp_dir)
 
+    # 📌 Notificación al solicitante
+    Notificacion.objects.create(
+        usuario=solicitud.usuario,
+        tipo="APROBADA",
+        mensaje=f"Su solicitud de préstamo del recurso '{solicitud.recurso.nombre}' ha sido aprobada por {request.user.get_full_name()}."
+    )
+
+    if solicitud.usuario.email:
+        send_mail(
+            subject="Solicitud de préstamo aprobada",
+            message=(
+                f"Estimado {solicitud.usuario.get_full_name()},\n\n"
+                f"Nos complace informarle que su solicitud de préstamo del recurso '{solicitud.recurso.nombre}' "
+                f"ha sido aprobada por el administrador {request.user.get_full_name()}.\n\n"
+                "Adjunto encontrará el contrato en la plataforma.\n\n"
+                "Atentamente,\nSistema de Préstamos UDENAR"
+            ),
+            from_email="noreply@unad.edu.co",
+            recipient_list=[solicitud.usuario.email],
+            fail_silently=True
+        )
+
     return redirect('lista_solicitudes')
 
 
-
-
+# Rechazar solicitud (administrador)
 @login_required
 def rechazar_solicitud(request, solicitud_id):
     if request.user.rol != "admin":
@@ -622,7 +682,88 @@ def rechazar_solicitud(request, solicitud_id):
     solicitud = get_object_or_404(SolicitudPrestamo, id=solicitud_id)
     solicitud.estado = SolicitudPrestamo.RECHAZADO
     solicitud.save()
+
+    # 📌 Notificación al solicitante
+    Notificacion.objects.create(
+        usuario=solicitud.usuario,
+        tipo="RECHAZADA",
+        mensaje=f"Su solicitud de préstamo del recurso '{solicitud.recurso.nombre}' fue rechazada por {request.user.get_full_name()}."
+    )
+
+    if solicitud.usuario.email:
+        send_mail(
+            subject="Solicitud de préstamo rechazada",
+            message=(
+                f"Estimado {solicitud.usuario.get_full_name()},\n\n"
+                f"Lamentamos informarle que su solicitud de préstamo para el recurso '{solicitud.recurso.nombre}' "
+                f"ha sido rechazada por el administrador {request.user.get_full_name()}.\n\n"
+                "Atentamente,\nSistema de Préstamos UDENAR"
+            ),
+            from_email="noreply@unad.edu.co",
+            recipient_list=[solicitud.usuario.email],
+            fail_silently=True
+        )
+
     return redirect('lista_solicitudes')
+
+
+@login_required
+def obtener_notificaciones(request):
+    # Traemos todas las notificaciones filtradas primero
+    notificaciones_qs = Notificacion.objects.filter(usuario=request.user).order_by('-fecha')
+
+    # Calculamos no leídas ANTES del slice
+    no_leidas = notificaciones_qs.filter(leida=False)
+
+    # Ahora sí limitamos a las 10 más recientes
+    notificaciones = notificaciones_qs[:10]
+
+    data = {
+        "total": no_leidas.count(),
+        "notificaciones": [
+            {
+                "id": n.id,
+                "mensaje": n.mensaje,
+                "tipo": n.tipo,
+                "fecha": n.fecha.strftime("%d/%m/%Y %H:%M"),
+                "leida": n.leida
+            }
+            for n in notificaciones
+        ]
+    }
+    return JsonResponse(data)
+
+
+@login_required
+def marcar_notificacion_leida(request):
+    if request.method == "POST":
+        noti_id = request.POST.get("id")
+        try:
+            noti = Notificacion.objects.get(id=noti_id, usuario=request.user)
+            noti.leida = True
+            noti.save()
+            return JsonResponse({"ok": True})
+        except Notificacion.DoesNotExist:
+            return JsonResponse({"ok": False}, status=404)
+    return JsonResponse({"ok": False}, status=400)
+
+
+
+
+
+#Lista para que el administrador pueda ver las solicitudes
+@login_required
+def lista_solicitudes(request):
+    if request.user.rol != 'admin':  # Asegurar que solo los administradores accedan
+        return redirect('inicio')
+
+    # Filtrar solicitudes de préstamo solo de la dependencia administrada por el usuario
+    solicitudes = SolicitudPrestamo.objects.select_related('recurso', 'usuario').filter(
+        recurso__dependencia=request.user.dependencia_administrada
+    ).order_by('-fecha_solicitud')
+
+    return render(request, 'admin/solicitudes_prestamo.html', {'solicitudes': solicitudes})
+
 
 #Lista para que el estudiante pueda ver sus solicitudes
 @login_required
@@ -668,11 +809,6 @@ def solicitudes_por_estado(request, estado):
 
     return render(request, template, {'solicitudes': solicitudes})
 
-from django.utils import timezone
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Prestamo
 
 @login_required
 def marcar_devuelto(request, prestamo_id):
@@ -680,19 +816,23 @@ def marcar_devuelto(request, prestamo_id):
         messages.error(request, 'No tienes permiso para acceder a esta página')
         return redirect('inicio')
     
-    prestamo = get_object_or_404(Prestamo, id=prestamo_id, devuelto=False)
+    prestamo = get_object_or_404(Prestamo, id=prestamo_id)
 
-    try:
-        prestamo.devuelto = True
-        prestamo.fecha_devolucion = timezone.now()
-        prestamo.save()
+    if request.method == "POST":
+        if prestamo.devuelto:
+            messages.warning(request, 'Este préstamo ya estaba marcado como devuelto.')
+        else:
+            try:
+                prestamo.devuelto = True
+                prestamo.fecha_devolucion = timezone.now()
+                prestamo.save()
 
-        prestamo.recurso.disponible = True
-        prestamo.recurso.save()
+                prestamo.recurso.disponible = True
+                prestamo.recurso.save()
 
-        messages.success(request, 'Préstamo marcado como devuelto exitosamente.')
-    except Exception as e:
-        messages.error(request, f'Error al marcar el préstamo como devuelto: {str(e)}')
+                messages.success(request, 'Préstamo marcado como devuelto exitosamente.')
+            except Exception as e:
+                messages.error(request, f'Error al marcar el préstamo como devuelto: {str(e)}')
 
     return redirect('inicio')
 
@@ -704,3 +844,54 @@ def pwa_registro(request):
 
 def pwa_inicio(request):
     return render(request, "mobile/inicio.html")
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.utils.timezone import now
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
+@login_required
+def estadisticas(request):
+    if request.user.rol != 'admin':
+        messages.error(request, "No tienes permiso para acceder a las estadísticas")
+        return redirect("inicio")
+
+    hoy = now()
+    mes_actual = hoy.month
+    anio_actual = hoy.year
+
+    # 📌 Total de préstamos en el mes actual
+    prestamos_mes = Prestamo.objects.filter(
+        fecha_prestamo__year=anio_actual,
+        fecha_prestamo__month=mes_actual
+    ).count()
+
+    # 📌 Recursos más prestados (TOP 5)
+    recursos_populares = (
+        Prestamo.objects.values("recurso__nombre")
+        .annotate(total=Count("id"))
+        .order_by("-total")[:5]
+    )
+
+    # 📌 Dependencias con más préstamos
+    dependencias_populares = (
+        Prestamo.objects.values("recurso__dependencia__nombre")
+        .annotate(total=Count("id"))
+        .order_by("-total")[:5]
+    )
+
+    # 📌 Usuarios más activos (TOP 5)
+    usuarios_activos = (
+        Prestamo.objects.values("usuario__first_name", "usuario__last_name")
+        .annotate(total=Count("id"))
+        .order_by("-total")[:5]
+    )
+
+    contexto = {
+        "prestamos_mes": prestamos_mes,
+        "recursos_populares": recursos_populares,
+        "dependencias_populares": dependencias_populares,
+        "usuarios_activos": usuarios_activos,
+    }
+
+    return render(request, "prestamo/estadisticas.html", contexto)
