@@ -13,7 +13,9 @@
             <div class="card-body">
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="alert alert-warning rounded-3">{{ message }}</div>
+                        {% if message.tags == "error" %}
+                            <div class="alert alert-danger rounded-3">{{ message }}</div>
+                        {% endif %}
                     {% endfor %}
                 {% endif %}
 

@@ -111,9 +111,11 @@
                         <table class="table table-bordered table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Usuario</th>
                                     <th>Recurso</th>
-                                    <th>Fecha Préstamo</th>
+                                    <th>ID Recurso</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha Aprobación</th>
+                                    <th>Fecha Devolución</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -121,9 +123,11 @@
                             <tbody>
                                 {% for prestamo in prestamos_recientes %}
                                 <tr>
-                                    <td>{{ prestamo.usuario.get_full_name }}</td>
                                     <td>{{ prestamo.recurso.nombre }}</td>
-                                    <td>{{ prestamo.fecha_prestamo }}</td>
+                                    <td>{{ prestamo.recurso.id }}</td>
+                                    <td>{{ prestamo.usuario.get_full_name }}</td>
+                                    <td>{{ prestamo.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ prestamo.fecha_devolucion|date:"d/m/Y" }}</td>
                                     <td>
                                         {% if prestamo.devuelto %}
                                             <span class="badge badge-success"><i class="fas fa-check-circle"></i> Devuelto</span>
@@ -133,7 +137,7 @@
                                     </td>
                                     <td>
                                         {% if not prestamo.devuelto %}
-                                            <!-- Botón devolver con POST -->
+                                            <!-- Botón devolver -->
                                             <form action="{% url 'marcar_devuelto' prestamo.id %}" method="post" class="inline-form">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-success btn-sm">
@@ -142,20 +146,56 @@
                                             </form>
 
                                             <!-- Botón extender -->
-                                            <a href="#" class="btn btn-primary btn-sm">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#extenderModal{{ prestamo.id }}">
                                                 <i class="fas fa-clock"></i> Extender
+                                            </button>
+
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="extenderModal{{ prestamo.id }}" tabindex="-1" aria-labelledby="extenderModalLabel{{ prestamo.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <form action="{% url 'extender_prestamo' prestamo.id %}" method="post">
+                                                            {% csrf_token %}
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="extenderModalLabel{{ prestamo.id }}"><i class="fas fa-clock"></i> Extender Préstamo</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <label for="nueva_fecha_{{ prestamo.id }}" class="form-label">Nueva fecha de devolución</label>
+                                                                <input 
+                                                                    type="date" 
+                                                                    name="nueva_fecha" 
+                                                                    id="nueva_fecha_{{ prestamo.id }}" 
+                                                                    class="form-control" 
+                                                                    required 
+                                                                    min="{{ prestamo.fecha_devolucion|date:'Y-m-d' }}">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                                <button type="submit" class="btn btn-success">Aceptar</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                        <!-- Botón contrato (siempre visible) -->
+                                        {% if prestamo.contrato_prestamo %}
+                                            <a href="{{ prestamo.contrato_prestamo.url }}" class="btn btn-outline-success btn-sm" download>
+                                                <i class="fas fa-download"></i> Contrato
                                             </a>
                                         {% else %}
-                                            <span class="text-muted">Sin acciones</span>
+                                            <span class="text-muted">Contrato no disponible</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="5" class="text-center text-muted">No hay préstamos recientes</td>
+                                    <td colspan="7" class="text-center text-muted">No hay préstamos recientes</td>
                                 </tr>
                                 {% endfor %}
-                            </tbody>                          
+                            </tbody>
                         </table>
                     </div>
                 </div>

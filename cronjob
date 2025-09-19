@@ -1,2 +1,2 @@
-20 20 * * * cd /app && /usr/local/bin/python3 manage.py notificar_devoluciones >> /var/log/cron.log 2>&1
-49 13 * * * cd /app && /usr/local/bin/python3 manage.py notificar_devoluciones >> /var/log/cron.log 2>&1
+11 18 * * * cd /app && /usr/local/bin/python3 manage.py notificar_devoluciones >> /var/log/cron.log 2>&1
+11 18 * * * echo "CRON ejecutado: $(date)" >> /var/log/cron.log 2>&1

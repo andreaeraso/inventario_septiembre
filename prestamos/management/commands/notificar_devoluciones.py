@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 from datetime import timedelta
 from prestamos.models import Prestamo, Notificacion
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -51,7 +52,7 @@ class Command(BaseCommand):
                         f"({prestamo.fecha_devolucion.strftime('%d/%m/%Y')}).\n\n"
                         "Universidad de Nariño."
                     ),
-                    from_email='noreply@unad.edu.co',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[usuario.email],
                     fail_silently=False,
                 )
@@ -93,7 +94,7 @@ class Command(BaseCommand):
                         "Por favor devuélvelo cuanto antes.\n\n"
                         "Universidad de Nariño."
                     ),
-                    from_email='noreply@unad.edu.co',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[usuario.email],
                     fail_silently=False,
                 )

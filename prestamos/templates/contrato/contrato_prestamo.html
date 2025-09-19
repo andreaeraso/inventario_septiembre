@@ -213,7 +213,16 @@
 
     <h4><strong>SÉPTIMA: PLAZO.</strong></h4>
     <p>
-    El término de duración del presente contrato de comodato precario será desde la fecha de suscripción del presente contrato hasta la fecha del <strong>{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</strong>.
+    El término de duración del presente contrato de comodato precario será desde la fecha de suscripción del presente contrato hasta la fecha del 
+    <strong>
+        {% if solicitud %}
+            {{ solicitud.fecha_devolucion|date:"d/m/Y" }}
+        {% elif fecha_devolucion %}
+            {{ fecha_devolucion|date:"d/m/Y" }}
+        {% else %}
+            [Fecha no especificada]
+        {% endif %}
+    </strong>.
     </p>
 
     <h4><strong>OCTAVA: RESTITUCIÓN DEL BIEN MUEBLE ENTREGADO EN COMODATO.</strong></h4>

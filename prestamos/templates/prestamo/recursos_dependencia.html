@@ -213,8 +213,12 @@
                                             <form method="post" action="{% url 'solicitar_prestamo' recurso.id %}">
                                                 {% csrf_token %}
                                                 <label for="fecha_devolucion_{{ recurso.id }}" class="form-label">Fecha Estimada de Devolución:</label>
-                                                <input type="date" name="fecha_devolucion" id="fecha_devolucion_{{ recurso.id }}"
-                                                       class="form-control" required>
+                                                <input type="date" 
+                                                        name="fecha_devolucion" 
+                                                        id="fecha_devolucion_{{ recurso.id }}"
+                                                        class="form-control" 
+                                                        required 
+                                                        min="{{ tomorrow }}">
 
                                                 <div class="mt-2">
                                                     <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>

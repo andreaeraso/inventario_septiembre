@@ -16,7 +16,7 @@ from .views import ( logout_view, inicio, login_registro_view, inventario, crear
     recursos_por_dependencia, lista_solicitudes, aprobar_solicitud, rechazar_solicitud,
     mis_solicitudes, solicitudes_por_estado, perfil_usuario, pwa_inicio,pwa_login,pwa_registro,
     subir_firma, subir_foto, guardar_cedula_telefono, perfil_usuario_detalle, obtener_notificaciones, 
-    marcar_notificacion_leida, estadisticas,
+    marcar_notificacion_leida, estadisticas, extender_prestamo,
 )
 
 # Configuración de las rutas de la API REST con Django Rest Framework
@@ -82,6 +82,8 @@ urlpatterns = [
     path('prestamos/historial/', historial_prestamos, name='historial_prestamos'),
     path('prestamos/editar/<int:prestamo_id>/', editar_prestamo, name='editar_prestamo'),
     path('prestamos/devolver/<int:prestamo_id>/', marcar_devuelto, name='marcar_devuelto'),
+    path('prestamos/extender/<int:prestamo_id>/', extender_prestamo, name='extender_prestamo'),
+
     
     path('pwa/login/', pwa_login, name='pwa_login'),
     path('pwa/registro/', pwa_registro, name='pwa_registro'),

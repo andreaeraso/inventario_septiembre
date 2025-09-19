@@ -16,6 +16,7 @@ from django.utils.timezone import now
 from django.db.models import Count
 from weasyprint import HTML
 from django.utils import timezone
+from datetime import timedelta
 
 
 
@@ -520,9 +521,13 @@ def recursos_por_dependencia(request, dependencia_id):
     # Ordenar los tipos de recurso alfabéticamente
     recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
 
+    # 📌 Calcular mañana (para el min del input date)
+    tomorrow = (timezone.localdate() + timedelta(days=1)).isoformat()  # 'YYYY-MM-DD'
+
     return render(request, 'prestamo/recursos_dependencia.html', {
         'dependencia': dependencia,
-        'recursos': recursos_ordenados
+        'recursos': recursos_ordenados,
+        'tomorrow': tomorrow,  # se pasa al template
     })
 
 ##########################################################################################
@@ -537,7 +542,20 @@ def solicitar_prestamo(request, recurso_id):
     recurso = get_object_or_404(Recurso, id=recurso_id)
 
     if request.method == 'POST':
-        fecha_devolucion = request.POST.get('fecha_devolucion')
+        fecha_devolucion_str = request.POST.get('fecha_devolucion')
+
+        # Validar formato fecha
+        try:
+            fecha_devolucion = datetime.strptime(fecha_devolucion_str, "%Y-%m-%d").date()
+        except (TypeError, ValueError):
+            messages.error(request, "La fecha seleccionada no es válida.")
+            return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)
+
+        # 📌 Requerir que la fecha sea >= mañana
+        hoy = timezone.localdate()
+        if fecha_devolucion <= hoy:
+            messages.error(request, "La fecha de devolución debe ser posterior a la fecha actual.")
+            return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)
 
         # Crear la solicitud de préstamo
         solicitud = SolicitudPrestamo.objects.create(
@@ -551,14 +569,12 @@ def solicitar_prestamo(request, recurso_id):
         admin_user = recurso.dependencia.administrador
 
         if admin_user:
-            # 📌 Notificación en el sistema
             Notificacion.objects.create(
                 usuario=admin_user,
                 tipo="SOLICITUD",
                 mensaje=f"El usuario {request.user.get_full_name()} ha solicitado el préstamo del recurso '{recurso.nombre}'."
             )
 
-            # 📌 Notificación por correo
             if admin_user.email:
                 send_mail(
                     subject="Nueva solicitud de préstamo de recurso",
@@ -835,6 +851,91 @@ def marcar_devuelto(request, prestamo_id):
                 messages.error(request, f'Error al marcar el préstamo como devuelto: {str(e)}')
 
     return redirect('inicio')
+
+@login_required
+def extender_prestamo(request, prestamo_id):
+    if request.user.rol != "admin":
+        return redirect('inicio')
+
+    prestamo = get_object_or_404(Prestamo, id=prestamo_id, devuelto=False)
+
+    if request.method == "POST":
+        nueva_fecha_str = request.POST.get("nueva_fecha")
+        if not nueva_fecha_str:
+            messages.error(request, "Debe seleccionar una nueva fecha de devolución.")
+            return redirect("prestamos_lista")
+
+        nueva_fecha = datetime.strptime(nueva_fecha_str, "%Y-%m-%d")
+
+        # 📌 Actualizar fecha de devolución del préstamo que se va a cerrar
+        prestamo.fecha_devolucion = datetime.now()  # la fecha desde la cual se aprueba la extensión
+        prestamo.devuelto = True
+        prestamo.save()
+
+        recurso = prestamo.recurso
+        usuario = prestamo.usuario
+        dependencia = recurso.dependencia
+        admin_dependencia = dependencia.administrador
+
+        # 2. Firmas y encabezado
+        firma_usuario_path = usuario.firma.path if usuario.firma else None
+        firma_admin_path = admin_dependencia.firma.path if admin_dependencia and admin_dependencia.firma else None
+        escudo_path = os.path.join(settings.MEDIA_ROOT, 'encabezado_contratos', 'escudo.png')
+        escudo_url = f'file://{escudo_path}'
+
+        context = {
+            'usuario': usuario,
+            'recurso': recurso,
+            'administrador': admin_dependencia,
+            'dependencia': admin_dependencia.dependencia_administrada if admin_dependencia else None,
+            'firma_usuario_path': f'file://{firma_usuario_path}' if firma_usuario_path else None,
+            'firma_admin_path': f'file://{firma_admin_path}' if firma_admin_path else None,
+            'escudo_path': escudo_url,
+            'fecha': datetime.now(),
+            'fecha_devolucion': nueva_fecha,
+        }
+
+        # 3. Generar nuevo PDF
+        html_string = render_to_string('contrato/contrato_prestamo.html', context)
+        html = HTML(string=html_string)
+
+        nombre_archivo = f'contrato_extension_{prestamo.id}_{int(datetime.now().timestamp())}.pdf'
+        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_contratos')
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, nombre_archivo)
+
+        html.write_pdf(temp_path)
+
+        destino_prestamo = os.path.join(settings.MEDIA_ROOT, 'contratos_prestamo', nombre_archivo)
+        os.makedirs(os.path.dirname(destino_prestamo), exist_ok=True)
+        shutil.copyfile(temp_path, destino_prestamo)
+
+        # 4. Crear nuevo préstamo
+        nuevo_prestamo = Prestamo.objects.create(
+            usuario=usuario,
+            recurso=recurso,
+            fecha_devolucion=nueva_fecha,
+            contrato_prestamo=f'contratos_prestamo/{nombre_archivo}'
+        )
+
+        # 5. Limpiar temp
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        if os.path.isdir(temp_dir) and not os.listdir(temp_dir):
+            os.rmdir(temp_dir)
+
+        # 6. Notificación al usuario
+        Notificacion.objects.create(
+            usuario=usuario,
+            tipo="EXTENSION",
+            mensaje=f"Su préstamo del recurso '{recurso.nombre}' ha sido extendido hasta {nueva_fecha.date()}."
+        )
+
+        messages.success(request, f"El préstamo ha sido extendido hasta {nueva_fecha.date()}.")
+        return redirect("inicio")
+
+    return redirect("inicio")
 
 def pwa_login(request):
     return render(request, "mobile/login.html")
