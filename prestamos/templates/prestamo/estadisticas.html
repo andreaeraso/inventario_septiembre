@@ -1,139 +1,191 @@
 {% extends "base.html" %}
-{% block title %}Estadísticas{% endblock %}
+{% load static %}
+
+{% block title %}Panel de Estadísticas{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h2 class="mb-4 text-center text-gradient fw-bold" 
-        style="color:#00ff99; text-shadow:0 0 10px #00ff99;">
-        <i class="fas fa-chart-bar"></i> Panel de Estadísticas
-    </h2>
+<div class="container-fluid mt-4 px-3">
+    <!-- ENCABEZADO -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-success" style="font-size: 2rem;">
+            <i class="bx bx-line-chart me-2"></i> Panel de Estadísticas Generales
+        </h2>
+        <p class="text-muted">Monitoreo inteligente del sistema de préstamos e inventario</p>
+    </div>
 
-    <!-- KPIs principales -->
-    <div class="row g-4">
+    <!-- KPIs PRINCIPALES -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card kpi-card kpi-green text-center p-3 rounded-4 shadow-sm">
+                <i class="bx bx-cube-alt fs-1 mb-2"></i>
+                <h6>Recursos Disponibles</h6>
+                <h2 class="fw-bold">{{ recursos_disponibles }}</h2>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card kpi-card kpi-blue text-center p-3 rounded-4 shadow-sm">
+                <i class="bx bx-transfer fs-1 mb-2"></i>
+                <h6>Recursos Prestados</h6>
+                <h2 class="fw-bold">{{ recursos_prestados }}</h2>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card kpi-card kpi-yellow text-center p-3 rounded-4 shadow-sm">
+                <i class="bx bx-list-check fs-1 mb-2"></i>
+                <h6>Total de Préstamos</h6>
+                <h2 class="fw-bold">{{ prestamos_total }}</h2>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card kpi-card kpi-purple text-center p-3 rounded-4 shadow-sm">
+                <i class="bx bx-calendar-event fs-1 mb-2"></i>
+                <h6>Préstamos este Mes</h6>
+                <h2 class="fw-bold">{{ prestamos_mes }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <!-- NUEVAS MÉTRICAS DE RENDIMIENTO -->
+    <div class="row g-4 mb-5">
         <div class="col-md-4">
-            <div class="card shadow-lg rounded-4" style="background:#0c7c3c; color:#fff;">
-                <div class="card-body text-center">
-                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
-                    <h6>Total préstamos este mes</h6>
-                    <h2 class="fw-bold">{{ prestamos_mes }}</h2>
+            <div class="card border-0 shadow-lg rounded-4 text-center p-4">
+                <i class="bx bx-timer text-info fs-1 mb-2"></i>
+                <h6 class="fw-semibold text-secondary">Promedio de duración del préstamo</h6>
+                <h3 class="fw-bold text-dark">{{ promedio_duracion }} días</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-lg rounded-4 text-center p-4">
+                <i class="bx bx-check-circle text-success fs-1 mb-2"></i>
+                <h6 class="fw-semibold text-secondary">Tasa de devoluciones a tiempo</h6>
+                <h3 class="fw-bold text-dark">{{ tasa_devoluciones }}%</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-lg rounded-4 text-center p-4">
+                <i class="bx bx-error text-danger fs-1 mb-2"></i>
+                <h6 class="fw-semibold text-secondary">Tasa de retrasos</h6>
+                <h3 class="fw-bold text-dark">{{ tasa_retrasos }}%</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRÁFICOS DE ACTIVIDAD -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 d-flex align-items-center">
+                    <i class="bx bx-package text-primary fs-4 me-2"></i>
+                    <h5 class="fw-semibold mb-0 text-primary">Recursos más prestados</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartRecursos" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 d-flex align-items-center">
+                    <i class="bx bx-building text-success fs-4 me-2"></i>
+                    <h5 class="fw-semibold mb-0 text-success">Dependencias más activas</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartDependencias" style="max-height: 280px;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Gráficos -->
-    <div class="row g-4 mt-2">
-        <!-- Recursos más prestados -->
-        <div class="col-md-6">
-            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
-                <div class="card-header border-0" style="background:transparent;">
-                    <h5 class="fw-bold" style="color:#7494ec;">
-                        <i class="fas fa-box"></i> Recursos más prestados
-                    </h5>
+    <!-- NUEVO GRÁFICO DE DEMANDA SEMANAL -->
+    <div class="row g-4 mt-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 d-flex align-items-center">
+                    <i class="bx bx-calendar-week text-warning fs-4 me-2"></i>
+                    <h5 class="fw-semibold mb-0 text-warning">Demanda de préstamos por día</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="chartRecursos" style="max-height:280px;"></canvas>
+                    <canvas id="chartDias" style="max-height: 280px;"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Dependencias -->
-        <div class="col-md-6">
-            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
-                <div class="card-header border-0" style="background:transparent;">
-                    <h5 class="fw-bold" style="color:#1cc88a;">
-                        <i class="fas fa-building"></i> Dependencias más activas
-                    </h5>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-header bg-white border-0 d-flex align-items-center">
+                    <i class="bx bx-user-circle text-danger fs-4 me-2"></i>
+                    <h5 class="fw-semibold mb-0 text-danger">Usuarios más activos</h5>
                 </div>
                 <div class="card-body">
-                    <canvas id="chartDependencias" style="max-height:280px;"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Usuarios -->
-    <div class="row g-4 mt-2">
-        <div class="col-md-12">
-            <div class="card shadow-lg rounded-4" style="background:#1e1e2f; color:#fff;">
-                <div class="card-header border-0" style="background:transparent;">
-                    <h5 class="fw-bold" style="color:#f6c23e;">
-                        <i class="fas fa-users"></i> Usuarios más activos
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="chartUsuarios" style="max-height:300px;"></canvas>
+                    <canvas id="chartUsuarios" style="max-height: 280px;"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Chart.js -->
+<!-- ESTILOS -->
+<style>
+    body { background-color: #f8f9fa !important; }
+    .kpi-card { color: #fff; transition: transform 0.25s, box-shadow 0.25s; }
+    .kpi-card:hover { transform: translateY(-6px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
+    .kpi-green { background: linear-gradient(135deg, #00b894, #55efc4); }
+    .kpi-blue { background: linear-gradient(135deg, #0984e3, #74b9ff); }
+    .kpi-yellow { background: linear-gradient(135deg, #fdcb6e, #ffeaa7); color: #333; }
+    .kpi-purple { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+</style>
+
+<!-- CHARTS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Config global: modo oscuro
-    Chart.defaults.color = "#ddd";
-    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+Chart.defaults.color = "#333";
+Chart.defaults.font.family = "'Poppins', 'Segoe UI', sans-serif";
 
-    const recursosLabels = [{% for r in recursos_populares %}"{{ r.recurso__nombre }}",{% endfor %}];
-    const recursosData = [{% for r in recursos_populares %}{{ r.total }},{% endfor %}];
+// --- Recursos ---
+new Chart(document.getElementById("chartRecursos"), {
+    type: "bar",
+    data: {
+        labels: [{% for r in recursos_populares %}"{{ r.recurso__nombre }}",{% endfor %}],
+        datasets: [{
+            data: [{% for r in recursos_populares %}{{ r.total }},{% endfor %}],
+            backgroundColor: "#74b9ff", borderRadius: 6
+        }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+});
 
-    const dependenciasLabels = [{% for d in dependencias_populares %}"{{ d.recurso__dependencia__nombre }}",{% endfor %}];
-    const dependenciasData = [{% for d in dependencias_populares %}{{ d.total }},{% endfor %}];
+// --- Dependencias ---
+new Chart(document.getElementById("chartDependencias"), {
+    type: "doughnut",
+    data: {
+        labels: [{% for d in dependencias_populares %}"{{ d.recurso__dependencia__nombre }}",{% endfor %}],
+        datasets: [{ data: [{% for d in dependencias_populares %}{{ d.total }},{% endfor %}],
+            backgroundColor: ['#00b894','#0984e3','#fdcb6e','#e17055','#6c5ce7'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } } }
+});
 
-    const usuariosLabels = [{% for u in usuarios_activos %}"{{ u.usuario__first_name }} {{ u.usuario__last_name }}",{% endfor %}];
-    const usuariosData = [{% for u in usuarios_activos %}{{ u.total }},{% endfor %}];
+// --- Usuarios ---
+new Chart(document.getElementById("chartUsuarios"), {
+    type: "line",
+    data: {
+        labels: [{% for u in usuarios_activos %}"{{ u.usuario__first_name }} {{ u.usuario__last_name }}",{% endfor %}],
+        datasets: [{ data: [{% for u in usuarios_activos %}{{ u.total }},{% endfor %}],
+            borderColor: "#00b894", fill: true, backgroundColor: "rgba(0,184,148,0.15)", tension: 0.4 }]
+    },
+    options: { plugins: { legend: { display: false } } }
+});
 
-    // Recursos - Barras horizontales
-    new Chart(document.getElementById('chartRecursos'), {
-        type: 'bar',
-        data: {
-            labels: recursosLabels,
-            datasets: [{
-                label: 'Préstamos',
-                data: recursosData,
-                backgroundColor: '#7494ec',
-                borderRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y',
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    // Dependencias - Dona
-    new Chart(document.getElementById('chartDependencias'), {
-        type: 'doughnut',
-        data: {
-            labels: dependenciasLabels,
-            datasets: [{
-                data: dependenciasData,
-                backgroundColor: ['#4e73df','#1cc88a','#36b9cc','#f6c23e','#e74a3b']
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-    });
-
-    // Usuarios - Línea suave
-    new Chart(document.getElementById('chartUsuarios'), {
-        type: 'line',
-        data: {
-            labels: usuariosLabels,
-            datasets: [{
-                label: 'Préstamos realizados',
-                data: usuariosData,
-                borderColor: '#00ff99',
-                backgroundColor: 'rgba(0,255,153,0.15)',
-                tension: 0.4,
-                fill: true,
-                pointRadius: 5,
-                pointBackgroundColor: '#00ff99'
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { display: false } } }
-    });
+// --- Días con más préstamos ---
+new Chart(document.getElementById("chartDias"), {
+    type: "bar",
+    data: {
+        labels: [{% for d in prestamos_por_dia %}"{{ d.dia }}",{% endfor %}],
+        datasets: [{ data: [{% for d in prestamos_por_dia %}{{ d.total }},{% endfor %}],
+            backgroundColor: "#fdcb6e", borderRadius: 6 }]
+    },
+    options: { plugins: { legend: { display: false } } }
+});
 </script>
 {% endblock %}

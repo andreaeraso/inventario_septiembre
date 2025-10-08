@@ -51,11 +51,13 @@ def inicio(request):
         else:
             return render(request, 'estudiante/dashboard.html', context)
         
-        
+
 def login_registro_view(request):
     if request.method == 'POST':
-        if 'form_type' in request.POST and request.POST['form_type'] == 'registro':
-            # -------- REGISTRO --------
+        form_type = request.POST.get('form_type')  # Para diferenciar login o registro
+
+        # ================== REGISTRO ==================
+        if form_type == 'registro':
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
             email = request.POST.get('email')
@@ -66,12 +68,13 @@ def login_registro_view(request):
             password2 = request.POST.get('password2')
             foto = request.FILES.get('foto')
 
+            # Validaciones
             if password1 != password2:
-                messages.error(request, "Las contraseñas no coinciden")
+                messages.error(request, "❌ Las contraseñas no coinciden")
             elif Usuario.objects.filter(email=email).exists():
-                messages.error(request, "El correo electrónico ya está registrado")
+                messages.error(request, "❌ El correo electrónico ya está registrado")
             elif Usuario.objects.filter(codigo=codigo).exists():
-                messages.error(request, "El código ya está registrado")
+                messages.error(request, "❌ El código ya está registrado")
             else:
                 try:
                     usuario = Usuario.objects.create(
@@ -85,29 +88,52 @@ def login_registro_view(request):
                     )
                     usuario.set_password(password1)
                     usuario.save()
-                    messages.success(request, "Registro exitoso. Ahora inicia sesión.")
+                    messages.success(request, "✅ Registro exitoso. Ahora inicia sesión.")
                 except Exception as e:
-                    messages.error(request, f"Error al crear el usuario: {str(e)}")
+                    messages.error(request, f"⚠️ Error al crear el usuario: {str(e)}")
 
-        elif 'form_type' in request.POST and request.POST['form_type'] == 'login':
-            # -------- LOGIN --------
+        # ================== LOGIN ==================
+        elif form_type == 'login':
             codigo = request.POST.get('codigo')
             password = request.POST.get('password')
+
             user = authenticate(request, username=codigo, password=password)
+
             if user is not None:
                 login(request, user)
-                messages.success(request, "Inicio de sesión exitoso")
+                messages.success(request, f"👋 Bienvenido {user.first_name} {user.last_name}")  # 👈 mensaje de éxito
                 return redirect("inicio")
             else:
-                messages.error(request, "Código o contraseña incorrectos")
+                messages.error(request, "❌ Código o contraseña incorrectos", extra_tags="error_login")
+                return redirect("login_registro")  # 👈 redirige a la misma vista
 
     return render(request, 'login_registro.html')
+
+
+from django.http import JsonResponse
+
+def check_email(request):
+    email = request.GET.get("valor", "")
+    exists = Usuario.objects.filter(email=email).exists()
+    return JsonResponse({
+        "exists": exists,
+        "message": "El correo ya está registrado" if exists else "Correo disponible"
+    })
+
+def check_codigo(request):
+    codigo = request.GET.get("valor", "")
+    exists = Usuario.objects.filter(codigo=codigo).exists()
+    return JsonResponse({
+        "exists": exists,
+        "message": "El código ya está registrado" if exists else "Código disponible"
+    })
+
 
 # Vista para cerrar sesión
 def logout_view(request):
     logout(request)
-    messages.success(request, "Has cerrado sesión correctamente")
-    return redirect("login_registro")  # Redirige al login después de cerrar sesión
+    return redirect("login_registro")   
+
 
 # Vista de recursos por dependencia
 @login_required
@@ -200,21 +226,53 @@ def subir_foto(request):
 
     return redirect('perfil_usuario')
 
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+
 @login_required
 def guardar_cedula_telefono(request):
+    usuario = request.user
+    error_cedula = None
+
     if request.method == 'POST':
-        usuario = request.user
         cedula = request.POST.get('cedula')
         telefono = request.POST.get('telefono')
 
-        if cedula and not usuario.cedula:
-            usuario.cedula = cedula
-        if telefono and not usuario.telefono:
-            usuario.telefono = telefono
+        # Validar si la cédula ya existe en otro usuario
+        if cedula:
+            existente = User.objects.filter(cedula=cedula).exclude(id=usuario.id).exists()
+            if existente:
+                error_cedula = "Esta cédula ya está registrada. Por favor ingrese otra."
+            else:
+                usuario.cedula = cedula
 
-        usuario.save()
-        messages.success(request, "Información actualizada correctamente.")
-    return redirect('perfil_usuario')  # Asegúrate que esta URL apunte al perfil
+        # Solo guardar si no hay error
+        if not error_cedula:
+            if telefono:
+                usuario.telefono = telefono
+            usuario.save()
+            messages.success(request, "Información actualizada correctamente.")
+            return redirect('perfil_usuario')
+
+    # Seleccionar plantilla según rol del usuario
+    rol = getattr(usuario, 'rol', None)
+    if rol == 'admin':
+        template = 'admin/perfil.html'
+    elif rol == 'profesor':
+        template = 'profesor/perfil.html'
+    elif rol == 'estudiante':
+        template = 'estudiante/perfil.html'
+    else:
+        template = 'perfil.html'  # por defecto
+
+    # 🔥 Siempre devolver el usuario en el contexto
+    return render(request, template, {
+        'usuario': usuario,
+        'error_cedula': error_cedula
+    })
+
 
 @login_required
 def agregar_recurso(request):
@@ -259,6 +317,35 @@ def agregar_recurso(request):
     return render(request, 'admin/inventario/agregar.html', {
         'tipos_existentes': tipos_existentes
     })
+
+from django.http import JsonResponse
+from .models import Recurso
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from .models import Recurso
+
+
+@login_required
+def validar_id_recurso(request):
+    """
+    Endpoint AJAX para validar si un ID/QR ya existe.
+    Parámetros GET:
+      - id: ID a validar (obligatorio)
+      - actual: ID del recurso actualmente en edición (opcional) -> se excluye de la búsqueda
+    Devuelve JSON: {'existe': True|False}
+    """
+    id_recurso = request.GET.get('id', '').strip()
+    recurso_actual = request.GET.get('actual', '').strip() or None
+
+    existe = False
+    if id_recurso:
+        qs = Recurso.objects.filter(id=id_recurso)
+        if recurso_actual:
+            qs = qs.exclude(id=recurso_actual)
+        existe = qs.exists()
+
+    return JsonResponse({'existe': existe})
+
 
 
 @login_required
@@ -945,54 +1032,223 @@ def pwa_registro(request):
 
 def pwa_inicio(request):
     return render(request, "mobile/inicio.html")
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count
-from django.utils.timezone import now
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField, Q
+from django.db.models.functions import ExtractWeekDay, ExtractHour, ExtractMonth
+from django.utils.timezone import now
+from django.contrib.auth.decorators import login_required
+from .models import Prestamo, Recurso
+
 
 @login_required
 def estadisticas(request):
+    # Solo el admin puede acceder
     if request.user.rol != 'admin':
-        messages.error(request, "No tienes permiso para acceder a las estadísticas")
+        messages.error(request, "No tienes permiso para acceder a las estadísticas.")
         return redirect("inicio")
 
     hoy = now()
     mes_actual = hoy.month
     anio_actual = hoy.year
 
-    # 📌 Total de préstamos en el mes actual
+    # 📊 Totales de préstamos
+    prestamos_total = Prestamo.objects.count()
     prestamos_mes = Prestamo.objects.filter(
         fecha_prestamo__year=anio_actual,
         fecha_prestamo__month=mes_actual
     ).count()
 
-    # 📌 Recursos más prestados (TOP 5)
+    # 📦 Recursos disponibles y prestados
+    recursos_disponibles = Recurso.objects.filter(disponible=True).count()
+    recursos_prestados = Recurso.objects.filter(disponible=False).count()
+    total_recursos = recursos_disponibles + recursos_prestados
+    tasa_uso_inventario = round((recursos_prestados / total_recursos) * 100, 1) if total_recursos > 0 else 0
+
+    # 🏆 Recursos más prestados
     recursos_populares = (
         Prestamo.objects.values("recurso__nombre")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
-    # 📌 Dependencias con más préstamos
+    # 🏛️ Dependencias más activas
     dependencias_populares = (
         Prestamo.objects.values("recurso__dependencia__nombre")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
-    # 📌 Usuarios más activos (TOP 5)
+    # 👥 Usuarios más activos
     usuarios_activos = (
         Prestamo.objects.values("usuario__first_name", "usuario__last_name")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
+    # 📈 Promedio de duración de préstamos (solo los devueltos)
+    prestamos_con_duracion = Prestamo.objects.filter(fecha_devolucion__isnull=False)
+    promedio_duracion = prestamos_con_duracion.annotate(
+        duracion=F('fecha_devolucion') - F('fecha_prestamo')
+    ).aggregate(prom=Avg('duracion'))['prom']
+    promedio_duracion = round(promedio_duracion.days if promedio_duracion else 0, 1)
+
+    # ✅ Devoluciones (solo distingue entre devueltos y pendientes)
+    total_prestamos = Prestamo.objects.count()
+    devueltos = Prestamo.objects.filter(devuelto=True).count()
+    pendientes = total_prestamos - devueltos
+    tasa_devoluciones = round((devueltos / total_prestamos) * 100, 1) if total_prestamos > 0 else 0
+    tasa_retrasos = 100 - tasa_devoluciones  # aproximado: representa préstamos aún no devueltos
+
+    # ⏰ Promedio de retraso (no hay fecha límite, así que lo omitimos o lo simulamos)
+    promedio_retraso = 0  # se activará cuando implementes fecha_limite en el modelo
+
+    # 📅 Préstamos por día de la semana
+    prestamos_por_dia = (
+        Prestamo.objects.annotate(dia=ExtractWeekDay('fecha_prestamo'))
+        .values('dia')
+        .annotate(total=Count('id'))
+        .order_by('dia')
+    )
+    dias_semana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+    prestamos_por_dia = [{'dia': dias_semana[p['dia'] - 1], 'total': p['total']} for p in prestamos_por_dia]
+
+    # 🕒 Horas pico de préstamos
+    prestamos_por_hora = (
+        Prestamo.objects.annotate(hora=ExtractHour('fecha_prestamo'))
+        .values('hora')
+        .annotate(total=Count('id'))
+        .order_by('hora')
+    )
+
+    # 📆 Evolución mensual del año actual
+    prestamos_mensuales = (
+        Prestamo.objects.filter(fecha_prestamo__year=anio_actual)
+        .annotate(mes=ExtractMonth('fecha_prestamo'))
+        .values('mes')
+        .annotate(total=Count('id'))
+        .order_by('mes')
+    )
+    meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    prestamos_mensuales = [{'mes': meses[p['mes'] - 1], 'total': p['total']} for p in prestamos_mensuales]
+
+    # 🔁 Índice de rotación de recursos
+    rotacion_recursos = round(prestamos_total / total_recursos, 2) if total_recursos > 0 else 0
+
+    # 👤 Usuarios recurrentes del mes (más de 1 préstamo)
+    usuarios_recurrentes = (
+        Prestamo.objects.filter(fecha_prestamo__month=mes_actual)
+        .values('usuario')
+        .annotate(total=Count('id'))
+        .filter(total__gt=1)
+        .count()
+    )
+    total_usuarios_mes = Prestamo.objects.filter(fecha_prestamo__month=mes_actual).values('usuario').distinct().count()
+    tasa_reincidencia = round((usuarios_recurrentes / total_usuarios_mes) * 100, 1) if total_usuarios_mes > 0 else 0
+
+    # 📊 Contexto completo
     contexto = {
+        # Totales
+        "prestamos_total": prestamos_total,
         "prestamos_mes": prestamos_mes,
+        "recursos_disponibles": recursos_disponibles,
+        "recursos_prestados": recursos_prestados,
+        "tasa_uso_inventario": tasa_uso_inventario,
+        "rotacion_recursos": rotacion_recursos,
+
+        # Rankings
         "recursos_populares": recursos_populares,
         "dependencias_populares": dependencias_populares,
         "usuarios_activos": usuarios_activos,
+
+        # Desempeño
+        "promedio_duracion": promedio_duracion,
+        "promedio_retraso": promedio_retraso,
+        "tasa_devoluciones": tasa_devoluciones,
+        "tasa_retrasos": tasa_retrasos,
+        "tasa_reincidencia": tasa_reincidencia,
+
+        # Gráficos
+        "prestamos_por_dia": prestamos_por_dia,
+        "prestamos_por_hora": prestamos_por_hora,
+        "prestamos_mensuales": prestamos_mensuales,
     }
 
     return render(request, "prestamo/estadisticas.html", contexto)
+
+
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils.timezone import now
+from .models import Prestamo
+
+@login_required
+def mis_prestamos(request):
+    """
+    Vista para mostrar los préstamos del usuario logueado (estudiante o profesor)
+    """
+    usuario = request.user
+
+    # Solo los roles estudiante o profesor pueden acceder
+    if usuario.rol not in ['estudiante', 'profesor']:
+        messages.error(request, "Solo los estudiantes o profesores pueden acceder a esta vista.")
+        return redirect('inicio')
+
+    prestamos = Prestamo.objects.filter(usuario=usuario).select_related('recurso')
+
+    contexto = {
+        'prestamos': prestamos,
+        'titulo': 'Mis Préstamos',
+    }
+    return render(request, 'prestamo/mis_prestamos.html', contexto)
+
+@login_required
+def lista_prestamos(request):
+    """
+    Vista para mostrar los préstamos de la dependencia del administrador.
+    """
+    usuario = request.user
+
+    # 1️⃣ Verificar que sea administrador
+    if usuario.rol != 'admin':
+        messages.error(request, "No tienes permiso para acceder a esta vista.")
+        return redirect('inicio')
+
+    # 2️⃣ Obtener dependencia administrada correctamente
+    dependencia_admin = getattr(usuario, 'dependencia_administrada', None)
+
+    # 3️⃣ Si no tiene dependencia asignada y no es superusuario, mostrar aviso
+    if not dependencia_admin and not usuario.is_superuser:
+        messages.warning(request, "No tienes una dependencia asignada. Contacta al administrador general.")
+        prestamos = Prestamo.objects.none()
+        titulo = "Préstamos (Sin dependencia asignada)"
+    else:
+        # 4️⃣ Si es superuser -> ve todo, si no -> solo su dependencia
+        if usuario.is_superuser:
+            prestamos = (
+                Prestamo.objects
+                .select_related('usuario', 'recurso', 'recurso__dependencia')
+                .order_by('-fecha_prestamo')
+            )
+            titulo = "Todos los préstamos (Administrador global)"
+        else:
+            prestamos = (
+                Prestamo.objects
+                .select_related('usuario', 'recurso', 'recurso__dependencia')
+                .filter(recurso__dependencia=dependencia_admin)
+                .order_by('-fecha_prestamo')
+            )
+            titulo = f"Préstamos de la Dependencia: {dependencia_admin.nombre}"
+
+    contexto = {
+        'prestamos': prestamos,
+        'titulo': titulo,
+    }
+
+    return render(request, 'prestamo/lista_prestamos.html', contexto)

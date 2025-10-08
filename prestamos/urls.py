@@ -16,7 +16,7 @@ from .views import ( logout_view, inicio, login_registro_view, inventario, crear
     recursos_por_dependencia, lista_solicitudes, aprobar_solicitud, rechazar_solicitud,
     mis_solicitudes, solicitudes_por_estado, perfil_usuario, pwa_inicio,pwa_login,pwa_registro,
     subir_firma, subir_foto, guardar_cedula_telefono, perfil_usuario_detalle, obtener_notificaciones, 
-    marcar_notificacion_leida, estadisticas, extender_prestamo,
+    marcar_notificacion_leida, estadisticas, extender_prestamo, check_codigo, check_email, validar_id_recurso, lista_prestamos, mis_prestamos
 )
 
 # Configuración de las rutas de la API REST con Django Rest Framework
@@ -33,6 +33,8 @@ urlpatterns = [
     
     # Endpoints de la API REST
     path('api/', include(router.urls)),
+    path("check_email/", check_email, name="check_email"),
+    path("check_codigo/", check_codigo, name="check_codigo"),
     
     # Autenticación de usuarios
     path('', login_registro_view, name='home'),
@@ -48,6 +50,7 @@ urlpatterns = [
     path('inventario/editar/<int:recurso_id>/', editar_recurso, name='editar_recurso'),
     path('inventario/eliminar/<int:recurso_id>/', eliminar_recurso, name='eliminar_recurso'),
     path('inventario/no-disponibles/', recursos_no_disponibles, name='recursos_no_disponibles'),
+    path('validar-id/',validar_id_recurso, name='validar_id_recurso'),
     
     # Gestión de dependencias y recursos asociados
     path('prestamo/dependencias/', lista_dependencias, name='lista_dependencias'),
@@ -60,6 +63,8 @@ urlpatterns = [
     path('solicitudes/rechazar/<int:solicitud_id>/', rechazar_solicitud, name='rechazar_solicitud'),
     path('mis-solicitudes/', mis_solicitudes, name='mis_solicitudes'),
     path('solicitudes/<str:estado>/', solicitudes_por_estado, name='solicitudes_por_estado'),
+    path('prestamos/', lista_prestamos, name='lista_prestamos'),
+    path('mis-prestamos/', mis_prestamos, name='mis_prestamos'),
     
     # Perfil de usuario
     path('perfil/', perfil_usuario, name='perfil_usuario'),

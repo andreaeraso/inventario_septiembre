@@ -1,53 +1,103 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Agregar Recurso</h2>
+
+<div class="content p-4">
+    <div class="container">
+        <div class="card shadow-lg border-0 rounded-4" style="background:#ffffff; color:#333;">
+            <div class="card-header border-0" style="background:linear-gradient(90deg,#14a34d,#28c76f); border-radius:1rem 1rem 0 0;">
+                <h3 class="card-title text-white m-0">
+                    <i class="fas fa-plus-circle me-2"></i> Agregar Recurso
+                </h3>
+            </div>
+
+        <div class="card-body">
 
 
-    <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm">
-        {% csrf_token %}
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
 
-        <div class="mb-3">
-            <label for="id" class="form-label">ID:</label>
-            <input type="text" class="form-control" name="id" required>
+<!-- ID -->
+<div class="mb-3 position-relative">
+    <label for="id-recurso" class="form-label fw-bold text-success">
+        <i class="fas fa-key me-1"></i> ID
+    </label>
+
+    <input type="text"
+           class="form-control border-success rounded-3 shadow-sm"
+           name="id"
+           id="id-recurso"
+           required
+           autocomplete="off">
+
+    <!-- Mensaje de error -->
+    <div id="error-id" class="text-danger mt-1" style="display:none; font-size:0.9em;">
+        ⚠️ Este ID ya está registrado.
+    </div>
+</div>
+
+
+                <!-- Tipo -->
+                <div class="mb-3">
+                    <label for="tipo" class="form-label fw-bold text-success">
+                        <i class="fas fa-tag me-1"></i> Tipo
+                    </label>
+                    <select name="tipo" id="tipo-select" class="form-select border-success rounded-3 shadow-sm" required onchange="toggleNuevoTipo(this)">
+                        <option value="" disabled selected>Seleccione un tipo</option>
+                        {% for tipo in tipos_existentes %}
+                            <option value="{{ tipo }}">{{ tipo }}</option>
+                        {% endfor %}
+                        <option value="nuevo">Otro (especificar nuevo tipo)</option>
+                    </select>
+                </div>
+
+                <!-- Nuevo Tipo -->
+                <div class="mb-3" id="nuevo-tipo-div" style="display:none;">
+                    <label for="nuevo_tipo" class="form-label fw-bold text-success">
+                        <i class="fas fa-plus-circle me-1"></i> Nuevo tipo
+                    </label>
+                    <input type="text" class="form-control border-success rounded-3 shadow-sm" name="nuevo_tipo" id="nuevo_tipo">
+                </div>
+
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label for="nombre" class="form-label fw-bold text-success">
+                        <i class="fas fa-box me-1"></i> Nombre
+                    </label>
+                    <input type="text" class="form-control border-success rounded-3 shadow-sm" name="nombre" required>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label fw-bold text-success">
+                        <i class="fas fa-align-left me-1"></i> Descripción
+                    </label>
+                    <textarea class="form-control border-success rounded-3 shadow-sm" name="descripcion" rows="3" required></textarea>
+                </div>
+
+                <!-- Foto -->
+                <div class="mb-3">
+                    <label for="foto" class="form-label fw-bold text-success">
+                        <i class="fas fa-upload me-1"></i> Subir foto
+                    </label>
+                    <input type="file" class="form-control border-success rounded-3 shadow-sm" name="foto">
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'inventario' %}" class="btn btn-outline-success rounded-3 px-4">
+                        ⬅ Volver
+                    </a>
+                    <button type="submit" class="btn btn-success rounded-3 px-4 shadow-sm">
+                        <i class="fas fa-save me-1"></i> Guardar Recurso
+                    </button>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
+```
 
-        <div class="mb-3">
-            <label for="tipo" class="form-label">Tipo:</label>
-            <select name="tipo" id="tipo-select" class="form-select" required onchange="toggleNuevoTipo(this)">
-                <option value="" disabled selected>Seleccione un tipo</option>
-                {% for tipo in tipos_existentes %}
-                    <option value="{{ tipo }}">{{ tipo }}</option>
-                {% endfor %}
-                <option value="nuevo">Otro (especificar nuevo tipo)</option>
-            </select>
-        </div>
-
-        <div id="nuevo-tipo-div" class="mb-3" style="display: none;">
-            <label for="nuevo_tipo" class="form-label">Nuevo tipo:</label>
-            <input type="text" class="form-control" name="nuevo_tipo" id="nuevo_tipo">
-        </div>
-
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre:</label>
-            <input type="text" class="form-control" name="nombre" required>
-        </div>
-
-        <div class="mb-3">
-            <label for="foto" class="form-label">Foto:</label>
-            <input type="file" class="form-control" name="foto">
-        </div>
-
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción:</label>
-            <textarea class="form-control" name="descripcion" rows="4" required></textarea>
-        </div>
-
-        <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">💾 Guardar</button>
-        </div>
-    </form>
 </div>
 
 <script>
@@ -63,4 +113,63 @@
         }
     }
 </script>
+
+<script>
+/* debounce simple */
+function debounce(fn, wait) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const inputID = document.getElementById("id-recurso");
+  if (!inputID) return;
+
+  const errorDiv = document.getElementById("error-id");
+  const submitBtn = document.querySelector("button[type='submit']");
+  const actualId = inputID.dataset.actual || '';
+
+  const checkId = () => {
+    const valor = inputID.value.trim();
+    if (!valor) {
+      errorDiv.style.display = "none";
+      if (submitBtn) submitBtn.disabled = false;
+      inputID.classList.remove('is-invalid');
+      return;
+    }
+
+    let url = `/validar-id/?id=${encodeURIComponent(valor)}`;
+    if (actualId) url += `&actual=${encodeURIComponent(actualId)}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.existe) {
+          errorDiv.style.display = "block";
+          if (submitBtn) submitBtn.disabled = true;
+          inputID.classList.add('is-invalid');
+        } else {
+          errorDiv.style.display = "none";
+          if (submitBtn) submitBtn.disabled = false;
+          inputID.classList.remove('is-invalid');
+        }
+      })
+      .catch(err => {
+        console.error("Error validando ID:", err);
+        // En caso de error de red, no bloquear al usuario:
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  };
+
+  const debouncedCheck = debounce(checkId, 350);
+  inputID.addEventListener("input", debouncedCheck);
+
+  // Chequeo inicial (útil cuando el campo viene precargado)
+  checkId();
+});
+</script>
+
 {% endblock %}

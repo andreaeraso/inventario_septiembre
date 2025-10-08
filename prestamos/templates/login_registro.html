@@ -25,7 +25,7 @@
         }
     </script>
 
-    <style>
+   <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
         *{
@@ -45,8 +45,8 @@
 
         .container{
             position: relative;
-            width: 1060px;
-            height: 666px;
+            width: 1110px;
+            height: 680px;
             background: #fff;
             border-radius: 30px;
             box-shadow: 0 0 30px rgb(0, 0,0, .2) ;
@@ -84,7 +84,7 @@
         
         .input-box {
             position: relative;
-            margin: 15px 0;
+            margin: 11px 0;
         }
 
         .input-box input {
@@ -165,7 +165,6 @@
             position: absolute;
             width: 50%;
             height: 100%;
-            /*background: seagreen;*/
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -291,19 +290,35 @@
             .container h1 {
                 font-size: 30px;
             }
+            
         }
 
- @media screen and (max-width: 400px) {
-      .container {
-        padding: 1.5rem;
-      }
+        @media screen and (max-width: 400px) {
+            .container {
+                padding: 1.5rem;
+            }
 
-      .form input,
-      .form button {
-        font-size: 14px;
-        padding: 10px;
-      }
-    }
+            .form input,
+            .form button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+        .input-box {
+            position: relative;
+            margin: 15px 0 25px; /* deja espacio para el mensaje */
+        }
+
+        .input-box p {
+            position: absolute;
+            bottom: -18px; /* mensaje fijo debajo del input */
+            left: 5px;
+            margin: 0;
+            font-size: 13px;
+            text-align: left;
+            line-height: 1;
+        }
 
     </style>
 </head>
@@ -315,7 +330,7 @@
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="login">
-                <h1>Login</h1>
+                <h1>Iniciar Sesión</h1>
                 <div class="input-box">
                     <input type="text" name="codigo" placeholder="Código" required>
                     <i class='bx bx-user'></i>
@@ -325,75 +340,104 @@
                     <i class='bx bx-lock-alt'></i>
                 </div>
                 <button type="submit" class="btn">Ingresar</button>
+
+                <!-- Mensajes SOLO para login -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'error_login' in message.tags %}
+                            <p class="text-danger flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
+                        {% elif 'success_login' in message.tags %}
+                            <p class="text-success flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
             </form>
         </div>
 
-<div class="form-box register">
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="registro">
-        <h1>Registro</h1>
+        <!-- REGISTRO -->
+        <div class="form-box register">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="registro">
+                <h1>Registro</h1>
 
-        <!-- Nombre y Apellido en fila -->
-        <div class="form-row">
-            <div class="col input-box">
-                <input type="text" name="first_name" placeholder="Nombres" required>
-                <i class='bx bx-user'></i>
-            </div>
-            <div class="col input-box">
-                <input type="text" name="last_name" placeholder="Apellidos" required>
-                <i class='bx bx-user'></i>
-            </div>
-        </div>
+                <!-- Nombre y Apellido en fila -->
+                <div class="form-row">
+                    <div class="col input-box">
+                        <input type="text" name="first_name" placeholder="Nombres" required>
+                        <i class='bx bx-user'></i>
+                    </div>
+                    <div class="col input-box">
+                        <input type="text" name="last_name" placeholder="Apellidos" required>
+                        <i class='bx bx-user'></i>
+                    </div>
+                </div>
 
-        <!-- Email -->
-        <div class="input-box">
-            <input type="email" name="email" placeholder="Email" required>
-            <i class='bx bx-envelope'></i>
-        </div>
+                <!-- Email -->
+                <div class="input-box">
+                    <input type="email" name="email" id="email" placeholder="Email" required>
+                    <i class='bx bx-envelope'></i>
+                    <p id="email-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
+                </div>
 
-        <!-- Código y Programa en fila -->
-        <div class="form-row">
-            <div class="col input-box">
-                <input type="text" name="codigo" placeholder="Código" required>
-                <i class='bx bx-id-card'></i>
-            </div>
-            <div class="col input-box">
-                <input type="text" name="programa" placeholder="Programa" required>
-                <i class='bx bx-book'></i>
-            </div>
-        </div>
+                <!-- Código y Programa en fila -->
+                <div class="form-row">
+                    <div class="col input-box">
+                        <input type="text" name="codigo" id="codigo" placeholder="Código" required>
+                        <i class='bx bx-id-card'></i>
+                        <p id="codigo-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
+                    </div>
+                    <div class="col input-box">
+                        <input type="text" name="programa" placeholder="Programa" required>
+                        <i class='bx bx-book'></i>
+                    </div>
+                </div>
 
-        <!-- Rol -->
-        <div class="input-box">
-            <select name="rol" required class="custom-select" style="height: 52px; padding-left: 20px;">
-                <option value="">Seleccione su rol</option>
-                <option value="estudiante">Estudiante</option>
-                <option value="profesor">Profesor</option>
-            </select>
-        </div>
+                <!-- Rol -->
+                <div class="input-box">
+                    <select name="rol" required class="custom-select" style="height: 52px; padding-left: 20px;">
+                        <option value="">Seleccione su rol</option>
+                        <option value="estudiante">Estudiante</option>
+                        <option value="profesor">Profesor</option>
+                    </select>
+                </div>
 
-        <!-- Foto -->
-        <div class="input-box">
-            <input type="file" name="foto" accept="image/*" style="padding-left: 20px;">
-            <i class='bx bx-camera'></i>
-        </div>
-
-        <!-- Contraseña y Confirmación en fila -->
-        <div class="form-row">
-            <div class="col input-box">
-                <input type="password" name="password1" placeholder="Contraseña" required>
-                <i class='bx bx-lock-alt'></i>
-            </div>
-            <div class="col input-box">
-                <input type="password" name="password2" placeholder="Confirmar contraseña" required>
-                <i class='bx bx-lock-alt'></i>
-            </div>
-        </div>
-
-        <button type="submit" class="btn">Registrarse</button>
-    </form>
+               <div class="col input-box">
+    <label for="foto" style="display:block; text-align:left; font-size:14px; color:#555; margin-bottom:5px;">
+        Foto de perfil
+    </label>
+    <input type="file" id="foto" name="foto" accept="image/*" style="padding-left: 20px;">
 </div>
+
+                <!-- Contraseñas -->
+                <div class="form-row">
+                    <div class="col input-box">
+                        <input type="password" name="password1" placeholder="Contraseña" required>
+                        <i class='bx bx-lock-alt'></i>
+                    </div>
+                    <div class="col input-box">
+                        <input type="password" name="password2" placeholder="Confirmar contraseña" required>
+                        <i class='bx bx-lock-alt'></i>
+                    </div>
+                </div>
+                <!-- Mensaje dinámico contraseñas -->
+                <p id="password-match-msg" style="font-size:13px; margin-top:5px; text-align:left;"></p>
+
+                <!-- Mensajes SOLO para registro -->
+                {% if messages %}
+                    {% for message in messages %}
+                        {% if 'error_register' in message.tags %}
+                            <p class="text-danger flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}</p>
+                        {% elif 'success_register' in message.tags %}
+                            <p class="text-success flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                <button type="submit" class="btn">Registrarse</button>
+            </form>
+        </div>
 
         <!-- Toggle Panel -->
         <div class="toggle-box">
@@ -410,6 +454,7 @@
         </div>
     </div>
 
+    <!-- Flip card -->
     <script>
         const container = document.querySelector('.container');
         const registerBtn = document.querySelector('.register-btn');
@@ -417,30 +462,74 @@
 
         registerBtn.addEventListener('click', () => container.classList.add('active'));
         loginBtn.addEventListener('click', () => container.classList.remove('active'));
-    </script>
-     <script>
-        let deferredPrompt;
-        const installBtn = document.getElementById('installAppBtn');
 
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();  // Previene el prompt automático
-            deferredPrompt = e;
-            installBtn.style.display = 'block';  // Muestra el botón
-
-            installBtn.addEventListener('click', () => {
-                installBtn.style.display = 'none';
-                deferredPrompt.prompt();  // Muestra el prompt manual
-
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Usuario aceptó la instalación.');
-                    } else {
-                        console.log('Usuario rechazó la instalación.');
-                    }
-                    deferredPrompt = null;
-                });
+        // Ocultar mensajes flash después de 3s
+        setTimeout(() => {
+            document.querySelectorAll('.flash-msg').forEach(msg => {
+                msg.style.transition = "opacity 0.5s ease";
+                msg.style.opacity = "0";
+                setTimeout(() => msg.remove(), 500);
             });
-        });
+        }, 3000);
+    </script>
+
+    <!-- Validación Email y Código -->
+    <script>
+        function validarCampo(inputId, msgId, url) {
+            const input = document.getElementById(inputId);
+            const msg = document.getElementById(msgId);
+
+            input.addEventListener("blur", function() {
+                const valor = input.value.trim();
+                if (valor.length > 0) {
+                    fetch(`${url}?valor=${encodeURIComponent(valor)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.exists) {
+                                msg.textContent = "❌ " + data.message;
+                                msg.style.color = "red";
+                            } else {
+                                msg.textContent = "✅ Disponible";
+                                msg.style.color = "green";
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error en validación:", error);
+                            msg.textContent = "⚠ Error al validar";
+                            msg.style.color = "orange";
+                        });
+                } else {
+                    msg.textContent = "";
+                }
+            });
+        }
+
+        validarCampo("email", "email-msg", "{% url 'check_email' %}");
+        validarCampo("codigo", "codigo-msg", "{% url 'check_codigo' %}");
+    </script>
+
+    <!-- Validación contraseñas -->
+    <script>
+        const pass1 = document.querySelector('input[name="password1"]');
+        const pass2 = document.querySelector('input[name="password2"]');
+        const msg = document.getElementById('password-match-msg');
+
+        function checkPasswords() {
+            if (pass1.value && pass2.value) {
+                if (pass1.value === pass2.value) {
+                    msg.textContent = "✅ Las contraseñas coinciden";
+                    msg.style.color = "green";
+                } else {
+                    msg.textContent = "❌ Las contraseñas no coinciden";
+                    msg.style.color = "red";
+                }
+            } else {
+                msg.textContent = "";
+            }
+        }
+
+        pass1.addEventListener('input', checkPasswords);
+        pass2.addEventListener('input', checkPasswords);
     </script>
 
     <!-- AdminLTE Scripts -->

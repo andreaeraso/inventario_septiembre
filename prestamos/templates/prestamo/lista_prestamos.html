@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<style>
+    .prestamos-wrapper {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        color: #333;
+        width: 100%;
+    }
+
+    .prestamos-header {
+        text-align: center;
+        margin-bottom: 1.8rem;
+        border-bottom: 3px solid #0c7c3c;
+        padding-bottom: 0.5rem;
+    }
+
+    .prestamos-header h3 {
+        color: #0c7c3c;
+        font-weight: bold;
+        margin: 0;
+        font-size: 1.6rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tabla-prestamos {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 900px;
+    }
+
+    .tabla-prestamos thead {
+        background-color: #0c7c3c;
+        color: white;
+    }
+
+    .tabla-prestamos th,
+    .tabla-prestamos td {
+        padding: 12px 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .tabla-prestamos tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .tabla-prestamos tbody tr:hover {
+        background-color: #e9f7ef;
+    }
+
+    .badge-success {
+        background-color: #27ae60;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .badge-warning {
+        background-color: #f1c40f;
+        color: #333;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .btn-contrato {
+        border: 1px solid #0c7c3c;
+        color: #0c7c3c;
+        background-color: #fff;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-contrato:hover {
+        background-color: #0c7c3c;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .mensaje-vacio {
+        text-align: center;
+        padding: 1.2rem;
+        color: #999;
+        font-size: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .tabla-prestamos th,
+        .tabla-prestamos td {
+            font-size: 0.85rem;
+            padding: 8px;
+        }
+        .prestamos-wrapper {
+            padding: 1.2rem;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4 px-2">
+    <div class="prestamos-wrapper mx-auto">
+        <div class="prestamos-header">
+            <h3><i class='bx bx-list-check'></i> {{ titulo }}</h3>
+        </div>
+
+        {% if prestamos %}
+        <div style="overflow-x: auto;">
+            <table class="tabla-prestamos">
+                <thead>
+                    <tr>
+                        <th><i class='bx bx-id-card'></i> Código</th>
+                        <th><i class='bx bx-user'></i> Nombre</th>
+                        <th><i class='bx bx-user-pin'></i> Rol</th>
+                        <th><i class='bx bx-cube'></i> Recurso</th>
+                        <th><i class='bx bx-calendar'></i> Fecha de Préstamo</th>
+                        <th><i class='bx bx-calendar-check'></i> Fecha de Devolución</th>
+                        <th><i class='bx bx-check-shield'></i> Estado</th>
+                        <th><i class='bx bx-file'></i> Contrato</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in prestamos %}
+                    <tr>
+                        <td>{{ p.usuario.codigo }}</td>
+                        <td>{{ p.usuario.first_name }} {{ p.usuario.last_name }}</td>
+                        <td>{{ p.usuario.get_rol_display }}</td>
+                        <td>{{ p.recurso.nombre }}</td>
+                        <td>{{ p.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                        <td>{{ p.fecha_devolucion|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if p.devuelto %}
+                                <span class="badge-success">Devuelto</span>
+                            {% else %}
+                                <span class="badge-warning">Pendiente</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if p.contrato_prestamo %}
+                                <a href="{{ p.contrato_prestamo.url }}" target="_blank" class="btn-contrato">
+                                    <i class='bx bx-link-external'></i> Ver Contrato
+                                </a>
+                            {% else %}
+                                <span class="text-muted">No disponible</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="mensaje-vacio">
+            <i class='bx bx-info-circle'></i> No hay préstamos registrados aún.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

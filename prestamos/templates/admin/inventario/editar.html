@@ -22,14 +22,29 @@
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
 
-                    <!-- ID -->
-                    <div class="mb-3">
-                        <label for="id" class="form-label fw-bold text-success">
-                            <i class="fas fa-key me-1"></i> ID
-                        </label>
-                        <input type="number" class="form-control border-success rounded-3 shadow-sm" 
-                               name="id" value="{{ recurso.id }}" required>
-                    </div>
+<!-- ID -->
+<div class="mb-3 position-relative">
+    <label for="id-recurso" class="form-label fw-bold text-success">
+        <i class="fas fa-key me-1"></i> ID
+    </label>
+
+<input type="text"
+       class="form-control border-success rounded-3 shadow-sm"
+       name="id"
+       id="id-recurso"
+       value="{{ recurso.id }}"
+       data-actual="{{ recurso.id }}"
+       required
+       autocomplete="off">
+
+
+    <!-- Mensaje de error -->
+    <div id="error-id" class="text-danger mt-1" style="display:none; font-size:0.9em;">
+        ⚠️ Este ID ya está registrado.
+    </div>
+</div>
+
+
 
                     <!-- Tipo -->
                     <div class="mb-3">
@@ -130,4 +145,65 @@
         }
     });
 </script>
+
+
+<script>
+/* debounce simple */
+function debounce(fn, wait) {
+  let t;
+  return function(...args) {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(this, args), wait);
+  };
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const inputID = document.getElementById("id-recurso");
+  if (!inputID) return;
+
+  const errorDiv = document.getElementById("error-id");
+  const submitBtn = document.querySelector("button[type='submit']");
+  const actualId = inputID.dataset.actual || '';
+
+  const checkId = () => {
+    const valor = inputID.value.trim();
+    if (!valor) {
+      errorDiv.style.display = "none";
+      if (submitBtn) submitBtn.disabled = false;
+      inputID.classList.remove('is-invalid');
+      return;
+    }
+
+    let url = `/validar-id/?id=${encodeURIComponent(valor)}`;
+    if (actualId) url += `&actual=${encodeURIComponent(actualId)}`;
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.existe) {
+          errorDiv.style.display = "block";
+          if (submitBtn) submitBtn.disabled = true;
+          inputID.classList.add('is-invalid');
+        } else {
+          errorDiv.style.display = "none";
+          if (submitBtn) submitBtn.disabled = false;
+          inputID.classList.remove('is-invalid');
+        }
+      })
+      .catch(err => {
+        console.error("Error validando ID:", err);
+        // En caso de error de red, no bloquear al usuario:
+        if (submitBtn) submitBtn.disabled = false;
+      });
+  };
+
+  const debouncedCheck = debounce(checkId, 350);
+  inputID.addEventListener("input", debouncedCheck);
+
+  // Chequeo inicial (útil cuando el campo viene precargado)
+  checkId();
+});
+</script>
+
+
 {% endblock %}
