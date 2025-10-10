@@ -5,61 +5,89 @@
 
 {% block content %}
 <style>
-    .prestamos-wrapper {
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .panel-wrapper {
         background-color: #ffffff;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         color: #333;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
         width: 100%;
     }
 
-    .prestamos-header {
-        text-align: center;
-        margin-bottom: 1.8rem;
+    .panel-header {
         border-bottom: 3px solid #0c7c3c;
-        padding-bottom: 0.5rem;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        text-align: center;
     }
 
-    .prestamos-header h3 {
+    .panel-header h3 {
         color: #0c7c3c;
         font-weight: bold;
+        font-size: 1.9rem;
         margin: 0;
-        font-size: 1.6rem;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        gap: 10px;
     }
 
-    .tabla-prestamos {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 900px;
+    /* 📋 Tarjeta contenedora */
+    .prestamos-card {
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border: none;
+        overflow: hidden;
     }
 
-    .tabla-prestamos thead {
+    .prestamos-card .card-header {
         background-color: #0c7c3c;
         color: white;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .tabla-prestamos th,
-    .tabla-prestamos td {
-        padding: 12px 10px;
-        border: 1px solid #ddd;
+    .buscador-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .buscador-input {
+        padding: 0.6rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px;
+        max-width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .buscador-input:focus {
+        border-color: #0c7c3c;
+        outline: none;
+        box-shadow: 0 0 6px rgba(12, 124, 60, 0.4);
+    }
+
+    .table th,
+    .table td {
+        vertical-align: middle !important;
         text-align: center;
         font-size: 0.95rem;
     }
 
-    .tabla-prestamos tbody tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
-
-    .tabla-prestamos tbody tr:hover {
-        background-color: #e9f7ef;
-    }
-
     .badge-success {
-        background-color: #27ae60;
+        background-color: #0c7c3c;
         color: white;
         padding: 5px 10px;
         border-radius: 8px;
@@ -68,7 +96,7 @@
     }
 
     .badge-warning {
-        background-color: #f1c40f;
+        background-color: #ffc107;
         color: #333;
         padding: 5px 10px;
         border-radius: 8px;
@@ -76,7 +104,7 @@
         font-weight: 500;
     }
 
-    .btn-contrato {
+    .btn-accion {
         border: 1px solid #0c7c3c;
         color: #0c7c3c;
         background-color: #fff;
@@ -88,9 +116,11 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        margin: 2px;
+        text-wrap: nowrap;
     }
 
-    .btn-contrato:hover {
+    .btn-accion:hover {
         background-color: #0c7c3c;
         color: #fff;
         text-decoration: none;
@@ -103,74 +133,189 @@
         font-size: 1rem;
     }
 
-    @media (max-width: 768px) {
-        .tabla-prestamos th,
-        .tabla-prestamos td {
-            font-size: 0.85rem;
-            padding: 8px;
+    /* ✅ Estilos responsive */
+    @media (max-width: 992px) {
+        .table thead {
+            display: none;
         }
-        .prestamos-wrapper {
+
+        .table,
+        .table tbody,
+        .table tr,
+        .table td {
+            display: block;
+            width: 100%;
+        }
+
+        .table tr {
+            margin-bottom: 1.2rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 0.8rem;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            position: relative;
+            border: none;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #0c7c3c;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .buscador-container {
+            justify-content: center;
+        }
+
+        .panel-wrapper {
             padding: 1.2rem;
+        }
+
+        .panel-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .prestamos-card .card-header {
+            font-size: 1rem;
+            text-align: center;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .buscador-input {
+            width: 100%;
         }
     }
 </style>
 
 <div class="container-fluid mt-4 px-2">
-    <div class="prestamos-wrapper mx-auto">
-        <div class="prestamos-header">
+    <div class="panel-wrapper mx-auto">
+        <div class="panel-header">
             <h3><i class='bx bx-list-check'></i> {{ titulo }}</h3>
         </div>
 
-        {% if prestamos %}
-        <div style="overflow-x: auto;">
-            <table class="tabla-prestamos">
-                <thead>
-                    <tr>
-                        <th><i class='bx bx-id-card'></i> Código</th>
-                        <th><i class='bx bx-user'></i> Nombre</th>
-                        <th><i class='bx bx-user-pin'></i> Rol</th>
-                        <th><i class='bx bx-cube'></i> Recurso</th>
-                        <th><i class='bx bx-calendar'></i> Fecha de Préstamo</th>
-                        <th><i class='bx bx-calendar-check'></i> Fecha de Devolución</th>
-                        <th><i class='bx bx-check-shield'></i> Estado</th>
-                        <th><i class='bx bx-file'></i> Contrato</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in prestamos %}
-                    <tr>
-                        <td>{{ p.usuario.codigo }}</td>
-                        <td>{{ p.usuario.first_name }} {{ p.usuario.last_name }}</td>
-                        <td>{{ p.usuario.get_rol_display }}</td>
-                        <td>{{ p.recurso.nombre }}</td>
-                        <td>{{ p.fecha_prestamo|date:"d/m/Y H:i" }}</td>
-                        <td>{{ p.fecha_devolucion|date:"d/m/Y H:i" }}</td>
-                        <td>
-                            {% if p.devuelto %}
-                                <span class="badge-success">Devuelto</span>
-                            {% else %}
-                                <span class="badge-warning">Pendiente</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if p.contrato_prestamo %}
-                                <a href="{{ p.contrato_prestamo.url }}" target="_blank" class="btn-contrato">
-                                    <i class='bx bx-link-external'></i> Ver Contrato
-                                </a>
-                            {% else %}
-                                <span class="text-muted">No disponible</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- 🔍 Buscador -->
+        <div class="buscador-container">
+            <input type="text" id="buscador" class="buscador-input" placeholder="Buscar por código, recurso o usuario...">
         </div>
-        {% else %}
-        <div class="mensaje-vacio">
-            <i class='bx bx-info-circle'></i> No hay préstamos registrados aún.
+
+        <!-- 📋 Tabla dentro de tarjeta -->
+        <div class="card prestamos-card">
+            <div class="card-header">
+                <i class="fas fa-clipboard-list"></i> Lista de Préstamos
+            </div>
+            <div class="card-body table-responsive">
+                {% if prestamos %}
+                <table class="table table-bordered table-hover align-middle mb-0" id="tablaPrestamos">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class='bx bx-id-card'></i> Código</th>
+                            <th><i class='bx bx-user'></i> Nombre</th>
+                            <th><i class='bx bx-user-pin'></i> Rol</th>
+                            <th><i class='bx bx-cube'></i> Recurso</th>
+                            <th><i class='bx bx-calendar'></i> Fecha de Préstamo</th>
+                            <th><i class='bx bx-calendar-check'></i> Fecha de Devolución</th>
+                            <th><i class='bx bx-check-shield'></i> Estado</th>
+                            <th><i class='bx bx-cog'></i> Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in prestamos %}
+                        <tr>
+                            <td data-label="Código">{{ p.usuario.codigo }}</td>
+                            <td data-label="Nombre">{{ p.usuario.first_name }} {{ p.usuario.last_name }}</td>
+                            <td data-label="Rol">{{ p.usuario.get_rol_display }}</td>
+                            <td data-label="Recurso">{{ p.recurso.nombre }}</td>
+                            <td data-label="Fecha de Préstamo">{{ p.fecha_prestamo|date:"d/m/Y H:i" }}</td>
+                            <td data-label="Fecha de Devolución">{{ p.fecha_devolucion|date:"d/m/Y H:i" }}</td>
+                            <td data-label="Estado">
+                                {% if p.devuelto %}
+                                    <span class="badge-success"><i class="fas fa-check-circle"></i> Devuelto</span>
+                                {% else %}
+                                    <span class="badge-warning"><i class="fas fa-hourglass-half"></i> Pendiente</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Acciones">
+                                {% if not p.devuelto %}
+                                    <form action="{% url 'marcar_devuelto' p.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-accion">
+                                            <i class="fas fa-check"></i> Devolver
+                                        </button>
+                                    </form>
+
+                                    <button type="button" class="btn-accion" data-bs-toggle="modal" data-bs-target="#extenderModal{{ p.id }}">
+                                        <i class="fas fa-clock"></i> Extender
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="extenderModal{{ p.id }}" tabindex="-1" aria-labelledby="extenderModalLabel{{ p.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form action="{% url 'extender_prestamo' p.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="extenderModalLabel{{ p.id }}">
+                                                            <i class="fas fa-clock"></i> Extender Préstamo
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <label for="nueva_fecha_{{ p.id }}" class="form-label">Nueva fecha de devolución</label>
+                                                        <input type="date" name="nueva_fecha" id="nueva_fecha_{{ p.id }}" class="form-control" required min="{{ p.fecha_devolucion|date:'Y-m-d' }}">
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-success">Aceptar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {% if p.contrato_prestamo %}
+                                    <a href="{{ p.contrato_prestamo.url }}" target="_blank" class="btn-accion">
+                                        <i class="fas fa-file-download"></i> Contrato
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">No disponible</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="mensaje-vacio">
+                    <i class='bx bx-info-circle'></i> No hay préstamos registrados aún.
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
     </div>
 </div>
+
+<!-- 🔎 Script de búsqueda -->
+<script>
+    document.getElementById("buscador").addEventListener("keyup", function() {
+        const filtro = this.value.toLowerCase();
+        const filas = document.querySelectorAll("#tablaPrestamos tbody tr");
+        filas.forEach(fila => {
+            const codigo = fila.children[0].textContent.toLowerCase();
+            const nombre = fila.children[1].textContent.toLowerCase();
+            const recurso = fila.children[3].textContent.toLowerCase();
+            fila.style.display = (codigo.includes(filtro) || nombre.includes(filtro) || recurso.includes(filtro)) ? "" : "none";
+        });
+    });
+</script>
 {% endblock %}

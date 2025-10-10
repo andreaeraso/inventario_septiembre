@@ -160,25 +160,13 @@ def inventario(request):
         'recursos': recursos_ordenados
     })
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+
 @login_required
 def perfil_usuario(request):
     usuario = request.user
-    
-    if usuario.rol == "admin":  # Asumiendo que el admin tiene `is_staff=True`
-        template_name = "admin/perfil.html"
-    elif usuario.rol == "estudiante":  # Ajusta el nombre del campo `rol` si es diferente
-        template_name = "estudiante/perfil.html"
-    elif usuario.rol == "profesor":
-        template_name = "profesor/perfil.html"
-    else:
-        template_name = "perfil.html"  # Un fallback por si acaso
-
-    return render(request, template_name, {'usuario': usuario})
-
-
-@login_required
-def perfil_usuario_detalle(request, usuario_id):
-    usuario = get_object_or_404(Usuario, id=usuario_id)
 
     if usuario.rol == "admin":
         template_name = "admin/perfil.html"
@@ -189,7 +177,35 @@ def perfil_usuario_detalle(request, usuario_id):
     else:
         template_name = "perfil.html"
 
-    return render(request, template_name, {'usuario': usuario})
+    # 🔹 Solo el propio usuario puede editar su información aquí
+    puede_editar = True
+
+    return render(request, template_name, {'usuario': usuario, 'puede_editar': puede_editar})
+
+
+@login_required
+def perfil_usuario_detalle(request, usuario_id):
+    usuario = get_object_or_404(Usuario, id=usuario_id)
+
+    # ⚠️ Solo el propio usuario puede editar sus datos
+    puede_editar = (request.user.id == usuario.id)
+
+    if usuario.rol == "admin":
+        template_name = "admin/perfil.html"
+    elif usuario.rol == "estudiante":
+        template_name = "estudiante/perfil.html"
+    elif usuario.rol == "profesor":
+        template_name = "profesor/perfil.html"
+    else:
+        template_name = "perfil.html"
+
+    # 🔒 Si no es el dueño del perfil y no es superusuario, no puede editar
+    if not puede_editar and not request.user.is_superuser:
+        # Si el admin quiere solo visualizar, ok; pero no editar
+        puede_editar = False
+
+    return render(request, template_name, {'usuario': usuario, 'puede_editar': puede_editar})
+
 
 
 @login_required
@@ -1041,6 +1057,15 @@ from django.utils.timezone import now
 from django.contrib.auth.decorators import login_required
 from .models import Prestamo, Recurso
 
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Avg, F
+from django.db.models.functions import ExtractWeekDay, ExtractHour, ExtractMonth
+from django.utils.timezone import now
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from datetime import timedelta
+from .models import Prestamo, Recurso
+
 
 @login_required
 def estadisticas(request):
@@ -1049,7 +1074,7 @@ def estadisticas(request):
         messages.error(request, "No tienes permiso para acceder a las estadísticas.")
         return redirect("inicio")
 
-    hoy = now()
+    hoy = now().date()
     mes_actual = hoy.month
     anio_actual = hoy.year
 
@@ -1087,22 +1112,29 @@ def estadisticas(request):
         .order_by("-total")[:5]
     )
 
-    # 📈 Promedio de duración de préstamos (solo los devueltos)
-    prestamos_con_duracion = Prestamo.objects.filter(fecha_devolucion__isnull=False)
-    promedio_duracion = prestamos_con_duracion.annotate(
-        duracion=F('fecha_devolucion') - F('fecha_prestamo')
-    ).aggregate(prom=Avg('duracion'))['prom']
-    promedio_duracion = round(promedio_duracion.days if promedio_duracion else 0, 1)
+    # 📈 Promedio de duración del préstamo
+    if prestamos_total > 0:
+        duraciones = [
+            (p.fecha_devolucion.date() - p.fecha_prestamo.date()).days
+            for p in Prestamo.objects.all()
+        ]
+        promedio_duracion = round(sum(duraciones) / len(duraciones), 1) if duraciones else 0
+    else:
+        promedio_duracion = 0
 
-    # ✅ Devoluciones (solo distingue entre devueltos y pendientes)
-    total_prestamos = Prestamo.objects.count()
+    # ✅ Devoluciones y retrasos reales
     devueltos = Prestamo.objects.filter(devuelto=True).count()
-    pendientes = total_prestamos - devueltos
-    tasa_devoluciones = round((devueltos / total_prestamos) * 100, 1) if total_prestamos > 0 else 0
-    tasa_retrasos = 100 - tasa_devoluciones  # aproximado: representa préstamos aún no devueltos
+    no_devueltos = Prestamo.objects.filter(devuelto=False).count()
 
-    # ⏰ Promedio de retraso (no hay fecha límite, así que lo omitimos o lo simulamos)
-    promedio_retraso = 0  # se activará cuando implementes fecha_limite en el modelo
+    # Retrasos: no devueltos con fecha_devolucion vencida
+    prestamos_vencidos = Prestamo.objects.filter(
+        devuelto=False,
+        fecha_devolucion__lt=now()
+    ).count()
+
+    tasa_devoluciones = round((devueltos / prestamos_total) * 100, 1) if prestamos_total > 0 else 0
+    tasa_retrasos = round((prestamos_vencidos / prestamos_total) * 100, 1) if prestamos_total > 0 else 0
+    promedio_retraso = 0  # Puedes ampliarlo si agregas fecha de devolución real más adelante
 
     # 📅 Préstamos por día de la semana
     prestamos_por_dia = (
@@ -1112,9 +1144,12 @@ def estadisticas(request):
         .order_by('dia')
     )
     dias_semana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-    prestamos_por_dia = [{'dia': dias_semana[p['dia'] - 1], 'total': p['total']} for p in prestamos_por_dia]
+    prestamos_por_dia = [
+        {'dia': dias_semana[p['dia'] - 1], 'total': p['total']}
+        for p in prestamos_por_dia
+    ]
 
-    # 🕒 Horas pico de préstamos
+    # 🕒 Horas pico
     prestamos_por_hora = (
         Prestamo.objects.annotate(hora=ExtractHour('fecha_prestamo'))
         .values('hora')
@@ -1131,12 +1166,15 @@ def estadisticas(request):
         .order_by('mes')
     )
     meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-    prestamos_mensuales = [{'mes': meses[p['mes'] - 1], 'total': p['total']} for p in prestamos_mensuales]
+    prestamos_mensuales = [
+        {'mes': meses[p['mes'] - 1], 'total': p['total']}
+        for p in prestamos_mensuales
+    ]
 
-    # 🔁 Índice de rotación de recursos
+    # 🔁 Rotación de recursos
     rotacion_recursos = round(prestamos_total / total_recursos, 2) if total_recursos > 0 else 0
 
-    # 👤 Usuarios recurrentes del mes (más de 1 préstamo)
+    # 👤 Usuarios recurrentes del mes
     usuarios_recurrentes = (
         Prestamo.objects.filter(fecha_prestamo__month=mes_actual)
         .values('usuario')
@@ -1144,38 +1182,36 @@ def estadisticas(request):
         .filter(total__gt=1)
         .count()
     )
-    total_usuarios_mes = Prestamo.objects.filter(fecha_prestamo__month=mes_actual).values('usuario').distinct().count()
-    tasa_reincidencia = round((usuarios_recurrentes / total_usuarios_mes) * 100, 1) if total_usuarios_mes > 0 else 0
+    total_usuarios_mes = Prestamo.objects.filter(
+        fecha_prestamo__month=mes_actual
+    ).values('usuario').distinct().count()
+    tasa_reincidencia = round(
+        (usuarios_recurrentes / total_usuarios_mes) * 100, 1
+    ) if total_usuarios_mes > 0 else 0
 
-    # 📊 Contexto completo
+    # 📊 Contexto final
     contexto = {
-        # Totales
         "prestamos_total": prestamos_total,
         "prestamos_mes": prestamos_mes,
         "recursos_disponibles": recursos_disponibles,
         "recursos_prestados": recursos_prestados,
         "tasa_uso_inventario": tasa_uso_inventario,
         "rotacion_recursos": rotacion_recursos,
-
-        # Rankings
         "recursos_populares": recursos_populares,
         "dependencias_populares": dependencias_populares,
         "usuarios_activos": usuarios_activos,
-
-        # Desempeño
         "promedio_duracion": promedio_duracion,
         "promedio_retraso": promedio_retraso,
         "tasa_devoluciones": tasa_devoluciones,
         "tasa_retrasos": tasa_retrasos,
         "tasa_reincidencia": tasa_reincidencia,
-
-        # Gráficos
         "prestamos_por_dia": prestamos_por_dia,
         "prestamos_por_hora": prestamos_por_hora,
         "prestamos_mensuales": prestamos_mensuales,
     }
 
     return render(request, "prestamo/estadisticas.html", contexto)
+
 
 
 

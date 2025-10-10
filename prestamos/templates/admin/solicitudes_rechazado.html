@@ -2,137 +2,189 @@
 
 {% block content %}
 <style>
-    .rechazadas-wrapper {
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .panel-wrapper {
         background-color: #ffffff;
-        padding: 2rem;
-        border-radius: 12px;
+        padding: 2.5rem 2rem;
+        border-radius: 16px;
         color: #333;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
         width: 100%;
     }
 
-    .rechazadas-header {
+    .panel-header {
         border-bottom: 3px solid #c0392b;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
         text-align: center;
     }
 
-    .rechazadas-header h3 {
+    .panel-header h3 {
         color: #c0392b;
         font-weight: bold;
+        font-size: 1.9rem;
         margin: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 10px;
     }
 
-    .rechazadas-box {
-        background-color: #f8f8f8;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #c0392b;
-        overflow-x: auto;
+    .solicitudes-card {
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        border: none;
+        overflow: hidden;
     }
 
-    .tabla-rechazadas {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 750px;
-    }
-
-    .tabla-rechazadas thead {
+    .solicitudes-card .card-header {
         background-color: #c0392b;
         color: white;
-    }
-
-    .tabla-rechazadas th,
-    .tabla-rechazadas td {
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-        font-size: 0.95rem;
-    }
-
-    .tabla-rechazadas tbody tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .tabla-rechazadas tbody tr:hover {
-        background-color: #ffecec;
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .badge-danger {
         background-color: #e74c3c;
         color: white;
-        padding: 4px 8px;
-        border-radius: 6px;
         font-size: 0.85rem;
+        border-radius: 8px;
+        padding: 5px 10px;
         font-weight: 500;
     }
 
-    .mensaje-vacio {
+    .table th, .table td {
+        vertical-align: middle !important;
         text-align: center;
-        padding: 1rem;
-        color: #999;
     }
 
-    @media (max-width: 576px) {
-        .tabla-rechazadas th,
-        .tabla-rechazadas td {
-            font-size: 0.85rem;
-            padding: 8px;
+    .text-muted {
+        color: #888 !important;
+    }
+
+    @media (max-width: 992px) {
+        .table thead {
+            display: none;
+        }
+
+        .table,
+        .table tbody,
+        .table tr,
+        .table td {
+            display: block;
+            width: 100%;
+        }
+
+        .table tr {
+            margin-bottom: 1.2rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 0.8rem;
+            background-color: #fff5f5;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            position: relative;
+            border: none;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #c0392b;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .panel-wrapper {
+            padding: 1.2rem;
+        }
+
+        .panel-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .solicitudes-card .card-header {
+            font-size: 1rem;
+            text-align: center;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.5rem;
         }
     }
 </style>
 
 <div class="container-fluid mt-4 px-2">
-    <div class="rechazadas-wrapper mx-auto">
-        <div class="rechazadas-header">
+    <div class="panel-wrapper mx-auto">
+        <div class="panel-header">
             <h3><i class='bx bx-x-circle'></i> Solicitudes Rechazadas</h3>
         </div>
 
-        <div class="rechazadas-box">
-            {% if solicitudes %}
-                <div style="overflow-x: auto;">
-                    <table class="tabla-rechazadas">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Recurso</th>
-                                <th>Usuario</th>
-                                <th>Fecha de Solicitud</th>
-                                <th>Fecha de Devolución</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for solicitud in solicitudes %}
-                            <tr>
-                                <td>{{ solicitud.id }}</td>
-                                <td>{{ solicitud.recurso.nombre }}</td>
-                                                                <td>
-                                    <a href="{% url 'perfil_usuario_detalle' solicitud.usuario.id %}" 
-                                    style="color: #0c7c3c; text-decoration: underline; font-weight: 600;">
-                                        {{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}
-                                    </a>
-                                </td>
-                                <td>{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
-                                <td>{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
-                                <td><span class="badge-danger">{{ solicitud.get_estado_display }}</span></td>
-                                <td><span class="text-muted">No disponible</span></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="row">
+            <div class="col-12">
+                <div class="card solicitudes-card">
+                    <div class="card-header">
+                        <i class="fas fa-ban"></i> Lista de Solicitudes Rechazadas
+                    </div>
+                    <div class="card-body table-responsive">
+                        {% if solicitudes %}
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Recurso</th>
+                                    <th>Usuario</th>
+                                    <th>Fecha Solicitud</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for solicitud in solicitudes %}
+                                <tr>
+                                    <td data-label="ID">{{ solicitud.id }}</td>
+                                    <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
+                                    <td data-label="Usuario">
+                                        <a href="{% url 'perfil_usuario_detalle' solicitud.usuario.id %}"
+                                           style="color: #0c7c3c; font-weight: 600; text-decoration: underline;">
+                                           {{ solicitud.usuario.first_name }} {{ solicitud.usuario.last_name }}
+                                        </a>
+                                    </td>
+                                    <td data-label="Fecha Solicitud">{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
+                                    <td data-label="Fecha Devolución">{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
+                                    <td data-label="Estado">
+                                        <span class="badge-danger"><i class='bx bx-x'></i> {{ solicitud.get_estado_display }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class='bx bx-info-circle'></i> No hay solicitudes rechazadas registradas.
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-            {% else %}
-                <div class="mensaje-vacio">
-                    <i class='bx bx-info-circle'></i> No hay solicitudes rechazadas registradas.
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>

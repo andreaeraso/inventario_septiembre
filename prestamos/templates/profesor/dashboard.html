@@ -33,6 +33,7 @@
         gap: 10px;
     }
 
+    /* === Tarjetas de recursos === */
     .recurso-card {
         border-radius: 14px;
         box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
@@ -48,7 +49,7 @@
     }
 
     .recurso-card img {
-        height: 170px;
+        height: 180px;
         object-fit: cover;
         width: 100%;
     }
@@ -77,13 +78,14 @@
 
     .btn-solicitar:hover {
         background-color: #095b2c;
-        color: white;
     }
 
+    /* === Tabla de préstamos === */
     .prestamos-card {
         border-radius: 14px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         border: none;
+        overflow: hidden;
     }
 
     .prestamos-card .card-header {
@@ -122,28 +124,70 @@
 
     table th, table td {
         vertical-align: middle !important;
+        text-align: center;
     }
 
-    @media (max-width: 768px) {
+    /* === Responsive === */
+    @media (max-width: 992px) {
         .panel-wrapper {
-            padding: 1rem;
+            padding: 1.2rem;
+        }
+
+        .panel-header h3 {
+            font-size: 1.5rem;
+        }
+
+        /* Ocultar encabezado de tabla en móvil */
+        .table thead {
+            display: none;
+        }
+
+        .table,
+        .table tbody,
+        .table tr,
+        .table td {
+            display: block;
+            width: 100%;
+        }
+
+        .table tr {
+            margin-bottom: 1.2rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 0.8rem;
+        }
+
+        .table td {
+            text-align: left;
+            padding: 0.6rem 0.8rem;
+            border: none;
+            position: relative;
+        }
+
+        .table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #0c7c3c;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
         }
 
         .recurso-card img {
-            height: 140px;
+            height: 150px;
         }
 
         .btn-solicitar {
             width: 100%;
             justify-content: center;
         }
+    }
 
-        .table {
-            font-size: 0.9rem;
-        }
-
-        .panel-header h3 {
-            font-size: 1.5rem;
+    @media (max-width: 400px) {
+        .btn-solicitar {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
         }
     }
 </style>
@@ -182,39 +226,37 @@
                     <div class="card-header">
                         <i class="bi bi-clipboard-check"></i> Mis Préstamos Recientes
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Recurso</th>
-                                        <th>Fecha Préstamo</th>
-                                        <th>Fecha Devolución</th>
-                                        <th>Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for prestamo in mis_prestamos %}
-                                    <tr>
-                                        <td>{{ prestamo.recurso.nombre }}</td>
-                                        <td>{{ prestamo.fecha_prestamo }}</td>
-                                        <td>{{ prestamo.fecha_devolucion }}</td>
-                                        <td>
-                                            {% if prestamo.devuelto %}
-                                                <span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Devuelto</span>
-                                            {% else %}
-                                                <span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pendiente</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="4" class="no-prestamos">No tienes préstamos aprobados</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div class="card-body table-responsive">
+                        <table class="table table-bordered table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Recurso</th>
+                                    <th>Fecha Préstamo</th>
+                                    <th>Fecha Devolución</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prestamo in mis_prestamos %}
+                                <tr>
+                                    <td data-label="Recurso">{{ prestamo.recurso.nombre }}</td>
+                                    <td data-label="Fecha Préstamo">{{ prestamo.fecha_prestamo }}</td>
+                                    <td data-label="Fecha Devolución">{{ prestamo.fecha_devolucion }}</td>
+                                    <td data-label="Estado">
+                                        {% if prestamo.devuelto %}
+                                            <span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Devuelto</span>
+                                        {% else %}
+                                            <span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="no-prestamos">No tienes préstamos aprobados</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

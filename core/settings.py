@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-zg%v%tc_an@^mtaph&#$@#8(uj__@jl6)7k4=i=3+&@)1c534@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
+
 
 
 # Application definition
@@ -54,7 +55,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
+
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
+
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Para pruebas en React Native o Flutter

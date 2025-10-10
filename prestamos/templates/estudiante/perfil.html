@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <style>
     .perfil-wrapper {
         background-color: #ffffff;
@@ -8,6 +9,7 @@
         color: #333;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         width: 100%;
+        max-width: 900px;
     }
 
     .perfil-header {
@@ -21,6 +23,7 @@
         color: #0c7c3c;
         font-weight: bold;
         margin: 0;
+        font-size: 1.6rem;
     }
 
     .perfil-foto {
@@ -30,45 +33,47 @@
         border-radius: 50%;
         border: 3px solid #0c7c3c;
         box-shadow: 0 0 10px rgba(12, 124, 60, 0.3);
+        max-width: 100%;
     }
 
-    .perfil-label {
-        font-weight: bold;
-        color: #0c7c3c;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        min-width: 130px;
-    }
-
-    .perfil-label i {
-        font-size: 18px;
-    }
-
-    .perfil-dato {
-        color: #333;
-    }
-
+    /* ✅ Estilo mejorado de línea (todo en una sola línea, sin saltos) */
     .perfil-linea {
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 0.5rem;
-        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 6px;
+        font-size: 1rem;
+        margin-bottom: 0.6rem;
+        white-space: nowrap;
     }
 
-    .form-control, .form-control-file {
-        background-color: #f9f9f9;
+    .perfil-linea strong {
+        color: #0c7c3c;
+        font-weight: 600;
+        margin-right: 4px;
+        flex-shrink: 0;
+    }
+
+    .perfil-linea span {
         color: #333;
-        border: 1px solid #ccc;
+        white-space: normal;
     }
 
     .perfil-info-box {
         background-color: #f8f8f8;
-        padding: 1rem;
+        padding: 1rem 1.2rem;
         border-radius: 8px;
         margin-bottom: 1rem;
         border-left: 4px solid #0c7c3c;
+    }
+
+    .form-control {
+        background-color: #f9f9f9;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 8px;
+        width: 100%;
     }
 
     .firma-box img {
@@ -79,35 +84,26 @@
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
-    .btn-success,
-    .btn-primary,
-    .btn-outline-success {
+    .btn-success {
         background-color: #0c7c3c !important;
         border-color: #0c7c3c !important;
         color: white !important;
-        font-size: 0.85rem;
-        padding: 6px 12px;
-        border-radius: 6px;
+        font-size: 0.9rem;
+        padding: 8px 14px;
+        border-radius: 8px;
         transition: all 0.2s ease-in-out;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 6px;
+        width: 100%;
     }
 
-    .btn-outline-success {
-        background-color: transparent !important;
-        color: #0c7c3c !important;
-    }
-
-    .btn-success:hover,
-    .btn-primary:hover,
-    .btn-outline-success:hover {
+    .btn-success:hover {
         background-color: #095b2c !important;
-        border-color: #095b2c !important;
-        color: white !important;
     }
 
-    /* Animación de carga */
+    /* Overlay de carga */
     .overlay-loading {
         position: fixed;
         top: 0;
@@ -142,10 +138,32 @@
         font-weight: bold;
     }
 
+    /* ✅ Responsive: mantiene una línea, pero con salto limpio en pantallas muy pequeñas */
     @media screen and (max-width: 768px) {
+        .perfil-wrapper {
+            padding: 1rem;
+        }
+
         .perfil-foto {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
+        }
+
+        .perfil-linea {
+            white-space: normal;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .btn-success {
+            width: 100%;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .perfil-foto {
+            width: 100px;
+            height: 100px;
         }
     }
 </style>
@@ -166,19 +184,19 @@
         </div>
 
         <div class="row g-4 align-items-start">
-            <!-- Foto + Firma -->
-            <div class="col-md-4 text-center">
+            <!-- Foto y firma -->
+            <div class="col-lg-4 col-md-5 col-sm-12 text-center">
                 {% if usuario.foto %}
-                    <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="perfil-foto">
+                    <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="perfil-foto img-fluid mb-3">
                 {% else %}
-                    <img src="/static/img/default-user.png" alt="Foto de perfil" class="perfil-foto">
+                    <img src="/static/img/default-user.png" alt="Foto de perfil" class="perfil-foto img-fluid mb-3">
                 {% endif %}
 
                 <!-- Subir foto -->
-                <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data" class="mt-3" id="form-foto">
+                <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data" id="form-foto">
                     {% csrf_token %}
                     <input type="file" name="foto" accept="image/*" id="input-foto" hidden required>
-                    <button type="button" class="btn btn-success btn-sm" onclick="document.getElementById('input-foto').click();">
+                    <button type="button" class="btn btn-success mt-2" onclick="document.getElementById('input-foto').click();">
                         <i class='bx bx-upload'></i> {% if usuario.foto %}Cambiar Foto{% else %}Subir Foto{% endif %}
                     </button>
                 </form>
@@ -188,80 +206,65 @@
                     {% if not usuario.firma %}
                         <form action="{% url 'subir_firma' %}" method="post" enctype="multipart/form-data" class="perfil-info-box" id="form-firma">
                             {% csrf_token %}
-                            <label class="perfil-label" for="firma"><i class='bx bxs-pen'></i> Subir firma (PNG):</label>
+                            <div class="perfil-linea"><strong><i class='bx bxs-pen'></i> Subir firma (PNG):</strong></div>
                             <input type="file" name="firma" id="input-firma" accept="image/png" hidden required>
-                            <button type="button" class="btn btn-success btn-sm mt-2" onclick="document.getElementById('input-firma').click();">
+                            <button type="button" class="btn btn-success mt-2" onclick="document.getElementById('input-firma').click();">
                                 <i class='bx bx-upload'></i> Subir firma
                             </button>
                         </form>
                     {% else %}
-                        <div class="perfil-info-box firma-box">
-                            <div class="perfil-linea">
-                                <span class="perfil-label"><i class='bx bxs-pen'></i> Firma registrada:</span>
+                        <div class="perfil-info-box firma-box text-center">
+                            <div class="perfil-linea justify-content-center">
+                                <strong><i class='bx bxs-pen'></i> Firma registrada:</strong>
                             </div>
-                            <img src="{{ usuario.firma.url }}" alt="Firma del usuario">
+                            <img src="{{ usuario.firma.url }}" alt="Firma del usuario" class="img-fluid mt-2">
                         </div>
                     {% endif %}
                 </div>
             </div>
 
             <!-- Datos -->
-            <div class="col-md-8">
+            <div class="col-lg-8 col-md-7 col-sm-12">
                 <div class="perfil-info-box">
-                    <div class="perfil-linea">
-                        <span class="perfil-label"><i class='bx bxs-user'></i> Nombre:</span>
-                        <span class="perfil-dato">{{ usuario.first_name }} {{ usuario.last_name }}</span>
-                    </div>
-                    <div class="perfil-linea">
-                        <span class="perfil-label"><i class='bx bxs-id-card'></i> Código:</span>
-                        <span class="perfil-dato">{{ usuario.codigo }}</span>
-                    </div>
-                    <div class="perfil-linea">
-                        <span class="perfil-label"><i class='bx bxs-user-badge'></i> Rol:</span>
-                        <span class="perfil-dato">{{ usuario.get_rol_display }}</span>
-                    </div>
-                    <div class="perfil-linea">
-                        <span class="perfil-label"><i class='bx bxs-graduation'></i> Programa:</span>
-                        <span class="perfil-dato">{{ usuario.programa|default:"No especificado" }}</span>
-                    </div>
+                    <div class="perfil-linea"><strong>Nombre:</strong> <span>{{ usuario.first_name }} {{ usuario.last_name }}</span></div>
+                    <div class="perfil-linea"><strong>Código:</strong> <span>{{ usuario.codigo }}</span></div>
+                    <div class="perfil-linea"><strong>Rol:</strong> <span>{{ usuario.get_rol_display }}</span></div>
+                    <div class="perfil-linea"><strong>Programa:</strong> <span>{{ usuario.programa|default:"No especificado" }}</span></div>
                 </div>
 
                 <div class="perfil-info-box">
-    <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="w-100">
-        {% csrf_token %}
-        <div class="perfil-linea mb-2">
-            <span class="perfil-label"><i class='bx bxs-file'></i> Cédula:</span>
-            {% if usuario.cedula %}
-                <span class="perfil-dato">{{ usuario.cedula }}</span>
-            {% else %}
-                <div class="w-100">
-                    <input type="text" name="cedula" id="cedula" class="form-control" required placeholder="Ingrese su cédula" value="{{ request.POST.cedula }}">
-                    {% if error_cedula %}
-                        <small class="text-danger">{{ error_cedula }}</small>
-                    {% endif %}
+                    <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="w-100">
+                        {% csrf_token %}
+                        <div class="perfil-linea mb-2">
+                            <strong>Cédula:</strong>
+                            {% if usuario.cedula %}
+                                <span>{{ usuario.cedula }}</span>
+                            {% else %}
+                                <input type="text" name="cedula" id="cedula" class="form-control" required placeholder="Ingrese su cédula" value="{{ request.POST.cedula }}">
+                                {% if error_cedula %}
+                                    <small class="text-danger">{{ error_cedula }}</small>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <div class="perfil-linea mt-3">
+                            <strong>Teléfono:</strong>
+                            {% if usuario.telefono %}
+                                <span>{{ usuario.telefono }}</span>
+                            {% else %}
+                                <input type="text" name="telefono" class="form-control" required placeholder="Ingrese su teléfono" value="{{ request.POST.telefono }}">
+                            {% endif %}
+                        </div>
+
+                        {% if not usuario.cedula or not usuario.telefono %}
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-success">
+                                    <i class='bx bx-save'></i> Guardar
+                                </button>
+                            </div>
+                        {% endif %}
+                    </form>
                 </div>
-            {% endif %}
-        </div>
-
-        <div class="perfil-linea mt-3">
-            <span class="perfil-label"><i class='bx bxs-phone'></i> Teléfono:</span>
-            {% if usuario.telefono %}
-                <span class="perfil-dato">{{ usuario.telefono }}</span>
-            {% else %}
-                <input type="text" name="telefono" class="form-control" required placeholder="Ingrese su teléfono" value="{{ request.POST.telefono }}">
-            {% endif %}
-        </div>
-
-        {% if not usuario.cedula or not usuario.telefono %}
-            <div class="mt-3 text-end">
-                <button type="submit" class="btn btn-success btn-sm">
-                    <i class='bx bx-save'></i> Guardar
-                </button>
-            </div>
-        {% endif %}
-    </form>
-</div>
-
             </div>
         </div>
     </div>
@@ -287,4 +290,5 @@
         }
     });
 </script>
+
 {% endblock %}

@@ -117,7 +117,10 @@
         border-radius: 4px;
     }
 
-    /* 🔔 Notificaciones */
+    /* ---------------------------
+       🔔 Notificaciones (mejoras)
+       --------------------------- */
+    /* Estilo base del menú de notificaciones */
     #noti-list {
         max-height: 400px;
         overflow-y: auto;
@@ -125,7 +128,26 @@
         border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         background: #ffffff;
+        width: 340px;                /* anchura óptima en escritorio */
+        min-width: 260px;
     }
+
+    /* Mantener el estilo de dropdown de bootstrap pero con padding interior */
+    .dropdown-menu#noti-list {
+        padding: 0.5rem;
+    }
+    /* Espaciado entre la campana de notificaciones y el botón de cerrar sesión */
+.navbar-nav .nav-item + .nav-item {
+    margin-left: 12px;
+}
+
+@media (max-width: 768px) {
+    /* En móviles un poco más de espacio para evitar que se junten */
+    .navbar-nav .nav-item + .nav-item {
+        margin-left: 18px;
+    }
+}
+
 
     #noti-list .dropdown-item {
         border-radius: 8px;
@@ -138,10 +160,10 @@
         white-space: normal !important;
     }
 
-    /* ✅ Hover: texto se pone más negro, no azul */
+    /* Hover: no cambiar color de link a azul */
     #noti-list .dropdown-item:hover {
-        color: #000 !important; /* negro sólido */
-        background: #f9f9f9;    /* fondo igual */
+        color: #000 !important;
+        background: #f0f0f0;
     }
 
     #noti-list small {
@@ -165,6 +187,104 @@
         border-radius: 10px;
     }
 
+    /* Ajustes del badge para que no se salga en móviles */
+    #noti-count {
+        font-size: 0.75rem;
+        padding: 3px 6px;
+        line-height: 1;
+    }
+
+    /* ---------------------------
+       Responsive: comportamiento móvil
+       --------------------------- */
+    @media (max-width: 992px) {
+        /* ancho más contenido en tablets/pequeños equipos */
+        #noti-list {
+            width: 300px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        /* En pantallas pequeñas, transformar el dropdown en panel fijo y accesible */
+        #noti-list {
+            position: fixed !important;
+            top: 56px;               /* debajo de la barra de navegación */
+            right: 8px;
+            left: 8px;
+            width: auto !important;
+            max-width: none !important;
+            max-height: 70vh !important;
+            z-index: 2000;
+            border-radius: 12px;
+            padding: 0.5rem;
+        }
+
+        /* Mejor legibilidad para items en móvil */
+        #noti-list .dropdown-item {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Ajustes del badge y icono para no sobreponerse */
+        .navbar .nav-link i {
+            font-size: 1.25rem;
+        }
+
+        .navbar .nav-item .nav-link.position-relative {
+            padding-right: 18px;
+        }
+
+        /* Un pequeño sombreado extra para destacarlo sobre el contenido */
+        #noti-list {
+            box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+            background: #ffffff;
+        }
+    }
+
+    /* Cuando el panel de notificaciones está abierto en móvil (clase que añadimos con JS) */
+    body.noti-open {
+        /* opcional: evitar scroll de fondo si quieres */
+        /* overflow: hidden; */
+    }/* 🔴 Ajuste final del badge de notificaciones */
+
+    
+#nav-noti .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 10px;
+}
+
+#nav-noti .navbar-badge {
+    position: absolute;
+    top: 17px;         /* 🔽 más abajo que antes */
+    right: 6px;        /* 🔙 pegadito a la campana */
+    transform: translate(50%, -50%);
+    border-radius: 50%;
+    font-size: 0.7rem;
+    min-width: 18px;
+    height: 18px;
+    padding: 2px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+}
+
+/* En pantallas pequeñas (celulares) */
+@media (max-width: 768px) {
+    #nav-noti .navbar-badge {
+        top: 14px;     /* 🔽 un poquito más abajo aún en móvil */
+        right: 8px;    /* mantiene alineación lateral */
+        font-size: 0.65rem;
+        min-width: 16px;
+        height: 16px;
+    }
+}
+
+
+
 </style>
 
 
@@ -186,11 +306,14 @@
 
             <ul class="navbar-nav ms-auto">
                 <!-- 🔔 Notificaciones -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <!-- Añadí id="nav-noti" para controlar el open/close en móviles sin afectar nada más -->
+                <li class="nav-item dropdown" id="nav-noti">
+                    <!-- position-relative para que el badge se posicione correctamente -->
+                    <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-bell"></i>
-                        <span id="noti-count" class="badge bg-danger navbar-badge">0</span>
+                        <span id="noti-count" class="badge bg-danger navbar-badge position-absolute top-0 start-100 translate-middle">0</span>
                     </a>
+                    <!-- Mantengo exactamente las clases originales dropdown-menu-lg dropdown-menu-end -->
                     <ul id="noti-list" class="dropdown-menu dropdown-menu-lg dropdown-menu-end">
                         <li><span class="dropdown-header">No tienes notificaciones</span></li>
                     </ul>
@@ -421,7 +544,25 @@ setInterval(cargarNotificaciones, 5000);
 cargarNotificaciones();
 </script>
 
+    <!-- Script adicional para mejorar UX del dropdown en móvil (no cambia lógica original) -->
+    <script>
+    (function() {
+        // Cuando el dropdown de notificaciones se abre/cierra, añadimos/quitan una clase en body
+        // para poder controlar comportamiento por CSS (ej. evitar scroll de fondo si se desea).
+        var $navNoti = $('#nav-noti');
 
+        $navNoti.on('shown.bs.dropdown', function () {
+            $('body').addClass('noti-open');
+        });
+        $navNoti.on('hidden.bs.dropdown', function () {
+            $('body').removeClass('noti-open');
+        });
+
+        // Si quieres que al abrir en móvil el cuerpo no se desplace, puedes descomentar:
+        // $(window).on('resize', function(){ if ($(window).width() < 768 && $navNoti.hasClass('show')) $('body').addClass('noti-open'); });
+
+    })();
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>
