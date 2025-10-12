@@ -240,12 +240,12 @@
                             </td>
                             <td data-label="Acciones">
                                 {% if solicitud.estado == 'pendiente' %}
-                                    <a href="{% url 'aprobar_solicitud' solicitud.id %}" class="btn btn-success btn-accion">
+                                    <button class="btn btn-success btn-accion" onclick="confirmarAccion('aprobar', '{{ solicitud.id }}')">
                                         <i class='bx bx-check'></i> Aprobar
-                                    </a>
-                                    <a href="{% url 'rechazar_solicitud' solicitud.id %}" class="btn btn-danger btn-accion">
+                                    </button>
+                                    <button class="btn btn-danger btn-accion" onclick="confirmarAccion('rechazar', '{{ solicitud.id }}')">
                                         <i class='bx bx-x'></i> Rechazar
-                                    </a>
+                                    </button>
                                 {% else %}
                                     {% if solicitud.contrato_solicitud %}
                                         <a href="{{ solicitud.contrato_solicitud.url }}" class="btn btn-outline-success btn-accion" download>
@@ -269,7 +269,7 @@
     </div>
 </div>
 
-<!-- 🔎 Script de búsqueda -->
+<!--Script de búsqueda -->
 <script>
     document.getElementById("buscador").addEventListener("keyup", function() {
         const filtro = this.value.toLowerCase();
@@ -288,4 +288,54 @@
         });
     });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmarAccion(accion, id) {
+    let accionTexto = accion === 'aprobar' ? 'aprobar' : 'rechazar';
+    let url = accion === 'aprobar'
+        ? "{% url 'aprobar_solicitud' 0 %}".replace('0', id)
+        : "{% url 'rechazar_solicitud' 0 %}".replace('0', id);
+
+    Swal.fire({
+        title: `¿Estás seguro de que deseas ${accionTexto} esta solicitud?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: accion === 'aprobar' ? '#28a745' : '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: `Sí, ${accionTexto}`,
+        cancelButtonText: 'Cancelar',
+        background: '#fff',
+        customClass: {
+            popup: 'swal2-rounded',
+            title: 'swal2-title-custom',
+            confirmButton: 'swal2-confirm-custom',
+            cancelButton: 'swal2-cancel-custom'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+</script>
+
+<style>
+/* 💅 Personalización ligera del SweetAlert2 */
+.swal2-popup.swal2-rounded {
+    border-radius: 15px !important;
+}
+.swal2-title-custom {
+    color: #0c7c3c !important;
+    font-weight: 700;
+}
+.swal2-confirm-custom {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+.swal2-cancel-custom {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
+</style>
 {% endblock %}

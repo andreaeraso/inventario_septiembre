@@ -88,7 +88,7 @@ def login_registro_view(request):
                     )
                     usuario.set_password(password1)
                     usuario.save()
-                    messages.success(request, "✅ Registro exitoso. Ahora inicia sesión.")
+                    messages.success(request, "Ahora inicia sesión.", extra_tags='success_register')
                 except Exception as e:
                     messages.error(request, f"⚠️ Error al crear el usuario: {str(e)}")
 
@@ -269,7 +269,7 @@ def guardar_cedula_telefono(request):
             if telefono:
                 usuario.telefono = telefono
             usuario.save()
-            messages.success(request, "Información actualizada correctamente.")
+            messages.success(request, "Información actualizada correctamente.", extra_tags='update_success')
             return redirect('perfil_usuario')
 
     # Seleccionar plantilla según rol del usuario
@@ -625,12 +625,12 @@ def recursos_por_dependencia(request, dependencia_id):
     recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
 
     # 📌 Calcular mañana (para el min del input date)
-    tomorrow = (timezone.localdate() + timedelta(days=1)).isoformat()  # 'YYYY-MM-DD'
+    min_fecha_prestamo = timezone.localdate() + timedelta(days=5)
 
     return render(request, 'prestamo/recursos_dependencia.html', {
         'dependencia': dependencia,
         'recursos': recursos_ordenados,
-        'tomorrow': tomorrow,  # se pasa al template
+        'min_fecha_prestamo': min_fecha_prestamo.isoformat()  # se pasa al template
     })
 
 ##########################################################################################
@@ -654,11 +654,13 @@ def solicitar_prestamo(request, recurso_id):
             messages.error(request, "La fecha seleccionada no es válida.")
             return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)
 
-        # 📌 Requerir que la fecha sea >= mañana
+        # 📌 Requerir que la fecha sea >= 5 dias
         hoy = timezone.localdate()
-        if fecha_devolucion <= hoy:
-            messages.error(request, "La fecha de devolución debe ser posterior a la fecha actual.")
+        minima_fecha = hoy + timedelta(days=5)
+        if fecha_devolucion < minima_fecha:
+            messages.error(request, f"La fecha de devolución debe ser al menos {minima_fecha.strftime('%d/%m/%Y')}.")
             return redirect('recursos_por_dependencia', dependencia_id=recurso.dependencia.id)
+
 
         # Crear la solicitud de préstamo
         solicitud = SolicitudPrestamo.objects.create(

@@ -126,7 +126,7 @@
 
 <!-- Contenido del contrato -->
 <div class="contenido">
-    <p><strong>CONTRATO DE COMODATO PRECARIO SUSCRITO ENTRE LA UNIVERSIDAD DE NARIÑO Y EL ESTUDIANTE BENEFICIARIO DEL PROGRAMA DE PRÉSTAMO DE USO DE EQUIPOS ACADÉMICOS.</strong></p>
+    <p><strong>CONTRATO DE COMODATO PRECARIO SUSCRITO ENTRE EL DIRECTOR DEL DEPARTAMENTO DE {{ dependencia.nombre|default:"[Dependencia no asignada]"|upper }} Y EL ESTUDIANTE O PROFESOR, BENEFICIARIO DEL PROGRAMA DE PRÉSTAMO DE USO DE EQUIPOS ACADÉMICOS.</strong></p>
 
     <p>
         Entre los suscritos <strong>{{ administrador.get_full_name }}</strong>, mayor de edad y vecino de la ciudad de Pasto (N), identificado con la Cédula de Ciudadanía No <strong>{{ administrador.cedula }}</strong>, actuando en calidad de Director del Departamento de <strong>{{ dependencia.nombre|default:"[Dependencia no asignada]" }}</strong> de la UNIVERSIDAD DE NARIÑO, ente universitario autónomo de carácter Oficial del orden Departamental, domiciliado en Pasto y quien en adelante se llamará <strong>EL COMODANTE</strong> y por la otra, <strong>{{ usuario.get_full_name }}</strong>, mayor de edad, identificado con cédula de ciudadanía número <strong>{{ usuario.cedula }}</strong> quien, en lo sucesivo, y para todos los efectos de este contrato, se denominará <strong>EL COMODATARIO</strong>, hemos celebrado el contrato de comodato precario que se regirá por las cláusulas que a continuación se enuncian y en lo no previsto en ellas por las disposiciones legales aplicables a la materia de qué trata el presente acto jurídico, en especial por las prescripciones contenidas en los artículos 2200 y siguientes del Código Civil.
@@ -135,13 +135,13 @@
     <h3><strong>CONSIDERANDO:</strong></h3>
 
     <p>
-        Que en aras de garantizar los procesos académicos y optimizar la interacción por medios, teniendo ello incidencia directa en la prestación del servicio educativo para el desarrollo de actividades prácticas, se encontró necesario facilitar en la medida de la disposición de recursos de la Universidad de Nariño, el préstamo de componentes académicos a los estudiantes de la Universidad de Nariño.
+        Que en aras de garantizar los procesos académicos y optimizar la interacción por medios, teniendo ello incidencia directa en la prestación del servicio educativo para el desarrollo de actividades prácticas, se encontró necesario facilitar en la medida de la disposición de recursos de la Universidad de Nariño, el préstamo de componentes académicos a los estudiantes y profesores de la Universidad de Nariño.
     </p>
 
     <p>A continuación, los requisitos para acceder al préstamo:</p>
 
     <ul>
-        <li>Ser estudiante de la Universidad de Nariño.</li>
+        <li>Ser estudiante o profesor de la Universidad de Nariño.</li>
         <li>Portar Carnet que acredite la identificación de la persona o recibo de matrícula más un documento que lo identifique.</li>
     </ul>
 
@@ -234,7 +234,7 @@
 
     <h4><strong>NOVENA: INDEMNIDAD.</strong></h4>
     <p>
-    EL COMODATARIO mantendrá indemne AL COMODANTE, de todo daño y/o perjuicio que puedan llegar a causar a terceros el uso del bien entregado.
+    EL COMODATARIO mantendrá indemne AL COMODANTE, de todo daño y/o perjuicio que puedan llegar a causar el bien que se le dispone.
     </p>
 
     <h4><strong>DÉCIMA: VALOR.</strong></h4>
@@ -273,10 +273,10 @@
     </p>
     
     <p style="margin-top: 30px;">
-        Para constancia se firma en la ciudad de Pasto en la fecha del <strong>{{ fecha|date:"d/m/Y" }}</strong>
+        En constancia de la entrega del bien al comodatario, se firma en la ciudad de Pasto, a la fecha del <strong>{{ fecha|date:"d/m/Y" }}</strong>
     </p>
     
-    <br><br>
+    <br>
     <p><strong>EL COMODANTE</strong></p>
     
     {% if firma_admin_path %}
@@ -292,7 +292,7 @@
     Director del departamento de {{ dependencia.nombre|default:"[Dependencia no asignada]" }}<br>
     UNIVERSIDAD DE NARIÑO</p>
     
-    <br><br>
+    <br>
     <p><strong>EL COMODATARIO</strong></p>
     
     {% if firma_usuario_path %}
@@ -307,6 +307,28 @@
     Cédula: {{ usuario.cedula }}<br>
     Código Estudiantil: {{ usuario.codigo }}<br>
     UNIVERSIDAD DE NARIÑO</p>
+
+    <br>
+    <p style="margin-top: 30px;">
+        En constancia de la devulución del bien al comodante, se firma en la ciudad de Pasto, a la fecha del ___________________________
+    </p>
+
+    <br>
+    <p><strong>EL COMODANTE</strong></p>
+    <br><br><br><br>
+    <p><strong>{{ administrador.get_full_name }}</strong><br>
+    Cédula: {{ administrador.cedula }}<br>
+    Director del departamento de {{ dependencia.nombre|default:"[Dependencia no asignada]" }}<br>
+    UNIVERSIDAD DE NARIÑO</p>
+
+    <br>
+    <p><strong>EL COMODATARIO</strong></p>
+    <br><br><br><br>
+    <p><strong>{{ usuario.get_full_name }}</strong><br>
+    Cédula: {{ usuario.cedula }}<br>
+    Código Estudiantil: {{ usuario.codigo }}<br>
+    UNIVERSIDAD DE NARIÑO</p>
+
 </div>
 
 </body>

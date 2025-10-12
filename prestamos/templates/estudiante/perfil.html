@@ -291,4 +291,40 @@
     });
 </script>
 
+<!-- SweetAlert2 para mostrar mensajes -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    {% if messages %}
+        {% for message in messages %}
+            {% if 'update_success' in message.tags %}
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Datos actualizados',
+                    text: '{{ message|escapejs }}',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '#0c7c3c',
+                    background: '#fff',
+                    color: '#333',
+                    customClass: {
+                        popup: 'swal2-rounded',
+                        confirmButton: 'swal2-confirm-custom'
+                    }
+                });
+            {% elif 'error' in message.tags %}
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ message|escapejs }}',
+                    confirmButtonText: 'Aceptar',
+                    confirmButtonColor: '#d33',
+                    background: '#fff',
+                    color: '#333'
+                });
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
 {% endblock %}
