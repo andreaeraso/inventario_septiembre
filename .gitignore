@@ -41,12 +41,12 @@ local_settings.py
 # 🖼️ Archivos estáticos y multimedia
 # ================================================
 /static/
-/staticfiles/
-/media/
-!/media/encabezado_contratos/
-!/media/encabezado_contratos/*
-/mediafiles/
-/uploads/
+
+media/
+!media/encabezado_contratos/
+!media/encabezado_contratos/*
+
+
 
 
 # ================================================

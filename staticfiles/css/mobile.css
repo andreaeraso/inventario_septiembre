@@ -1,0 +1,63 @@
+body {
+    background-color: #f4f6f9;
+}
+
+.login-box, .register-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+form .form-group label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.form-control {
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 5px;
+}
+
+.alert {
+    padding: 10px;
+    font-size: 14px;
+}
+
+.text-primary {
+    font-weight: bold;
+}
+
+input[type="file"] {
+    border: none;
+}
+.install-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.install-btn:hover {
+    background-color: #0056b3;
+}
