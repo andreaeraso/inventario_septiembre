@@ -26,8 +26,18 @@ SECRET_KEY = 'django-insecure-zg%v%tc_an@^mtaph&#$@#8(uj__@jl6)7k4=i=3+&@)1c534@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app']
+ALLOWED_HOSTS = [
+    'sisprestamos.udenar.edu.co',
+    'www.sisprestamos.udenar.edu.co',
+    'localhost',
+    '127.0.0.1',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://sisprestamos.udenar.edu.co',
+    'https://www.sisprestamos.udenar.edu.co',
+    'https://*.ngrok-free.app',
+]
 
 
 # Application definition
@@ -57,9 +67,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
 ]
-
-CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app']
-
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Para pruebas en React Native o Flutter
@@ -128,6 +135,7 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # Default primary key field type

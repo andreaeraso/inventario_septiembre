@@ -5,3 +5,57 @@ __pycache__/
 # Archivos temporales o del entorno
 *.log
 *.sqlite3
+
+# ================================================
+# 🐍 Entornos de Python
+# ================================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
+
+# ================================================
+# 🧩 Entornos virtuales
+# ================================================
+
+
+# ================================================
+# ⚙️ Archivos de configuración y credenciales
+# ================================================
+
+# Evita exponer configuraciones locales sensibles
+settings_local.py
+local_settings.py
+
+# ================================================
+# 🧱 Django / Base de datos / Migraciones temporales
+# ================================================
+
+
+# ================================================
+# 🖼️ Archivos estáticos y multimedia
+# ================================================
+/static/
+/staticfiles/
+/media/
+!/media/encabezado_contratos/
+!/media/encabezado_contratos/*
+/mediafiles/
+/uploads/
+
+
+# ================================================
+# 💻 IDEs y sistemas operativos
+# ================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+.DS_Store
+Thumbs.db
