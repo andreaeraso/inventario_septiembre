@@ -20,7 +20,7 @@ from datetime import timedelta
 
 
 
-from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo, Notificacion, Recurso
+from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo, Notificacion, Recurso, TipoRecurso
 
 # Vista de inicio
 @login_required
@@ -135,30 +135,41 @@ def logout_view(request):
     return redirect("login_registro")   
 
 
-# Vista de recursos por dependencia
+from collections import defaultdict, OrderedDict
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+
 @login_required
 def inventario(request):
     if request.user.rol != 'admin':
         messages.error(request, 'No tienes permiso para acceder a esta página')
         return redirect('inicio')
 
-    recursos_queryset = Recurso.objects.filter(dependencia=request.user.dependencia_administrada)
+    recursos_queryset = Recurso.objects.filter(
+        dependencia=request.user.dependencia_administrada
+    )
 
-    # Agrupar y ordenar
+    # Agrupar por tipo
     recursos_agrupados = defaultdict(list)
     for recurso in recursos_queryset:
         recursos_agrupados[recurso.tipo].append(recurso)
 
-    # Ordenar los recursos dentro de cada tipo por nombre
+    # Ordenar los recursos dentro de cada tipo
     for tipo in recursos_agrupados:
-        recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
+        recursos_agrupados[tipo] = sorted(
+            recursos_agrupados[tipo], key=lambda r: r.nombre.lower()
+        )
 
-    # Ordenar los tipos de recurso alfabéticamente
-    recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
+    # ✅ Ordenar los tipos de recurso por nombre
+    recursos_ordenados = OrderedDict(
+        sorted(recursos_agrupados.items(), key=lambda item: item[0].nombre.lower())
+    )
 
     return render(request, 'admin/inventario/lista.html', {
         'recursos': recursos_ordenados
     })
+
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -289,34 +300,39 @@ def guardar_cedula_telefono(request):
         'error_cedula': error_cedula
     })
 
-
 @login_required
 def agregar_recurso(request):
     if request.user.rol != 'admin':
         messages.error(request, 'No tienes permiso para acceder a esta página')
         return redirect('inicio')
     
+    dependencia = request.user.dependencia_administrada
+
     if request.method == 'POST':
         id_recurso = request.POST.get('id', '').strip()
-        tipo = request.POST.get('tipo', '').strip()
+        tipo_id = request.POST.get('tipo', '').strip()  # este será el ID del tipo o "nuevo"
 
-        # Si seleccionaron "nuevo", usar el valor del campo nuevo_tipo
-        if tipo == "nuevo":
-            tipo = request.POST.get('nuevo_tipo', '').strip()
+        if tipo_id == "nuevo":
+            nuevo_tipo_nombre = request.POST.get('nuevo_tipo', '').strip()
+            tipo_obj, created = TipoRecurso.objects.get_or_create(
+                nombre=nuevo_tipo_nombre,
+                dependencia=dependencia
+            )
+        else:
+            tipo_obj = TipoRecurso.objects.get(id=tipo_id)
 
         nombre = request.POST.get('nombre', '').strip()
         foto = request.FILES.get('foto', None)
         descripcion = request.POST.get('descripcion', '').strip()
-        dependencia = request.user.dependencia_administrada
 
-        if not (id_recurso and tipo and nombre and descripcion):
+        if not (id_recurso and tipo_obj and nombre and descripcion):
             messages.error(request, 'Todos los campos son obligatorios excepto la foto')
             return redirect('agregar_recurso')
 
         try:
             Recurso.objects.create(
                 id=id_recurso,
-                tipo=tipo,
+                tipo=tipo_obj,
                 nombre=nombre,
                 foto=foto,
                 descripcion=descripcion,
@@ -327,12 +343,13 @@ def agregar_recurso(request):
         except Exception as e:
             messages.error(request, f'Error al crear el recurso: {str(e)}')
 
-    # Obtener tipos ya existentes
-    tipos_existentes = Recurso.objects.values_list('tipo', flat=True).distinct().order_by('tipo')
+    # Obtener tipos de la dependencia
+    tipos_existentes = TipoRecurso.objects.filter(dependencia=dependencia).order_by('nombre')
 
     return render(request, 'admin/inventario/agregar.html', {
         'tipos_existentes': tipos_existentes
     })
+
 
 from django.http import JsonResponse
 from .models import Recurso
@@ -1069,6 +1086,14 @@ from datetime import timedelta
 from .models import Prestamo, Recurso
 
 
+from django.db.models import Count
+from django.db.models.functions import ExtractWeekDay, ExtractHour, ExtractMonth
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.utils.timezone import now
+from django.contrib.auth.decorators import login_required
+from .models import Prestamo, Recurso
+
 @login_required
 def estadisticas(request):
     # Solo el admin puede acceder
@@ -1076,40 +1101,43 @@ def estadisticas(request):
         messages.error(request, "No tienes permiso para acceder a las estadísticas.")
         return redirect("inicio")
 
+    # Verificar que el admin tenga una dependencia asignada
+    dependencia = getattr(request.user, "dependencia_administrada", None)
+    if not dependencia:
+        messages.warning(request, "No tienes una dependencia asignada. Contacta al administrador general.")
+        return redirect("inicio")
+
+    # 🔍 Filtrar todos los datos por dependencia
+    prestamos = Prestamo.objects.filter(recurso__dependencia=dependencia)
+    recursos = Recurso.objects.filter(dependencia=dependencia)
+
     hoy = now().date()
     mes_actual = hoy.month
     anio_actual = hoy.year
 
     # 📊 Totales de préstamos
-    prestamos_total = Prestamo.objects.count()
-    prestamos_mes = Prestamo.objects.filter(
+    prestamos_total = prestamos.count()
+    prestamos_mes = prestamos.filter(
         fecha_prestamo__year=anio_actual,
         fecha_prestamo__month=mes_actual
     ).count()
 
     # 📦 Recursos disponibles y prestados
-    recursos_disponibles = Recurso.objects.filter(disponible=True).count()
-    recursos_prestados = Recurso.objects.filter(disponible=False).count()
+    recursos_disponibles = recursos.filter(disponible=True).count()
+    recursos_prestados = recursos.filter(disponible=False).count()
     total_recursos = recursos_disponibles + recursos_prestados
     tasa_uso_inventario = round((recursos_prestados / total_recursos) * 100, 1) if total_recursos > 0 else 0
 
     # 🏆 Recursos más prestados
     recursos_populares = (
-        Prestamo.objects.values("recurso__nombre")
-        .annotate(total=Count("id"))
-        .order_by("-total")[:5]
-    )
-
-    # 🏛️ Dependencias más activas
-    dependencias_populares = (
-        Prestamo.objects.values("recurso__dependencia__nombre")
+        prestamos.values("recurso__nombre")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
 
     # 👥 Usuarios más activos
     usuarios_activos = (
-        Prestamo.objects.values("usuario__first_name", "usuario__last_name")
+        prestamos.values("usuario__first_name", "usuario__last_name")
         .annotate(total=Count("id"))
         .order_by("-total")[:5]
     )
@@ -1118,29 +1146,28 @@ def estadisticas(request):
     if prestamos_total > 0:
         duraciones = [
             (p.fecha_devolucion.date() - p.fecha_prestamo.date()).days
-            for p in Prestamo.objects.all()
+            for p in prestamos
         ]
         promedio_duracion = round(sum(duraciones) / len(duraciones), 1) if duraciones else 0
     else:
         promedio_duracion = 0
 
     # ✅ Devoluciones y retrasos reales
-    devueltos = Prestamo.objects.filter(devuelto=True).count()
-    no_devueltos = Prestamo.objects.filter(devuelto=False).count()
+    devueltos = prestamos.filter(devuelto=True).count()
+    no_devueltos = prestamos.filter(devuelto=False).count()
 
     # Retrasos: no devueltos con fecha_devolucion vencida
-    prestamos_vencidos = Prestamo.objects.filter(
+    prestamos_vencidos = prestamos.filter(
         devuelto=False,
         fecha_devolucion__lt=now()
     ).count()
 
     tasa_devoluciones = round((devueltos / prestamos_total) * 100, 1) if prestamos_total > 0 else 0
     tasa_retrasos = round((prestamos_vencidos / prestamos_total) * 100, 1) if prestamos_total > 0 else 0
-    promedio_retraso = 0  # Puedes ampliarlo si agregas fecha de devolución real más adelante
 
     # 📅 Préstamos por día de la semana
     prestamos_por_dia = (
-        Prestamo.objects.annotate(dia=ExtractWeekDay('fecha_prestamo'))
+        prestamos.annotate(dia=ExtractWeekDay('fecha_prestamo'))
         .values('dia')
         .annotate(total=Count('id'))
         .order_by('dia')
@@ -1153,7 +1180,7 @@ def estadisticas(request):
 
     # 🕒 Horas pico
     prestamos_por_hora = (
-        Prestamo.objects.annotate(hora=ExtractHour('fecha_prestamo'))
+        prestamos.annotate(hora=ExtractHour('fecha_prestamo'))
         .values('hora')
         .annotate(total=Count('id'))
         .order_by('hora')
@@ -1161,7 +1188,7 @@ def estadisticas(request):
 
     # 📆 Evolución mensual del año actual
     prestamos_mensuales = (
-        Prestamo.objects.filter(fecha_prestamo__year=anio_actual)
+        prestamos.filter(fecha_prestamo__year=anio_actual)
         .annotate(mes=ExtractMonth('fecha_prestamo'))
         .values('mes')
         .annotate(total=Count('id'))
@@ -1178,13 +1205,13 @@ def estadisticas(request):
 
     # 👤 Usuarios recurrentes del mes
     usuarios_recurrentes = (
-        Prestamo.objects.filter(fecha_prestamo__month=mes_actual)
+        prestamos.filter(fecha_prestamo__month=mes_actual)
         .values('usuario')
         .annotate(total=Count('id'))
         .filter(total__gt=1)
         .count()
     )
-    total_usuarios_mes = Prestamo.objects.filter(
+    total_usuarios_mes = prestamos.filter(
         fecha_prestamo__month=mes_actual
     ).values('usuario').distinct().count()
     tasa_reincidencia = round(
@@ -1193,6 +1220,7 @@ def estadisticas(request):
 
     # 📊 Contexto final
     contexto = {
+        "dependencia": dependencia,
         "prestamos_total": prestamos_total,
         "prestamos_mes": prestamos_mes,
         "recursos_disponibles": recursos_disponibles,
@@ -1200,10 +1228,8 @@ def estadisticas(request):
         "tasa_uso_inventario": tasa_uso_inventario,
         "rotacion_recursos": rotacion_recursos,
         "recursos_populares": recursos_populares,
-        "dependencias_populares": dependencias_populares,
         "usuarios_activos": usuarios_activos,
         "promedio_duracion": promedio_duracion,
-        "promedio_retraso": promedio_retraso,
         "tasa_devoluciones": tasa_devoluciones,
         "tasa_retrasos": tasa_retrasos,
         "tasa_reincidencia": tasa_reincidencia,
@@ -1213,6 +1239,7 @@ def estadisticas(request):
     }
 
     return render(request, "prestamo/estadisticas.html", contexto)
+
 
 
 

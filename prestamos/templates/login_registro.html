@@ -59,6 +59,119 @@
             background: linear-gradient(90deg, #e2e2e2, #c9ffd6);
         }
 
+
+.titulo-login {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0a7735;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.input-login {
+    position: relative;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.input-login input {
+    width: 100%;
+    padding: 14px 40px 14px 15px;
+    font-size: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-weight: 500;
+    height: 48px;
+}
+
+.input-login i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0a7735;
+    font-size: 18px;
+}
+
+.btn-login {
+    width: 100%;
+    height: 52px;
+    background: #0a7735;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-login:hover {
+    background: #0d8b40;
+    transform: scale(1.03);
+}
+
+        .titulo-sistema {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0a7735;
+            text-align: center;
+            margin-bottom: 25px; /* deja espacio entre el título y el subtítulo */
+            letter-spacing: 0.5px;
+        }
+
+
+            .logo-login {
+                display: block;
+                margin: 0 auto 15px auto;
+                width: 150px;
+                height: 150px;
+                object-fit: contain;
+            }
+
+
+.login-box-borde {
+    border: 2px solid #0a7735;
+    border-radius: 14px;
+    padding: 70px 50px;      /* 🔹 Más grande por dentro */
+    margin-top: 0;
+    margin-bottom: 25px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);  /* 🔹 Amplía el cuadro suavemente */
+    transition: all 0.3s ease;
+}
+
+.register-box-borde {
+    border: 2px solid #0a7735;
+    border-radius: 12px;
+    padding: 25px 20px 30px 20px; /* antes 35px 30px 40px 30px */
+    margin-top: 5px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    max-width: 420px; /* 🔹 controla el ancho total */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 🔹 Quita la barra gris de desplazamiento en el registro */
+.form-box form {
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* Internet Explorer / Edge antiguo */
+}
+
+.form-box form::-webkit-scrollbar {
+    display: none;              /* Chrome, Safari y Opera */
+}
+
+
+
+
         .container {
             position: relative;
             width: 1110px;
@@ -103,16 +216,17 @@
             margin: 11px 0;
         }
 
-        .input-box input {
-            width: 100%;
-            padding: 10px 45px 10px 15px;
-            font-size: 14px;
-            background: #eee;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-weight: 500;
-        }
+.input-box input {
+    width: 100%;
+    padding: 6px 28px 6px 10px; /* 🔸 Menos alto */
+    font-size: 12px;            /* 🔸 Letra más pequeña */
+    background: #f2f2f2;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    font-weight: 500;
+    height: 32px;               /* 🔸 Controla altura fija */
+}
 
         .input-box input::placeholder {
             color: #888;
@@ -128,18 +242,18 @@
             color: #888;
         }
 
-        .btn {
-            width: 100%;
-            height: 44px;
-            background: #0a7735;
-            border-radius: 8px;
-            box-shadow: 0 0 8px rgb(0, 0, 0, .1);
-            border: none;
-            cursor: pointer;
-            font-size: 15px;
-            color: #fff;
-            font-weight: 600;
-        }
+       .btn {
+    width: 100%;
+    height: 38px; /* antes 44px */
+    background: #0a7735;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgb(0, 0, 0, .1);
+    border: none;
+    cursor: pointer;
+    font-size: 14px; /* antes 15px */
+    color: #fff;
+    font-weight: 600;
+}
 
         .form-box form {
             max-height: 100%;
@@ -434,123 +548,134 @@
 
         <!-- LOGIN -->
         <div class="form-box login">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="login">
-                <h1>Iniciar Sesión</h1>
-                <p class="subtitulo-sistema">
-                    Sistema de Inventario y Préstamo de Equipos Académicos de la Universidad de Nariño
-                </p>
-                <div class="input-box">
-                    <input type="text" name="codigo" placeholder="Código" required>
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="login">
+      
+
+        <!-- CUADRO VERDE -->
+<div class="login-box-borde">
+    <p class="titulo-login">Sistema de Préstamo de Equipos Académicos de la Universidad de Nariño</p>
+
+    <div class="input-login">
+        <input type="text" name="codigo" placeholder="Código" required>
+        <i class='bx bx-user'></i>
+    </div>
+
+    <div class="input-login">
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <i class='bx bx-lock-alt'></i>
+    </div>
+
+    <button type="submit" class="btn-login">Ingresar</button>
+
+
+
+            <!-- Mensajes SOLO para login -->
+            {% if messages %}
+            {% for message in messages %}
+            {% if 'error_login' in message.tags %}
+            <p class="text-danger flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
+            {% elif 'success_login' in message.tags %}
+            <p class="text-success flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+
+<!-- REGISTRO -->
+<div class="form-box register">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="registro">
+
+        <!-- CUADRO VERDE -->
+        <div class="register-box-borde">
+
+            <!-- Nombre y Apellido en fila -->
+            <div class="form-row">
+                <div class="col input-box">
+                    <input type="text" name="first_name" placeholder="Nombres" required>
                     <i class='bx bx-user'></i>
                 </div>
-                <div class="input-box">
-                    <input type="password" name="password" placeholder="Contraseña" required>
+                <div class="col input-box">
+                    <input type="text" name="last_name" placeholder="Apellidos" required>
+                    <i class='bx bx-user'></i>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="input-box">
+                <input type="email" name="email" id="email" placeholder="Email" required>
+                <i class='bx bx-envelope'></i>
+                <p id="email-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
+            </div>
+
+            <!-- Código y Programa en fila -->
+            <div class="form-row">
+                <div class="col input-box">
+                    <input type="text" name="codigo" id="codigo" placeholder="Código" required>
+                    <i class='bx bx-id-card'></i>
+                    <p id="codigo-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
+                </div>
+                <div class="col input-box">
+                    <input type="text" name="programa" placeholder="Programa" required>
+                    <i class='bx bx-book'></i>
+                </div>
+            </div>
+
+            <!-- Rol -->
+            <div class="input-box">
+               <select name="rol" required class="custom-select" style="height: 38px; font-size: 13px; padding-left: 10px; border-radius: 6px;">
+                    <option value="">Seleccione su rol</option>
+                    <option value="estudiante">Estudiante</option>
+                    <option value="profesor">Profesor</option>
+                </select>
+            </div>
+
+            <div class="col input-box">
+                <label for="foto"
+                    style="display:block; text-align:left; font-size:14px; color:#555; margin-bottom:5px;">
+                    Foto de perfil
+                </label>
+                <input type="file" id="foto" name="foto" accept="image/*" style="padding-left: 20px;">
+            </div>
+
+            <!-- Contraseñas -->
+            <div class="form-row">
+                <div class="col input-box">
+                    <input type="password" name="password1" placeholder="Contraseña" required>
                     <i class='bx bx-lock-alt'></i>
                 </div>
-                <button type="submit" class="btn">Ingresar</button>
-
-                <!-- Mensajes SOLO para login -->
-                {% if messages %}
-                {% for message in messages %}
-                {% if 'error_login' in message.tags %}
-                <p class="text-danger flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
-                {% elif 'success_login' in message.tags %}
-                <p class="text-success flash-msg" style="font-size:14px; margin-top:10px;">{{ message }}</p>
-                {% endif %}
-                {% endfor %}
-                {% endif %}
-
-            </form>
-        </div>
-
-        <!-- REGISTRO -->
-        <div class="form-box register">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="registro">
-                <h1>Registro</h1>
-
-                <!-- Nombre y Apellido en fila -->
-                <div class="form-row">
-                    <div class="col input-box">
-                        <input type="text" name="first_name" placeholder="Nombres" required>
-                        <i class='bx bx-user'></i>
-                    </div>
-                    <div class="col input-box">
-                        <input type="text" name="last_name" placeholder="Apellidos" required>
-                        <i class='bx bx-user'></i>
-                    </div>
-                </div>
-
-                <!-- Email -->
-                <div class="input-box">
-                    <input type="email" name="email" id="email" placeholder="Email" required>
-                    <i class='bx bx-envelope'></i>
-                    <p id="email-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
-                </div>
-
-                <!-- Código y Programa en fila -->
-                <div class="form-row">
-                    <div class="col input-box">
-                        <input type="text" name="codigo" id="codigo" placeholder="Código" required>
-                        <i class='bx bx-id-card'></i>
-                        <p id="codigo-msg" style="font-size:13px; margin-top:3px; text-align:left;"></p>
-                    </div>
-                    <div class="col input-box">
-                        <input type="text" name="programa" placeholder="Programa" required>
-                        <i class='bx bx-book'></i>
-                    </div>
-                </div>
-
-                <!-- Rol -->
-                <div class="input-box">
-                    <select name="rol" required class="custom-select" style="height: 52px; padding-left: 20px;">
-                        <option value="">Seleccione su rol</option>
-                        <option value="estudiante">Estudiante</option>
-                        <option value="profesor">Profesor</option>
-                    </select>
-                </div>
-
                 <div class="col input-box">
-                    <label for="foto"
-                        style="display:block; text-align:left; font-size:14px; color:#555; margin-bottom:5px;">
-                        Foto de perfil
-                    </label>
-                    <input type="file" id="foto" name="foto" accept="image/*" style="padding-left: 20px;">
+                    <input type="password" name="password2" placeholder="Confirmar contraseña" required>
+                    <i class='bx bx-lock-alt'></i>
                 </div>
+            </div>
 
-                <!-- Contraseñas -->
-                <div class="form-row">
-                    <div class="col input-box">
-                        <input type="password" name="password1" placeholder="Contraseña" required>
-                        <i class='bx bx-lock-alt'></i>
-                    </div>
-                    <div class="col input-box">
-                        <input type="password" name="password2" placeholder="Confirmar contraseña" required>
-                        <i class='bx bx-lock-alt'></i>
-                    </div>
-                </div>
-                <!-- Mensaje dinámico contraseñas -->
-                <p id="password-match-msg" style="font-size:13px; margin-top:5px; text-align:left;"></p>
+            <!-- Mensaje dinámico contraseñas -->
+            <p id="password-match-msg" style="font-size:13px; margin-top:5px; text-align:left;"></p>
 
-                <!-- Mensajes SOLO para registro -->
-                {% if messages %}
-                {% for message in messages %}
-                {% if 'error_register' in message.tags %}
-                <p class="text-danger flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}
-                </p>
-                {% elif 'success_register' in message.tags %}
-                <p class="text-success flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}
-                </p>
-                {% endif %}
-                {% endfor %}
-                {% endif %}
+            <!-- Mensajes SOLO para registro -->
+            {% if messages %}
+            {% for message in messages %}
+            {% if 'error_register' in message.tags %}
+            <p class="text-danger flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}</p>
+            {% elif 'success_register' in message.tags %}
+            <p class="text-success flash-msg" style="font-size:13px; margin-top:5px; text-align:left;">{{ message }}</p>
+            {% endif %}
+            {% endfor %}
+            {% endif %}
 
-                <button type="submit" class="btn">Registrarse</button>
-            </form>
-        </div>
+            <button type="submit" class="btn">Registrarse</button>
+        </div> <!-- 🔰 cierre del cuadro verde -->
+
+    </form>
+</div>
+
 
         <!-- Toggle Panel -->
         <div class="toggle-box">

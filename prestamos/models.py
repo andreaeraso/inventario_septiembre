@@ -21,21 +21,33 @@ class UsuarioManager(BaseUserManager):
 
 
 class Dependencia(models.Model):
+    id = models.CharField(
+        primary_key=True,
+        max_length=20,
+        unique=True,
+        help_text="Identificador único asignado manualmente (por ejemplo: DEP001)"
+    )
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True)
-    imagen = models.ImageField(upload_to='dependencias/', null=True, blank=True, help_text="Imagen representativa de la dependencia")
-    
+    imagen = models.ImageField(
+        upload_to='dependencias/',
+        null=True,
+        blank=True,
+        help_text="Imagen representativa de la dependencia"
+    )
+
     administrador = models.OneToOneField(
-        'Usuario', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
+        'Usuario',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='dependencia_administrada',
         help_text="Administrador de la dependencia"
     )
 
     def __str__(self):
-        return self.nombre
+        return f"{self.id} - {self.nombre}"
+
 
 # Modelo de Usuario (Extiende AbstractUser para roles personalizados)
 class Usuario(AbstractUser):
@@ -71,11 +83,20 @@ class Usuario(AbstractUser):
             self.dependencia_administrada = None
         super().save(*args, **kwargs)
 
+class TipoRecurso(models.Model):
+    nombre = models.CharField(max_length=255)
+    dependencia = models.ForeignKey(Dependencia, on_delete=models.CASCADE)
 
-# Modelo de Recurso
+    class Meta:
+        unique_together = ('nombre', 'dependencia')  # evita duplicados en la misma dependencia
+
+    def __str__(self):
+        return self.nombre
+    
+    
 class Recurso(models.Model):
     id = models.IntegerField(primary_key=True)
-    tipo = models.CharField(max_length=255, default="General")
+    tipo = models.ForeignKey(TipoRecurso, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=255)
     foto = models.ImageField(upload_to='recursos/', blank=True, null=True)
     descripcion = models.TextField()
@@ -84,6 +105,7 @@ class Recurso(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({'Disponible' if self.disponible else 'No disponible'})"
+
 
 # Modelo de Préstamo
 class Prestamo(models.Model):
