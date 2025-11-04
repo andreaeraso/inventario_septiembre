@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario, Dependencia, Recurso, Prestamo
+from .models import Usuario, Dependencia, Recurso, Prestamo, TipoRecurso, SolicitudPrestamo, Notificacion
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
@@ -35,6 +35,12 @@ class DependenciaAdmin(admin.ModelAdmin):
             from .models import Usuario
             kwargs['queryset'] = Usuario.objects.filter(rol=Usuario.ADMIN)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+@admin.register(TipoRecurso)
+class TipoRecursoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'dependencia')
+    search_fields = ('nombre',)
+    list_filter = ('dependencia',)
 
 @admin.register(Recurso)
 class RecursoAdmin(admin.ModelAdmin):
@@ -47,3 +53,15 @@ class PrestamoAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'recurso', 'fecha_prestamo', 'fecha_devolucion', 'devuelto')
     list_filter = ('devuelto', 'fecha_prestamo')
     search_fields = ('usuario__codigo', 'recurso__nombre')  
+
+@admin.register(SolicitudPrestamo)
+class SolicitudPrestamoAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'recurso', 'estado', 'fecha_solicitud')
+    list_filter = ('estado', 'fecha_solicitud')
+    search_fields = ('usuario__codigo', 'recurso__nombre')
+
+@admin.register(Notificacion)
+class NotificacionAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'tipo', 'leida', 'fecha')
+    list_filter = ('tipo', 'leida')
+    search_fields = ('usuario__codigo', 'mensaje')
