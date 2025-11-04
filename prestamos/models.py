@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from django.contrib.auth.models import BaseUserManager
 
@@ -120,6 +121,7 @@ class Prestamo(models.Model):
     def __str__(self):
         return f"{self.usuario.codigo} -> {self.recurso.nombre} ({'Devuelto' if self.devuelto else 'Pendiente'})"
 
+
 class SolicitudPrestamo(models.Model):
     PENDIENTE = 'pendiente'
     APROBADO = 'aprobado'
@@ -131,15 +133,36 @@ class SolicitudPrestamo(models.Model):
         (RECHAZADO, 'Rechazado'),
     ]
 
-    fecha_solicitud = models.DateTimeField(auto_now_add=True)  # Fecha y hora automática
-    recurso = models.ForeignKey(Recurso, on_delete=models.CASCADE)  # Recurso solicitado
-    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)  # Estudiante que solicita
+    fecha_solicitud = models.DateTimeField(auto_now_add=True)
+    recurso = models.ForeignKey(Recurso, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     fecha_devolucion = models.DateField(help_text="Fecha estimada de devolución")
     estado = models.CharField(max_length=20, choices=ESTADOS, default=PENDIENTE)
     contrato_solicitud = models.FileField(upload_to='contratos_solicitud/', null=True, blank=True)
 
     def __str__(self):
         return f"Solicitud de {self.usuario.codigo} para {self.recurso.nombre} - {self.get_estado_display()}"
+
+    # 🚨 Nueva validación
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Verifica si existe otra solicitud pendiente del mismo recurso por el mismo usuario
+        existe_pendiente = SolicitudPrestamo.objects.filter(
+            usuario=self.usuario,
+            recurso=self.recurso,
+            estado=self.PENDIENTE
+        ).exclude(pk=self.pk).exists()
+
+        if existe_pendiente:
+            raise ValidationError(
+                f"Ya tienes una solicitud pendiente para el recurso '{self.recurso.nombre}'. "
+                "Debes esperar a que sea aprobada o rechazada antes de hacer otra."
+            )
+
+    def save(self, *args, **kwargs):
+        # Llamamos clean() antes de guardar para asegurar la validación
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 # prestamos/models.py

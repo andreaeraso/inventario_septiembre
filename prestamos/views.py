@@ -697,7 +697,7 @@ def recursos_por_dependencia(request, dependencia_id):
     recursos_agrupados = defaultdict(list)
     for recurso in recursos_queryset:
         recursos_agrupados[recurso.tipo].append(recurso)
-
+    
     # Ordenar los recursos dentro de cada tipo por nombre
     for tipo in recursos_agrupados:
         recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
@@ -707,14 +707,22 @@ def recursos_por_dependencia(request, dependencia_id):
         sorted(recursos_agrupados.items(), key=lambda item: item[0].nombre.lower())
     )
 
-    # 📌 Calcular mañana (para el min del input date)
+    # 📅 Calcular mínimo de fecha de préstamo (5 días)
     min_fecha_prestamo = timezone.localdate() + timedelta(days=5)
+
+    # ✅ NUEVO: obtener los recursos con solicitud pendiente del usuario actual
+    solicitudes_pendientes = SolicitudPrestamo.objects.filter(
+        usuario=request.user,
+        estado=SolicitudPrestamo.PENDIENTE
+    ).values_list('recurso_id', flat=True)
 
     return render(request, 'prestamo/recursos_dependencia.html', {
         'dependencia': dependencia,
         'recursos': recursos_ordenados,
-        'min_fecha_prestamo': min_fecha_prestamo.isoformat()
+        'min_fecha_prestamo': min_fecha_prestamo.isoformat(),
+        'solicitudes_pendientes': list(solicitudes_pendientes),  # 👈 se pasa al template
     })
+
 
 ##########################################################################################
 

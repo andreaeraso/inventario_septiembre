@@ -196,39 +196,51 @@
 
                                     {% if recurso.disponible %}
                                     <div class="mt-auto">
-                                        <button class="btn btn-success btn-sm mb-2" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#solicitudForm{{ recurso.id }}"
-                                                aria-expanded="false" aria-controls="solicitudForm{{ recurso.id }}"
-                                                {% if not request.user.firma or not request.user.cedula or not request.user.telefono %}disabled{% endif %}>
-                                            <i class='bx bx-send'></i> Solicitar Préstamo
-                                        </button>
 
-                                        {% if not request.user.firma or not request.user.cedula or not request.user.telefono %}
-                                        <p class="text-muted" style="font-size: 0.9em;">
-                                            Completa tu perfil (firma, cédula y teléfono) para solicitar préstamos.
-                                        </p>
+                                        {% if recurso.id in solicitudes_pendientes %}
+                                            <button class="btn btn-secondary btn-sm mb-2" disabled>
+                                                <i class='bx bx-time-five'></i> Solicitud Pendiente
+                                            </button>
+                                            <p class="text-warning" style="font-size: 0.9em;">
+                                                Ya tienes una solicitud pendiente de este recurso. Espera su aprobación o rechazo.
+                                            </p>
+                                        {% elif not request.user.firma or not request.user.cedula or not request.user.telefono %}
+                                            <button class="btn btn-secondary btn-sm mb-2" disabled>
+                                                <i class='bx bx-block'></i> Incompleto
+                                            </button>
+                                            <p class="text-muted" style="font-size: 0.9em;">
+                                                Completa tu perfil (firma, cédula y teléfono) para solicitar préstamos.
+                                            </p>
+                                        {% else %}
+                                            <button class="btn btn-success btn-sm mb-2" type="button"
+                                                    data-bs-toggle="collapse" data-bs-target="#solicitudForm{{ recurso.id }}"
+                                                    aria-expanded="false" aria-controls="solicitudForm{{ recurso.id }}">
+                                                <i class='bx bx-send'></i> Solicitar Préstamo
+                                            </button>
+
+                                            <div class="collapse mt-2" id="solicitudForm{{ recurso.id }}">
+                                                <form method="post" action="{% url 'solicitar_prestamo' recurso.id %}">
+                                                    {% csrf_token %}
+                                                    <label for="fecha_devolucion_{{ recurso.id }}" class="form-label">
+                                                        Fecha Estimada de Devolución:
+                                                    </label>
+                                                    <input type="date" 
+                                                            name="fecha_devolucion" 
+                                                            id="fecha_devolucion_{{ recurso.id }}"
+                                                            class="form-control" 
+                                                            required 
+                                                            min="{{ min_fecha_prestamo }}">
+
+                                                    <div class="mt-2">
+                                                        <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>
+                                                        <button class="btn btn-secondary btn-sm" type="button"
+                                                                data-bs-toggle="collapse" data-bs-target="#solicitudForm{{ recurso.id }}">
+                                                            Cancelar
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
                                         {% endif %}
-
-                                        <div class="collapse mt-2" id="solicitudForm{{ recurso.id }}">
-                                            <form method="post" action="{% url 'solicitar_prestamo' recurso.id %}">
-                                                {% csrf_token %}
-                                                <label for="fecha_devolucion_{{ recurso.id }}" class="form-label">Fecha Estimada de Devolución:</label>
-                                                <input type="date" 
-                                                        name="fecha_devolucion" 
-                                                        id="fecha_devolucion_{{ recurso.id }}"
-                                                        class="form-control" 
-                                                        required 
-                                                        min="{{ min_fecha_prestamo }}">
-
-                                                <div class="mt-2">
-                                                    <button type="submit" class="btn btn-primary btn-sm">Aceptar</button>
-                                                    <button class="btn btn-secondary btn-sm" type="button"
-                                                            data-bs-toggle="collapse" data-bs-target="#solicitudForm{{ recurso.id }}">
-                                                        Cancelar
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -258,4 +270,47 @@
     });
     {% endfor %}
 </script>
+
+<script>
+    // Bloquear selección de sábados y domingos
+    // y limitar la fecha máxima a 6 meses desde hoy
+    document.addEventListener("DOMContentLoaded", function () {
+        const dateInputs = document.querySelectorAll('input[type="date"][id^="fecha_devolucion_"]');
+
+        // Calcular fecha máxima = hoy + 6 meses
+        const hoy = new Date();
+        const maxDate = new Date();
+        maxDate.setMonth(hoy.getMonth() + 6);
+
+        // Convertir a formato YYYY-MM-DD para el atributo 'max'
+        const maxDateStr = maxDate.toISOString().split("T")[0];
+
+        dateInputs.forEach(input => {
+            // Asignar fecha máxima
+            input.setAttribute("max", maxDateStr);
+
+            // Bloquear sábados y domingos
+            input.addEventListener("change", function () {
+                const selectedDate = new Date(this.value);
+                const day = selectedDate.getUTCDay(); // 0 = domingo, 6 = sábado
+
+                if (day === 0 || day === 6) {
+                    alert("⚠️ No se permiten devoluciones en sábado ni domingo. Por favor, elige un día hábil.");
+                    this.value = ""; // Limpia el campo
+                }
+            });
+
+            // Evitar escribir manualmente fin de semana
+            input.addEventListener("input", function () {
+                const selectedDate = new Date(this.value);
+                const day = selectedDate.getUTCDay();
+                if (day === 0 || day === 6) {
+                    this.value = "";
+                }
+            });
+        });
+    });
+</script>
+
+
 {% endblock %}
