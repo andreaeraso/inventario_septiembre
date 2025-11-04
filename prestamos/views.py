@@ -255,17 +255,25 @@ def subir_firma(request):
 @login_required
 def subir_foto(request):
     usuario = request.user
+
     if request.method == 'POST' and request.FILES.get('foto'):
         nueva_foto = request.FILES['foto']
-        
-        # Eliminar foto anterior si existe
-        if usuario.foto:
-            if os.path.isfile(usuario.foto.path):
-                os.remove(usuario.foto.path)
 
+        # 📌 Guardar la ruta antigua antes de reemplazar
+        foto_antigua = usuario.foto.path if usuario.foto else None
+
+        # 📷 Asignar la nueva foto
         usuario.foto = nueva_foto
         usuario.save()
-        return redirect('perfil_usuario')  # Asegúrate de tener una URL llamada 'perfil'
+
+        # 🧹 Eliminar la foto anterior si existe y es diferente
+        if foto_antigua and os.path.exists(foto_antigua):
+            try:
+                os.remove(foto_antigua)
+            except Exception as e:
+                print(f"⚠️ No se pudo eliminar la foto anterior: {e}")
+
+        return redirect('perfil_usuario')
 
     return redirect('perfil_usuario')
 
@@ -403,25 +411,40 @@ def editar_recurso(request, recurso_id):
         messages.error(request, 'No tienes permiso para acceder a esta página')
         return redirect('inicio')
 
-    recurso = get_object_or_404(Recurso, id=recurso_id, dependencia=request.user.dependencia_administrada)
+    recurso = get_object_or_404(
+        Recurso,
+        id=recurso_id,
+        dependencia=request.user.dependencia_administrada
+    )
 
     if request.method == 'POST':
         try:
             nuevo_id = request.POST.get('id', '').strip()
-            tipo = request.POST.get('tipo', '').strip()
+            tipo_id = request.POST.get('tipo', '').strip()
 
             # Si se seleccionó "nuevo", usar el campo nuevo_tipo
-            if tipo == "nuevo":
-                tipo = request.POST.get('nuevo_tipo', '').strip()
+            if tipo_id == "nuevo":
+                tipo_nombre = request.POST.get('nuevo_tipo', '').strip()
+                if not tipo_nombre:
+                    messages.error(request, 'Debe ingresar un nombre para el nuevo tipo de recurso.')
+                    return redirect('editar_recurso', recurso_id=recurso.id)
+                tipo, _ = TipoRecurso.objects.get_or_create(
+                    nombre=tipo_nombre,
+                    dependencia=request.user.dependencia_administrada
+                )
+            else:
+                tipo = TipoRecurso.objects.get(id=tipo_id)
 
             nombre = request.POST.get('nombre', '').strip()
             descripcion = request.POST.get('descripcion', '').strip()
-            foto = request.FILES.get('foto', None)
+            nueva_foto = request.FILES.get('foto', None)
 
-            # Validaciones mínimas
             if not (nuevo_id and tipo and nombre and descripcion):
                 messages.error(request, 'Todos los campos obligatorios deben ser completados.')
                 return redirect('editar_recurso', recurso_id=recurso.id)
+
+            # 📸 Guardar referencia de la foto anterior solo si llega una nueva
+            foto_anterior = recurso.foto.path if (nueva_foto and recurso.foto) else None
 
             # Si el usuario cambia el ID
             if nuevo_id and str(nuevo_id) != str(recurso.id):
@@ -436,40 +459,61 @@ def editar_recurso(request, recurso_id):
                     descripcion=descripcion,
                     dependencia=recurso.dependencia,
                     disponible=recurso.disponible,
+                    foto=nueva_foto if nueva_foto else recurso.foto
                 )
-
-                if foto:
-                    nuevo_recurso.foto = foto
-                else:
-                    nuevo_recurso.foto = recurso.foto
-
                 nuevo_recurso.save()
                 recurso.delete()
+
+                # 🧹 Solo eliminar la foto anterior si se subió una nueva
+                if foto_anterior and os.path.exists(foto_anterior):
+                    try:
+                        os.remove(foto_anterior)
+                    except Exception as e:
+                        print(f"⚠️ No se pudo eliminar la foto anterior: {e}")
 
                 messages.success(request, 'Recurso actualizado exitosamente con un nuevo ID.')
                 return redirect('inventario')
 
-            # Si no cambia el ID, solo actualiza los campos
+            # Si no cambia el ID, actualizar campos
             recurso.tipo = tipo
             recurso.nombre = nombre
             recurso.descripcion = descripcion
-            if foto:
-                recurso.foto = foto
-            recurso.save()
 
+            # 📸 Si hay una nueva foto, eliminar la anterior
+            if nueva_foto:
+                if recurso.foto and os.path.exists(recurso.foto.path):
+                    try:
+                        os.remove(recurso.foto.path)
+                    except Exception as e:
+                        print(f"⚠️ No se pudo eliminar la foto anterior: {e}")
+                recurso.foto = nueva_foto
+
+            recurso.save()
             messages.success(request, 'Recurso actualizado exitosamente.')
             return redirect('inventario')
 
         except Exception as e:
             messages.error(request, f'Error al actualizar el recurso: {str(e)}')
 
-    # Enviar tipos únicos al template
-    tipos_existentes = Recurso.objects.values_list('tipo', flat=True).distinct().order_by('tipo')
+    # 🔹 Obtener los tipos existentes
+    tipos_existentes = TipoRecurso.objects.filter(
+        dependencia=request.user.dependencia_administrada
+    ).order_by('nombre')
 
-    return render(request, 'admin/inventario/editar.html', {
+    # 🔹 Verificar si el tipo del recurso está en la lista
+    tipo_actual = recurso.tipo
+    tipo_en_lista = tipos_existentes.filter(id=tipo_actual.id).exists()
+
+    # 🔹 Enviar flags al template
+    contexto = {
         'recurso': recurso,
-        'tipos_existentes': tipos_existentes
-    })
+        'tipos_existentes': tipos_existentes,
+        'tipo_en_lista': tipo_en_lista,
+        'tipo_nombre': tipo_actual.nombre if not tipo_en_lista else '',
+    }
+
+    return render(request, 'admin/inventario/editar.html', contexto)
+
 
 
 @login_required
@@ -482,6 +526,10 @@ def eliminar_recurso(request, recurso_id):
     
     if request.method == 'POST':
         try:
+            # Guardamos la ruta absoluta de la imagen antes de eliminar el recurso
+            if recurso.foto and os.path.isfile(recurso.foto.path):
+                os.remove(recurso.foto.path)
+
             recurso.delete()
             messages.success(request, 'Recurso eliminado exitosamente')
         except Exception as e:
