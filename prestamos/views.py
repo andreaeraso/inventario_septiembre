@@ -25,31 +25,47 @@ from .models import Dependencia, Recurso, Prestamo, Usuario, SolicitudPrestamo, 
 # Vista de inicio
 @login_required
 def inicio(request):
-    if request.user.rol == 'admin':
-        context = {
-            'total_recursos': Recurso.objects.filter(dependencia=request.user.dependencia_administrada).count(),
-            'prestamos_activos': Prestamo.objects.filter(
-                recurso__dependencia=request.user.dependencia_administrada,
-                devuelto=False
-            ).count(),
-            'prestamos_recientes': Prestamo.objects.filter(
-                recurso__dependencia=request.user.dependencia_administrada
-            ).order_by('-fecha_prestamo')[:10]
-        }
-        return render(request, 'admin/dashboard.html', context)
+    from django.core.exceptions import ObjectDoesNotExist
 
-    elif request.user.rol in ['profesor', 'estudiante']:
-        # Obtener los préstamos aprobados y activos (no devueltos)
-        prestamos_aprobados = Prestamo.objects.filter(usuario=request.user).select_related('recurso')
+    try:
+        if request.user.rol == 'admin':
+            # Verificar que tenga dependencia asignada
+            dependencia = request.user.dependencia_administrada
 
-        context = {
-            'mis_prestamos': prestamos_aprobados
-        }
+            context = {
+                'total_recursos': Recurso.objects.filter(dependencia=dependencia).count(),
+                'prestamos_activos': Prestamo.objects.filter(
+                    recurso__dependencia=dependencia,
+                    devuelto=False
+                ).count(),
+                'prestamos_recientes': Prestamo.objects.filter(
+                    recurso__dependencia=dependencia
+                ).order_by('-fecha_prestamo')[:10]
+            }
+            return render(request, 'admin/dashboard.html', context)
 
-        if request.user.rol == 'profesor':
-            return render(request, 'profesor/dashboard.html', context)
-        else:
-            return render(request, 'estudiante/dashboard.html', context)
+        elif request.user.rol in ['profesor', 'estudiante']:
+            # Obtener los préstamos aprobados y activos (no devueltos)
+            prestamos_aprobados = Prestamo.objects.filter(usuario=request.user).select_related('recurso')
+
+            context = {
+                'mis_prestamos': prestamos_aprobados
+            }
+
+            if request.user.rol == 'profesor':
+                return render(request, 'profesor/dashboard.html', context)
+            else:
+                return render(request, 'estudiante/dashboard.html', context)
+
+    except ObjectDoesNotExist:
+        # ⚠️ Si no tiene dependencia asignada u otro problema relacional
+        messages.error(
+            request,
+            "⚠️ Error al iniciar sesión. Tu cuenta no tiene una dependencia asignada. Contacta al administrador.",
+            extra_tags='error_login'
+        )
+        return redirect("login_registro")  # 👈 Ajusta si tu ruta de login tiene otro nombre
+
         
 
 def login_registro_view(request):

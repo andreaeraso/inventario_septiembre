@@ -839,6 +839,33 @@
         });
     </script>
 
+<!-- Mensaje de errores general -->
+    {% if messages %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            {% for message in messages %}
+                {% if 'error_login' in message.tags %}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de inicio de sesión',
+                        text: '{{ message|escapejs }}',
+                        confirmButtonColor: '#0a7735',
+                        confirmButtonText: 'Entendido'
+                    });
+                {% elif 'success_login' in message.tags %}
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bienvenido',
+                        text: '{{ message|escapejs }}',
+                        confirmButtonColor: '#0a7735',
+                        confirmButtonText: 'Continuar'
+                    });
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
     <style>
         .swal2-popup.swal2-rounded {
             border-radius: 15px !important;

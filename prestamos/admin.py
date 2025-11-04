@@ -29,6 +29,13 @@ class DependenciaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'descripcion')
     search_fields = ('nombre',)
 
+    # 🔹 Filtra solo los usuarios con rol ADMIN en el desplegable de administrador
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'administrador':
+            from .models import Usuario
+            kwargs['queryset'] = Usuario.objects.filter(rol=Usuario.ADMIN)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 @admin.register(Recurso)
 class RecursoAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'dependencia', 'disponible')

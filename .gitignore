@@ -40,11 +40,10 @@ local_settings.py
 # ================================================
 # 🖼️ Archivos estáticos y multimedia
 # ================================================
-/static/
-
-media/
-!media/encabezado_contratos/
-!media/encabezado_contratos/*
+/media/*
+!/media/.gitkeep
+!/media/encabezado_contratos/
+!/media/encabezado_contratos/**
 
 
 
