@@ -58,13 +58,13 @@ def inicio(request):
                 return render(request, 'estudiante/dashboard.html', context)
 
     except ObjectDoesNotExist:
-        # ⚠️ Si no tiene dependencia asignada u otro problema relacional
+        #Si no tiene dependencia asignada u otro problema relacional
         messages.error(
             request,
             "⚠️ Error al iniciar sesión. Tu cuenta no tiene una dependencia asignada. Contacta al administrador.",
             extra_tags='error_login'
         )
-        return redirect("login_registro")  # 👈 Ajusta si tu ruta de login tiene otro nombre
+        return redirect("login_registro")  
 
         
 
@@ -654,8 +654,10 @@ def recursos_por_dependencia(request, dependencia_id):
     for tipo in recursos_agrupados:
         recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
 
-    # Ordenar los tipos de recurso alfabéticamente
-    recursos_ordenados = OrderedDict(sorted(recursos_agrupados.items(), key=lambda item: item[0].lower()))
+    # ✅ Ordenar los tipos de recurso alfabéticamente por su nombre
+    recursos_ordenados = OrderedDict(
+        sorted(recursos_agrupados.items(), key=lambda item: item[0].nombre.lower())
+    )
 
     # 📌 Calcular mañana (para el min del input date)
     min_fecha_prestamo = timezone.localdate() + timedelta(days=5)
@@ -663,7 +665,7 @@ def recursos_por_dependencia(request, dependencia_id):
     return render(request, 'prestamo/recursos_dependencia.html', {
         'dependencia': dependencia,
         'recursos': recursos_ordenados,
-        'min_fecha_prestamo': min_fecha_prestamo.isoformat()  # se pasa al template
+        'min_fecha_prestamo': min_fecha_prestamo.isoformat()
     })
 
 ##########################################################################################
