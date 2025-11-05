@@ -156,6 +156,22 @@
         background: #14a34d;
         font-weight: bold;
     }
+
+    .card-recurso {
+        padding: 0.6rem;              /* menos padding */
+        font-size: 0.85rem;           /* texto más pequeño */
+        border-radius: 8px;           /* esquinas un poco menos redondeadas */
+    }
+
+    .card-recurso h5 {
+        font-size: 1rem;              /* título más pequeño */
+        margin-bottom: 0.3rem;
+    }
+
+    .card-recurso p {
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+    }
 </style>
 
 <!-- Título de la dependencia -->
@@ -181,7 +197,7 @@
                         <input class="search search-input form-control mb-3" placeholder="🔍 Buscar por nombre o ID..." />
                         <div class="row list">
                             {% for recurso in recursos_por_tipo %}
-                            <div class="col-md-4 mb-4 recurso-item">
+                            <div class="col-md-3 mb-4 recurso-item">
                                 <div class="card-recurso h-100">
                                     {% if recurso.foto %}
                                     <div class="recurso-imagen-overlay mb-2">
