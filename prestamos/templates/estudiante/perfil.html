@@ -10,6 +10,8 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         width: 100%;
         max-width: 900px;
+        max-width: 1200px; /* ← aumentado (antes 1000px) */
+        min-height: 600px; /* más alto para espacio visual */
     }
 
     .perfil-header {
@@ -36,7 +38,6 @@
         max-width: 100%;
     }
 
-    /* ✅ Estilo mejorado de línea (todo en una sola línea, sin saltos) */
     .perfil-linea {
         display: flex;
         align-items: center;
@@ -103,7 +104,6 @@
         background-color: #095b2c !important;
     }
 
-    /* Overlay de carga */
     .overlay-loading {
         position: fixed;
         top: 0;
@@ -138,23 +138,19 @@
         font-weight: bold;
     }
 
-    /* ✅ Responsive: mantiene una línea, pero con salto limpio en pantallas muy pequeñas */
     @media screen and (max-width: 768px) {
         .perfil-wrapper {
             padding: 1rem;
         }
-
         .perfil-foto {
             width: 130px;
             height: 130px;
         }
-
         .perfil-linea {
             white-space: normal;
             flex-direction: row;
             flex-wrap: wrap;
         }
-
         .btn-success {
             width: 100%;
         }
@@ -192,6 +188,7 @@
                     <img src="/static/img/default-user.png" alt="Foto de perfil" class="perfil-foto img-fluid mb-3">
                 {% endif %}
 
+                {% if puede_editar %}
                 <!-- Subir foto -->
                 <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data" id="form-foto">
                     {% csrf_token %}
@@ -200,10 +197,12 @@
                         <i class='bx bx-upload'></i> {% if usuario.foto %}Cambiar Foto{% else %}Subir Foto{% endif %}
                     </button>
                 </form>
+                {% endif %}
 
                 <!-- Firma -->
                 <div class="mt-4">
                     {% if not usuario.firma %}
+                        {% if puede_editar %}
                         <form action="{% url 'subir_firma' %}" method="post" enctype="multipart/form-data" class="perfil-info-box" id="form-firma">
                             {% csrf_token %}
                             <div class="perfil-linea"><strong><i class='bx bxs-pen'></i> Subir firma (PNG):</strong></div>
@@ -212,6 +211,7 @@
                                 <i class='bx bx-upload'></i> Subir firma
                             </button>
                         </form>
+                        {% endif %}
                     {% else %}
                         <div class="perfil-info-box firma-box text-center">
                             <div class="perfil-linea justify-content-center">
@@ -232,6 +232,7 @@
                     <div class="perfil-linea"><strong>Programa:</strong> <span>{{ usuario.programa|default:"No especificado" }}</span></div>
                 </div>
 
+                {% if puede_editar %}
                 <div class="perfil-info-box">
                     <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="w-100">
                         {% csrf_token %}
@@ -265,12 +266,17 @@
                         {% endif %}
                     </form>
                 </div>
+                {% else %}
+                <div class="perfil-info-box">
+                    <div class="perfil-linea"><strong>Cédula:</strong> <span>{{ usuario.cedula|default:"No registrada" }}</span></div>
+                    <div class="perfil-linea"><strong>Teléfono:</strong> <span>{{ usuario.telefono|default:"No registrado" }}</span></div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- JS: Spinner de carga -->
 <script>
     const overlay = document.getElementById('overlay-loading');
     const inputFoto = document.getElementById('input-foto');
@@ -291,7 +297,6 @@
     });
 </script>
 
-<!-- SweetAlert2 para mostrar mensajes -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -305,11 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     confirmButtonText: 'Aceptar',
                     confirmButtonColor: '#0c7c3c',
                     background: '#fff',
-                    color: '#333',
-                    customClass: {
-                        popup: 'swal2-rounded',
-                        confirmButton: 'swal2-confirm-custom'
-                    }
+                    color: '#333'
                 });
             {% elif 'error' in message.tags %}
                 Swal.fire({

@@ -779,7 +779,7 @@ def solicitar_prestamo(request, recurso_id):
                         f"El usuario {request.user.get_full_name()} ha registrado una solicitud de préstamo "
                         f"para el recurso: '{recurso.nombre}'.\n\n"
                         "Por favor, revise la plataforma para aprobar o rechazar esta solicitud.\n\n"
-                        "Atentamente,\nSistema de Préstamos UNAD"
+                        "Atentamente,\nSistema de Préstamos UDENAR"
                     ),
                     from_email="noreply@unad.edu.co",
                     recipient_list=[admin_user.email],
