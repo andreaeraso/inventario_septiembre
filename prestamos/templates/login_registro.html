@@ -5,6 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Login y Registro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
     <!-- Iconos -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
@@ -48,7 +52,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
         }
 
         body {
@@ -59,61 +62,115 @@
             background: linear-gradient(90deg, #e2e2e2, #c9ffd6);
         }
 
-
-.titulo-login {
-    font-size: 15px;
-    font-weight: 700;
+.install-banner {
+        position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 16px;
+    width: auto;
+    margin-top: 700px;
+    max-width: 380px;
+    font-size: 16px;
     color: #0a7735;
-    text-align: center;
-    margin-bottom: 20px;
-    letter-spacing: 0.5px;
+    z-index: 9999;
+    transition: all 0.3s 
+ease;
 }
 
-.input-login {
-    position: relative;
-    width: 100%;
-    margin-bottom: 20px;
+/* Texto */
+.install-text {
+    font-weight: 600;
+    color: #0a7735;
 }
 
-.input-login input {
-    width: 100%;
-    padding: 14px 40px 14px 15px;
-    font-size: 15px;
-    background: #f9f9f9;
+/* Botón */
+#installButton {
+    background: #0a7735;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
     border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-    font-weight: 500;
-    height: 48px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
 }
 
-.input-login i {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #0a7735;
+/* Hover */
+#installButton:hover {
+    background: #09642d;
+}
+
+/* Ícono */
+#installButton i {
     font-size: 18px;
 }
 
-.btn-login {
-    width: 100%;
-    height: 52px;
-    background: #0a7735;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    color: #fff;
-    font-weight: 600;
-    transition: background 0.3s ease, transform 0.2s ease;
-}
+        .titulo-login {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0a7735;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
 
-.btn-login:hover {
-    background: #0d8b40;
-    transform: scale(1.03);
-}
+        .input-login {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input-login input {
+            width: 100%;
+            padding: 14px 40px 14px 15px;
+            font-size: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-weight: 500;
+            height: 48px;
+        }
+
+        .input-login i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #0a7735;
+            font-size: 18px;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 52px;
+            background: #0a7735;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-login:hover {
+            background: #0d8b40;
+            transform: scale(1.03);
+        }
 
         .titulo-sistema {
             font-size: 20px;
@@ -125,63 +182,58 @@
         }
 
 
-            .logo-login {
-                display: block;
-                margin: 0 auto 15px auto;
-                width: 150px;
-                height: 150px;
-                object-fit: contain;
+        .logo-login {
+            display: block;
+            margin: 0 auto 15px auto;
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
             }
 
 
 .login-box-borde {
-    border: 2px solid #0a7735;
-    border-radius: 14px;
-    padding: 70px 50px;      /* 🔹 Más grande por dentro */
-    margin-top: 0;
-    margin-bottom: 25px;
+    padding: 90px 70px;            /* 🔹 Aumenta el tamaño interno (más grande) */
+    margin-top: 50px;              /* 🔹 Lo empuja hacia abajo */
+    margin-bottom: 100px;          /* Mantiene espacio inferior */
     background-color: #ffffff;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    transform: scale(1.05);  /* 🔹 Amplía el cuadro suavemente */
+    transform: scale(1.08);        /* 🔹 Lo hace ligeramente más grande */
     transition: all 0.3s ease;
+    border-radius: 20px;           /* 🔹 Le da bordes más suaves */
 }
 
-.register-box-borde {
-    border: 2px solid #0a7735;
-    border-radius: 12px;
-    padding: 25px 20px 30px 20px; /* antes 35px 30px 40px 30px */
-    margin-top: 5px;
-    margin-bottom: 15px;
-    background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    max-width: 420px; /* 🔹 controla el ancho total */
-    margin-left: auto;
-    margin-right: auto;
-}
+        .register-box-borde {
+            border: 2px solid #0a7735;
+            border-radius: 12px;
+            padding: 25px 20px 30px 20px; /* antes 35px 30px 40px 30px */
+            margin-top: 5px;
+            margin-bottom: 15px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            max-width: 420px; /* 🔹 controla el ancho total */
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-/* 🔹 Quita la barra gris de desplazamiento en el registro */
-.form-box form {
-    scrollbar-width: none;      /* Firefox */
-    -ms-overflow-style: none;   /* Internet Explorer / Edge antiguo */
-}
+        /* 🔹 Quita la barra gris de desplazamiento en el registro */
+        .form-box form {
+            scrollbar-width: none;      /* Firefox */
+            -ms-overflow-style: none;   /* Internet Explorer / Edge antiguo */
+        }
 
-.form-box form::-webkit-scrollbar {
-    display: none;              /* Chrome, Safari y Opera */
-}
-
-
-
+        .form-box form::-webkit-scrollbar {
+            display: none;              /* Chrome, Safari y Opera */
+        }
 
         .container {
-            position: relative;
-            width: 1110px;
-            height: 660px;
-            background: #fff;
-            border-radius: 30px;
-            box-shadow: 0 0 30px rgb(0, 0, 0, .2);
-            margin: 25px;
-            overflow: hidden;
-        }
+    position: relative;
+    width: 1200px;
+    height: 660px;
+    background: #fff;
+    border-radius: 30px;
+    box-shadow: 0 0 30px rgb(0, 0, 0, .2);
+    margin: 25px;
+    overflow: hidden;
+}
 
         .form-box {
             position: absolute;
@@ -216,17 +268,17 @@
             margin: 11px 0;
         }
 
-.input-box input {
-    width: 100%;
-    padding: 6px 28px 6px 10px; /* 🔸 Menos alto */
-    font-size: 12px;            /* 🔸 Letra más pequeña */
-    background: #f2f2f2;
-    border-radius: 5px;
-    border: none;
-    outline: none;
-    font-weight: 500;
-    height: 32px;               /* 🔸 Controla altura fija */
-}
+        .input-box input {
+            width: 100%;
+            padding: 6px 28px 6px 10px; /* 🔸 Menos alto */
+            font-size: 12px;            /* 🔸 Letra más pequeña */
+            background: #f2f2f2;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-weight: 500;
+            height: 32px;               /* 🔸 Controla altura fija */
+        }
 
         .input-box input::placeholder {
             color: #888;
@@ -242,18 +294,18 @@
             color: #888;
         }
 
-       .btn {
-    width: 100%;
-    height: 38px; /* antes 44px */
-    background: #0a7735;
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgb(0, 0, 0, .1);
-    border: none;
-    cursor: pointer;
-    font-size: 14px; /* antes 15px */
-    color: #fff;
-    font-weight: 600;
-}
+        .btn {
+            width: 100%;
+            height: 38px; /* antes 44px */
+            background: #0a7735;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgb(0, 0, 0, .1);
+            border: none;
+            cursor: pointer;
+            font-size: 14px; /* antes 15px */
+            color: #fff;
+            font-weight: 600;
+        }
 
         .form-box form {
             max-height: 100%;
@@ -354,87 +406,6 @@
             min-width: 0;
         }
 
-        @media screen and (max-width: 768px) {
-            .form-row {
-                flex-direction: column;
-            }
-        }
-
-        @media screen and (max-width: 650px) {
-            .container {
-                height: calc(100vh - 40px);
-            }
-
-            .form-box {
-                bottom: 0;
-                width: 100%;
-                height: 70%;
-            }
-
-            .container.active .form-box {
-                right: 0;
-                bottom: 30%;
-            }
-
-            .toggle-box::before {
-                left: 0;
-                top: -270%;
-                width: 100%;
-                height: 300%;
-                border-radius: 20vw;
-            }
-
-            .container.active .toggle-box::before {
-                top: 70%;
-                left: 0;
-            }
-
-            .toggle-panel {
-                width: 100%;
-                height: 30%;
-            }
-
-            .toggle-panel.toggle-left {
-                top: 0;
-            }
-
-            .container.active .toggle-panel.toggle-left {
-                left: 0;
-                top: -30%;
-            }
-
-            .toggle-panel.toggle-right {
-                right: 0;
-                bottom: -30%;
-            }
-
-            .container.active .toggle-panel.toggle-right {
-                bottom: 0;
-            }
-
-            .input-box input {
-                padding: 14px 45px 14px 18px;
-                font-size: 15px;
-            }
-
-            .container h1 {
-                font-size: 30px;
-            }
-
-        }
-
-        @media screen and (max-width: 400px) {
-            .container {
-                padding: 1.5rem;
-            }
-
-            .form input,
-            .form button {
-                font-size: 14px;
-                padding: 10px;
-            }
-        }
-
         .input-box {
             position: relative;
             margin: 15px 0 25px;
@@ -512,16 +483,6 @@
             font-weight: 500;
         }
 
-        /* Versión responsive */
-        @media (max-width: 768px) {
-            .footer-principal {
-                flex-direction: column;
-                text-align: center;
-                font-size: 13px;
-                padding: 12px;
-                gap: 4px;
-            }
-        }
 
         .subtitulo-sistema {
             font-size: 15px;         /* tamaño de fuente del subtítulo */
@@ -531,7 +492,319 @@
             font-weight: 400;
             line-height: 1.4;
         }
+
+                .subtitulo-sistema {
+            font-size: 15px;         /* tamaño de fuente del subtítulo */
+            color: #555;             /* color gris neutro */
+            margin-top: -5px;        /* ajusta el espacio con el título */
+            margin-bottom: 25px;     /* deja aire antes del primer input */
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+
+         .subtitulo-sistema {
+            font-size: 15px;         /* tamaño de fuente del subtítulo */
+            color: #555;             /* color gris neutro */
+            margin-top: -5px;        /* ajusta el espacio con el título */
+            margin-bottom: 25px;     /* deja aire antes del primer input */
+            font-weight: 400;
+            line-height: 1.4;
+        }
+
+
+       
+
+ @media screen and (max-width: 650px) {
+
+
+            .register-box-borde {
+    border: 2px solid #0a7735;
+    border-radius: 12px;
+    padding: 2px 10px 18px 10px;
+    margin-top: 20px;
+    margin-bottom: 2px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+            .container {
+                height: calc(100vh - 100px);
+            }
+
+               .form-box {
+        bottom: 0;
+        width: 100%;
+        height: 75%;
+    }
+
+            .container.active .form-box {
+                right: 0;
+                bottom: 30%;
+            }
+
+            .toggle-box::before {
+                left: 0;
+                top: -270%;
+                width: 100%;
+                height: 300%;
+                border-radius: 20vw;
+            }
+
+            .container.active .toggle-box::before {
+                top: 70%;
+                left: 0;
+            }
+
+            .toggle-panel {
+                width: 100%;
+                height: 30%;
+            }
+
+            .toggle-panel.toggle-left {
+                top: 0;
+            }
+
+            .container.active .toggle-panel.toggle-left {
+                left: 0;
+                top: -30%;
+            }
+
+            .toggle-panel.toggle-right {
+                right: 0;
+                bottom: -30%;
+            }
+
+            .container.active .toggle-panel.toggle-right {
+                bottom: 0;
+            }
+
+                .input-box input {
+        padding: 14px 45px 14px 10px;
+        font-size: 10px;
+        height: 38px;
+    }
+
+            .container h1 {
+                font-size: 30px;
+            }
+
+            .escudo-universidad {
+        width: 85px;
+        height: auto;
+        margin-bottom: 15px;
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+        margin-top: 20px;
+    }
+
+                .toggle-panel p {
+        margin-bottom: 0px;
+        padding: 8px;
+        font-size: 13px;
+    }
+         .container h1 {
+        font-size: 24px;
+        margin-top: 3px;
+    }
+
+
+
+        .register-h1 {
+        font-size: 20px;
+    }
+     
+    .toggle-panel .btn {
+    width: 100px;
+    height: 35px;
+    font-size: 12px;
+    background: transparent;
+    border: 2px solid #fff;
+    box-shadow: none;
+}
+
+.login-box-borde {
+    padding: 5px 10px;
+    margin-top: 0;
+    margin-bottom: 100px;
+    background-color: #ffffff;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+    .toggle-panel {
+        width: 100%;
+        height: 27%;
+    }
+
+
+    .install-banner {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #dcdcdc;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        padding: 8px 14px;
+        margin-top: 10px;
+        width: 100%;
+        margin-top: -65px;
+        font-size: 15px;
+        color: #0a7735;
+        transition: all 0.3s 
+ease;
+    }
+
+
+/* Texto */
+.install-text {
+    font-weight: 600;
+    color: #0a7735;
+}
+
+/* Botón */
+#installButton {
+    background: #0a7735;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+/* Hover */
+#installButton:hover {
+    background: #09642d;
+}
+
+/* Ícono */
+#installButton i {
+    font-size: 18px;
+}
+
+.toggle-box {
+    position: absolute;
+    top: 0;
+    left: 0;         /* 👈 esto asegura que empiece pegado al borde izquierdo */
+    width: 100%;
+    height: 100%;
+}
+
+
+.input-login input {
+    width: 100%;
+    padding: 14px 40px 14px 15px;
+    font-size: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-weight: 200;
+    height: 35px;
+}
+
+.btn login-btn {
+    width: 100%;
+    height: 35px;
+    background: #0a7735;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.3s 
+ease, transform 0.2s 
+ease;
+}
+
+.footer-principal {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0a7735;
+    color: #e9ffe6;
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 9px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+
+#installButton:hover {
+    background: #09933e;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.titulo-login {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0a7735;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+
+.escudo-register {
+    width: 80px;
+        height: auto;
+        margin-bottom: 0px;
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+        margin-top: 0px;
+}
+
+.btn register-btn {
+ width: 100%;
+    height: 30px;
+    background: #0a7735;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+    font-weight: 600;
+    transition: background 0.3s 
+ease, transform 0.2s 
+ease;
+}
+
+
+
+
+
+
+    }
+
+
+
+
+
+
     </style>
+    
 </head>
 
 <footer class="footer-principal">
@@ -582,7 +855,16 @@
             {% endfor %}
             {% endif %}
         </div>
+
+        <!-- 🔰 BOTÓN DE DESCARGA DE LA APLICACIÓN -->
+<div class="install-banner">
+  <span class="install-text">Descarga la App</span>
+  <button id="installButton">
+    <i class="fa-solid fa-download"></i>
+  </button>
+</div>
     </form>
+
 </div>
 
 
@@ -681,14 +963,14 @@
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
                 <img src="/media/encabezado_contratos/escudoblanco.png" alt="Escudo Universidad de Nariño"
-                    class="escudo-universidad">
+                    class="escudo-register">
                 <h1>Bienvenido</h1>
                 <p>¿No tienes cuenta?</p>
                 <button class="btn register-btn">Regístrate</button>
             </div>
             <div class="toggle-panel toggle-right">
                 <img src="/media/encabezado_contratos/escudoblanco.png" alt="Escudo Universidad de Nariño" class="escudo-register">
-                <h1>Hola de nuevo</h1>
+                <h1 class="register-h1 ">Hola de nuevo</h1>
                 <p>¿Ya tienes una cuenta?</p>
                 <button class="btn login-btn">Ingresar</button>
             </div>
@@ -795,6 +1077,71 @@
             });
         }
     </script>
+    <script>
+  let deferredPrompt;
+  const installBanner = document.querySelector('.install-banner');
+  const installButton = document.getElementById('installButton');
+
+  // Por defecto, ocultamos el banner
+  installBanner.style.display = 'none';
+
+  // Detectar si la app ya está instalada (modo PWA)
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      console.log('✅ La app ya está instalada');
+      installBanner.style.display = 'none'; // Oculta el botón
+  } else {
+      console.log('📱 La app NO está instalada');
+  }
+
+  // Evento que se dispara cuando el navegador permite instalar la PWA
+  window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBanner.style.display = 'flex'; // Mostrar el banner solo si es instalable
+  });
+
+  // Cuando el usuario hace clic en "Descargar"
+  installButton.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+          console.log('✅ Usuario aceptó instalar la app');
+      } else {
+          console.log('❌ Usuario rechazó la instalación');
+      }
+      deferredPrompt = null;
+      installBanner.style.display = 'none';
+  });
+
+  // Si el usuario instala la app, ocultamos el banner
+  window.addEventListener('appinstalled', () => {
+      console.log('🎉 App instalada correctamente');
+      installBanner.style.display = 'none';
+  });
+</script>
+
+    <script>
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').style.display = 'block';
+  });
+
+  document.getElementById('installButton').addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const result = await deferredPrompt.userChoice;
+      if (result.outcome === 'accepted') {
+        console.log('✅ App instalada');
+      }
+      document.getElementById('installBanner').style.display = 'none';
+    }
+  });
+</script>
+
 
     <!-- SweetAlert2 para mensajes (tuyos) -->
     <script>
@@ -864,6 +1211,43 @@
             {% endfor %}
         });
     </script>
+
+    <script>
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installButton = document.getElementById('installButton');
+
+    // Escucha el evento antes de instalar (para móviles y navegadores compatibles)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.style.display = 'block';  // Mostrar banner
+    });
+
+    // Cuando el usuario hace clic en el botón "Descargar aplicación"
+    installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+            deferredPrompt = null;
+            installBanner.style.display = 'none'; // Ocultar después de instalar
+        } else {
+            // Si no hay evento, ofrecer una descarga directa del manifest
+            window.location.href = "{% static 'manifest.json' %}";
+        }
+    });
+
+    // Para escritorio: mostrar el mismo banner simulando instalación
+    window.addEventListener('load', () => {
+        // Si no hay soporte PWA, igualmente mostrar el botón
+        setTimeout(() => {
+            if (!window.matchMedia('(display-mode: standalone)').matches) {
+                installBanner.style.display = 'block';
+            }
+        }, 3000);
+    });
+</script>
     {% endif %}
 
     <style>

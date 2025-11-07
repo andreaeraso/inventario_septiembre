@@ -36,7 +36,6 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     'https://sisprestamos.udenar.edu.co',
     'https://www.sisprestamos.udenar.edu.co',
-    'https://*.ngrok-free.app',
 ]
 
 
