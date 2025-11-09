@@ -205,7 +205,7 @@
 
         <!-- 🔍 Buscador -->
         <div class="buscador-container">
-            <input type="text" id="buscador" class="buscador-input" placeholder="Buscar por código, recurso o usuario...">
+            <input type="text" id="buscador" class="buscador-input" placeholder="Buscar por nombre, ID recurso, recurso o fecha de préstamo...">
         </div>
 
         <!-- 📋 Tabla dentro de tarjeta -->
@@ -218,9 +218,9 @@
                 <table class="table table-bordered table-hover align-middle mb-0" id="tablaPrestamos">
                     <thead class="table-light">
                         <tr>
-                            <th><i class='bx bx-id-card'></i> Código</th>
+                            <th><i class='bx bx-id-card'></i> ID</th>
                             <th><i class='bx bx-user'></i> Nombre</th>
-                            <th><i class='bx bx-user-pin'></i> Rol</th>
+                            <th><i class='bx bx-barcode'></i> ID Recurso</th>
                             <th><i class='bx bx-cube'></i> Recurso</th>
                             <th><i class='bx bx-calendar'></i> Fecha de Préstamo</th>
                             <th><i class='bx bx-calendar-check'></i> Fecha de Devolución</th>
@@ -231,9 +231,14 @@
                     <tbody>
                         {% for p in prestamos %}
                         <tr>
-                            <td data-label="Código">{{ p.usuario.codigo }}</td>
-                            <td data-label="Nombre">{{ p.usuario.first_name }} {{ p.usuario.last_name }}</td>
-                            <td data-label="Rol">{{ p.usuario.get_rol_display }}</td>
+                            <td data-label="ID">{{ p.id }}</td>
+                            <td data-label="Nombre">
+                                <a href="{% url 'perfil_usuario_detalle' p.usuario.id %}" 
+                                style="color: #0c7c3c; text-decoration: underline; font-weight: 600;">
+                                    {{ p.usuario.first_name }} {{ p.usuario.last_name }}
+                                </a>
+                            </td>
+                            <td data-label="ID Recurso">{{ p.recurso.id }}</td>
                             <td data-label="Recurso">{{ p.recurso.nombre }}</td>
                             <td data-label="Fecha de Préstamo">{{ p.fecha_prestamo|date:"d/m/Y H:i" }}</td>
                             <td data-label="Fecha de Devolución">{{ p.fecha_devolucion|date:"d/m/Y H:i" }}</td>
@@ -310,13 +315,22 @@
 <!-- 🔎 Script de búsqueda -->
 <script>
     document.getElementById("buscador").addEventListener("keyup", function() {
-        const filtro = this.value.toLowerCase();
+        const filtro = this.value.toLowerCase().trim();
         const filas = document.querySelectorAll("#tablaPrestamos tbody tr");
+
         filas.forEach(fila => {
-            const codigo = fila.children[0].textContent.toLowerCase();
             const nombre = fila.children[1].textContent.toLowerCase();
+            const idRecurso = fila.children[2].textContent.toLowerCase();
             const recurso = fila.children[3].textContent.toLowerCase();
-            fila.style.display = (codigo.includes(filtro) || nombre.includes(filtro) || recurso.includes(filtro)) ? "" : "none";
+            const fechaPrestamo = fila.children[4].textContent.toLowerCase();
+
+            const coincide = 
+                nombre.includes(filtro) || 
+                idRecurso.includes(filtro) || 
+                recurso.includes(filtro) || 
+                fechaPrestamo.includes(filtro);
+
+            fila.style.display = coincide ? "" : "none";
         });
     });
 </script>
