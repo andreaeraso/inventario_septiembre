@@ -798,7 +798,7 @@ def aprobar_solicitud(request, solicitud_id):
     solicitud = get_object_or_404(SolicitudPrestamo, id=solicitud_id)
 
     if not solicitud.recurso.disponible:
-        messages.error(request, "El recurso no está disponible.")
+        messages.error(request, "El recurso no está disponible.", extra_tags="recurso_no_disponible")
         return redirect('lista_solicitudes')
 
     recurso = solicitud.recurso
@@ -966,15 +966,25 @@ def marcar_notificacion_leida(request):
 #Lista para que el administrador pueda ver las solicitudes
 @login_required
 def lista_solicitudes(request):
-    if request.user.rol != 'admin':  # Asegurar que solo los administradores accedan
+    if request.user.rol != 'admin':
         return redirect('inicio')
 
-    # Filtrar solicitudes de préstamo solo de la dependencia administrada por el usuario
     solicitudes = SolicitudPrestamo.objects.select_related('recurso', 'usuario').filter(
         recurso__dependencia=request.user.dependencia_administrada
     ).order_by('-fecha_solicitud')
 
-    return render(request, 'admin/solicitudes_prestamo.html', {'solicitudes': solicitudes})
+    # Filtrar los mensajes: solo mostrar los del tipo 'recurso_no_disponible'
+    mensajes_filtrados = []
+    for message in messages.get_messages(request):
+        if 'recurso_no_disponible' in message.tags:
+            mensajes_filtrados.append(message)
+
+    context = {
+        'solicitudes': solicitudes,
+        'mensajes_filtrados': mensajes_filtrados
+    }
+
+    return render(request, 'admin/solicitudes_prestamo.html', context)
 
 
 #Lista para que el estudiante pueda ver sus solicitudes

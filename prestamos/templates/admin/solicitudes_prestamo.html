@@ -324,23 +324,14 @@ function confirmarAccion(accion, id) {
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    {% if messages %}
-        {% for message in messages %}
-            {% if 'success' in message.tags %}
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito',
-                    text: '{{ message|escapejs }}',
-                    confirmButtonColor: '#0c7c3c'
-                });
-            {% elif 'error' in message.tags %}
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '{{ message|escapejs }}',
-                    confirmButtonColor: '#d33'
-                });
-            {% endif %}
+    {% if mensajes_filtrados %}
+        {% for message in mensajes_filtrados %}
+            Swal.fire({
+                icon: 'error',
+                title: 'Recurso no disponible',
+                text: '{{ message|escapejs }}',
+                confirmButtonColor: '#d33'
+            });
         {% endfor %}
     {% endif %}
 });
