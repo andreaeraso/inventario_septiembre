@@ -196,6 +196,7 @@
                 <table class="table table-bordered table-hover align-middle mb-0" id="tablaPrestamos">
                     <thead>
                         <tr>
+                            <th> ID Recurso</th>
                             <th><i class='bx bx-cube'></i> Recurso</th>
                             <th><i class='bx bx-buildings'></i> Dependencia</th>
                             <th><i class='bx bx-calendar'></i> Fecha de Préstamo</th>
@@ -206,16 +207,29 @@
                     <tbody>
                         {% for p in prestamos %}
                         <tr>
+                            <td data-label="ID Recurso">{{ p.recurso.id }}</td>
                             <td data-label="Recurso">{{ p.recurso.nombre }}</td>
                             <td data-label="Dependencia">{{ p.recurso.dependencia.nombre }}</td>
                             <td data-label="Fecha de Préstamo">{{ p.fecha_prestamo|date:"d/m/Y H:i" }}</td>
-                            <td data-label="Fecha de Devolución">{{ p.fecha_devolucion|date:"d/m/Y H:i" }}</td>
+                            <td data-label="Fecha de Devolución">
+                                {% if p.fecha_devolucion %}
+                                    {{ p.fecha_devolucion|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <em>No registrada</em>
+                                {% endif %}
+                            </td>
                             <td data-label="Estado">
                                 {% if p.devuelto %}
                                     <span class="badge-success"><i class="fas fa-check-circle"></i> Devuelto</span>
                                 {% else %}
                                     <span class="badge-warning"><i class="fas fa-hourglass-half"></i> Pendiente</span>
                                 {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="mensaje-vacio">
+                                <i class='bx bx-info-circle'></i> No tienes préstamos registrados actualmente.
                             </td>
                         </tr>
                         {% endfor %}

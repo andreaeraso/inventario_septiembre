@@ -45,8 +45,12 @@ def inicio(request):
             return render(request, 'admin/dashboard.html', context)
 
         elif request.user.rol in ['profesor', 'estudiante']:
-            # Obtener los préstamos aprobados y activos (no devueltos)
-            prestamos_aprobados = Prestamo.objects.filter(usuario=request.user).select_related('recurso')
+            prestamos_aprobados = (
+                Prestamo.objects
+                .filter(usuario=request.user)
+                .select_related('recurso')
+                .order_by('-fecha_prestamo')  # 👈 Orden descendente por fecha de préstamo
+            )
 
             context = {
                 'mis_prestamos': prestamos_aprobados
@@ -1349,7 +1353,12 @@ def mis_prestamos(request):
         messages.error(request, "Solo los estudiantes o profesores pueden acceder a esta vista.")
         return redirect('inicio')
 
-    prestamos = Prestamo.objects.filter(usuario=usuario).select_related('recurso')
+    prestamos = (
+        Prestamo.objects
+        .filter(usuario=usuario)
+        .select_related('recurso')
+        .order_by('-fecha_prestamo')  # 🔽 Más recientes primero
+    )
 
     contexto = {
         'prestamos': prestamos,

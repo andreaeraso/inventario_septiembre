@@ -224,13 +224,15 @@
             <div class="col-12">
                 <div class="card prestamos-card">
                     <div class="card-header">
-                        <i class="bi bi-clipboard-check"></i> Mis Préstamos Recientes
+                        <i class="bi bi-clipboard-check"></i> Mis Préstamos Recientes 
                     </div>
                     <div class="card-body table-responsive">
                         <table class="table table-bordered table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
+                                    <th>ID Recurso</th>
                                     <th>Recurso</th>
+                                    <th>Dependencia</th>
                                     <th>Fecha Préstamo</th>
                                     <th>Fecha Devolución</th>
                                     <th>Estado</th>
@@ -239,20 +241,32 @@
                             <tbody>
                                 {% for prestamo in mis_prestamos %}
                                 <tr>
+                                    <td data-label="ID Recurso">{{ prestamo.recurso.id }}</td>
                                     <td data-label="Recurso">{{ prestamo.recurso.nombre }}</td>
-                                    <td data-label="Fecha Préstamo">{{ prestamo.fecha_prestamo }}</td>
-                                    <td data-label="Fecha Devolución">{{ prestamo.fecha_devolucion }}</td>
+                                    <td data-label="Dependencia">{{ prestamo.recurso.dependencia.nombre }}</td>
+                                    <td data-label="Fecha Préstamo">{{ prestamo.fecha_prestamo|date:"Y-m-d" }}</td>
+                                    <td data-label="Fecha Devolución">
+                                        {% if prestamo.fecha_devolucion %}
+                                            {{ prestamo.fecha_devolucion|date:"Y-m-d" }}
+                                        {% else %}
+                                            <em>No registrada</em>
+                                        {% endif %}
+                                    </td>
                                     <td data-label="Estado">
                                         {% if prestamo.devuelto %}
-                                            <span class="badge badge-success"><i class="bi bi-check-circle-fill"></i> Devuelto</span>
+                                            <span class="badge badge-success">
+                                                <i class="bi bi-check-circle-fill"></i> Devuelto
+                                            </span>
                                         {% else %}
-                                            <span class="badge badge-warning"><i class="bi bi-hourglass-split"></i> Pendiente</span>
+                                            <span class="badge badge-warning">
+                                                <i class="bi bi-hourglass-split"></i> Pendiente
+                                            </span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="no-prestamos">No tienes préstamos aprobados</td>
+                                    <td colspan="6" class="no-prestamos">No tienes préstamos aprobados</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
