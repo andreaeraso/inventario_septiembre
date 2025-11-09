@@ -150,10 +150,11 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
+                                    <th>ID Recurso</th>
                                     <th>Recurso</th>
                                     <th>Usuario</th>
                                     <th>Fecha Solicitud</th>
-                                    <th>Fecha Devolución</th>
+                                    <th>Fecha Tentativa<br>de Devolución</th>
                                     <th>Estado</th>
                                 </tr>
                             </thead>
@@ -161,6 +162,7 @@
                                 {% for solicitud in solicitudes %}
                                 <tr>
                                     <td data-label="ID">{{ solicitud.id }}</td>
+                                    <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td>
                                     <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
                                     <td data-label="Usuario">
                                         <a href="{% url 'perfil_usuario_detalle' solicitud.usuario.id %}"
