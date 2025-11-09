@@ -185,9 +185,9 @@
                                     <td data-label="Acciones">
                                         {% if not prestamo.devuelto %}
                                             <!-- Botón devolver -->
-                                            <form action="{% url 'marcar_devuelto' prestamo.id %}" method="post" class="inline-form">
+                                            <form action="{% url 'marcar_devuelto' prestamo.id %}" method="post" class="inline-form devolver-form">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-success btn-sm">
+                                                <button type="button" class="btn btn-success btn-sm btn-devolver">
                                                     <i class="fas fa-check"></i> Devolver
                                                 </button>
                                             </form>
@@ -250,4 +250,31 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const devolverButtons = document.querySelectorAll('.btn-devolver');
+
+    devolverButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('.devolver-form');
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Deseas marcar este recurso como devuelto?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0c7c3c',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();  // ✅ Envía el formulario si confirma
+                }
+            });
+        });
+    });
+});
+</script>
 {% endblock %}

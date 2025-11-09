@@ -246,13 +246,12 @@
                             </td>
                             <td data-label="Acciones">
                                 {% if not p.devuelto %}
-                                    <form action="{% url 'marcar_devuelto' p.id %}" method="post" style="display:inline;">
+                                    <form action="{% url 'marcar_devuelto' p.id %}" method="post" class="inline-form devolver-form" style="display:inline;">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn-accion">
+                                        <button type="button" class="btn-accion btn-devolver">
                                             <i class="fas fa-check"></i> Devolver
                                         </button>
                                     </form>
-
                                     <button type="button" class="btn-accion" data-bs-toggle="modal" data-bs-target="#extenderModal{{ p.id }}">
                                         <i class="fas fa-clock"></i> Extender
                                     </button>
@@ -305,6 +304,9 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 <!-- 🔎 Script de búsqueda -->
 <script>
     document.getElementById("buscador").addEventListener("keyup", function() {
@@ -318,4 +320,33 @@
         });
     });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const devolverButtons = document.querySelectorAll('.btn-devolver');
+
+    devolverButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const form = this.closest('.devolver-form');
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: '¿Deseas marcar este recurso como devuelto?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0c7c3c',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // ✅ Envía el formulario solo si confirma
+                }
+            });
+        });
+    });
+});
+</script>
+
 {% endblock %}
+
