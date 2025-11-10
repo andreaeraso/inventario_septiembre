@@ -878,7 +878,6 @@ def aprobar_solicitud(request, solicitud_id):
                 f"Estimado {solicitud.usuario.get_full_name()},\n\n"
                 f"Nos complace informarle que su solicitud de préstamo del recurso '{solicitud.recurso.nombre}' "
                 f"ha sido aprobada por el administrador {request.user.get_full_name()}.\n\n"
-                "Adjunto encontrará el contrato en la plataforma.\n\n"
                 "Atentamente,\nSistema de Préstamos UDENAR"
             ),
             from_email="noreply@unad.edu.co",

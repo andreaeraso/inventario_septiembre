@@ -170,6 +170,6 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'julidiviu@gmail.com'
-EMAIL_HOST_PASSWORD = 'pjhw jhok hhid jusc'  # generada en el paso 3
+EMAIL_HOST_USER = 'sisprestamosudenar@gmail.com'
+EMAIL_HOST_PASSWORD = 'begz opsl apqy vein'  # generada en el paso 3
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
