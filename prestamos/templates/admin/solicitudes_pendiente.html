@@ -53,6 +53,28 @@
         gap: 10px;
     }
 
+    .buscador-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .buscador-input {
+        padding: 0.6rem 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        width: 300px;
+        max-width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .buscador-input:focus {
+        border-color: #f1c40f;
+        outline: none;
+        box-shadow: 0 0 6px rgba(241, 196, 15, 0.4);
+    }
+
     .badge-pendiente {
         background-color: #ffc107;
         color: #333;
@@ -93,7 +115,6 @@
         background-color: #ff4d4d;
     }
 
-    /* ✅ Modo Responsive (idéntico al ejemplo verde) */
     @media (max-width: 992px) {
         .table thead {
             display: none;
@@ -148,6 +169,10 @@
     }
 
     @media (max-width: 400px) {
+        .buscador-input {
+            width: 100%;
+        }
+
         .btn-success, .btn-danger {
             font-size: 0.8rem;
             padding: 0.3rem 0.5rem;
@@ -161,6 +186,11 @@
             <h3><i class='bx bx-time'></i> Solicitudes Pendientes</h3>
         </div>
 
+        <!-- 🔍 Buscador -->
+        <div class="buscador-container">
+            <input type="text" id="buscador" class="buscador-input" placeholder="Buscar por ID, recurso, usuario o fecha...">
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <div class="card solicitudes-card">
@@ -169,7 +199,7 @@
                     </div>
                     <div class="card-body table-responsive">
                         {% if solicitudes %}
-                        <table class="table table-bordered table-hover align-middle mb-0">
+                        <table class="table table-bordered table-hover align-middle mb-0" id="tablaSolicitudes">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -223,7 +253,30 @@
     </div>
 </div>
 
+<!-- 🔎 Script de búsqueda -->
 <script>
+document.getElementById("buscador").addEventListener("keyup", function() {
+    const filtro = this.value.toLowerCase().trim();
+    const filas = document.querySelectorAll("#tablaSolicitudes tbody tr");
+
+    filas.forEach(fila => {
+        const id = fila.children[0].textContent.toLowerCase();
+        const idRecurso = fila.children[1].textContent.toLowerCase();
+        const recurso = fila.children[2].textContent.toLowerCase();
+        const usuario = fila.children[3].textContent.toLowerCase();
+        const fecha = fila.children[4].textContent.toLowerCase();
+
+        const coincide =
+            id.includes(filtro) ||
+            idRecurso.includes(filtro) ||
+            recurso.includes(filtro) ||
+            usuario.includes(filtro) ||
+            fecha.includes(filtro);
+
+        fila.style.display = coincide ? "" : "none";
+    });
+});
+
 function confirmarAccion(accion, id) {
     let accionTexto = accion === 'aprobar' ? 'aprobar' : 'rechazar';
     let url = accion === 'aprobar'
@@ -231,7 +284,7 @@ function confirmarAccion(accion, id) {
         : "{% url 'rechazar_solicitud' 0 %}".replace('0', id);
 
     Swal.fire({
-        title: `¿Estás segura de que deseas ${accionTexto} esta solicitud?`,
+        title: `¿Estás seguro de que deseas ${accionTexto} esta solicitud?`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: accion === 'aprobar' ? '#28a745' : '#dc3545',

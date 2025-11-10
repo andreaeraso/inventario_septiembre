@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 <style>
     body {
@@ -74,6 +73,27 @@
         color: #999;
     }
 
+    /* 🔍 Estilo buscador */
+    .search-box {
+        margin-bottom: 1.5rem;
+        text-align: right;
+    }
+
+    .search-box input {
+        width: 300px;
+        max-width: 100%;
+        padding: 8px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #f1c40f;
+        box-shadow: 0 0 5px rgba(241, 196, 15, 0.4);
+    }
+
     /* ✅ Diseño Responsive igual al ejemplo */
     @media (max-width: 992px) {
         .table thead {
@@ -126,6 +146,10 @@
             text-align: center;
             justify-content: center;
         }
+
+        .search-box {
+            text-align: center;
+        }
     }
 </style>
 
@@ -142,12 +166,18 @@
                         <i class="fas fa-clipboard-list"></i> Lista de Solicitudes Pendientes
                     </div>
                     <div class="card-body table-responsive">
+
+                        <!-- 🔍 Buscador -->
+                        <div class="search-box">
+                            <input type="text" id="buscador" placeholder="Buscar por ID Recurso, Recurso o Fecha Solicitud...">
+                        </div>
+
                         {% if solicitudes %}
-                            <table class="table table-bordered table-hover align-middle mb-0">
+                            <table class="table table-bordered table-hover align-middle mb-0" id="tablaSolicitudes">
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
-                                        <th>ID Recurso</th> <!-- 👈 Nueva columna -->
+                                        <th>ID Recurso</th>
                                         <th>Recurso</th>
                                         <th>Fecha de Solicitud</th>
                                         <th>Fecha de Devolución</th>
@@ -158,7 +188,7 @@
                                     {% for solicitud in solicitudes %}
                                     <tr>
                                         <td data-label="ID">{{ solicitud.id }}</td>
-                                        <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td> <!-- 👈 Nueva celda -->
+                                        <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td>
                                         <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
                                         <td data-label="Fecha de Solicitud">{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
                                         <td data-label="Fecha de Devolución">{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
@@ -180,4 +210,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    // 🔍 Filtro de búsqueda dinámico
+    document.getElementById("buscador").addEventListener("keyup", function() {
+        const valorBusqueda = this.value.toLowerCase();
+        const filas = document.querySelectorAll("#tablaSolicitudes tbody tr");
+
+        filas.forEach(fila => {
+            const idRecurso = fila.cells[1].textContent.toLowerCase();
+            const recurso = fila.cells[2].textContent.toLowerCase();
+            const fechaSolicitud = fila.cells[3].textContent.toLowerCase();
+
+            if (
+                idRecurso.includes(valorBusqueda) ||
+                recurso.includes(valorBusqueda) ||
+                fechaSolicitud.includes(valorBusqueda)
+            ) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    });
+</script>
 {% endblock %}

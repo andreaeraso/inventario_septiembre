@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block content %}
 <style>
     body {
@@ -51,6 +50,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        justify-content: center;
     }
 
     .badge-rechazada {
@@ -70,6 +70,27 @@
 
     .text-muted {
         color: #888 !important;
+    }
+
+    /* 🔍 Estilo buscador */
+    .search-box {
+        margin-bottom: 1.5rem;
+        text-align: right;
+    }
+
+    .search-box input {
+        width: 300px;
+        max-width: 100%;
+        padding: 8px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #c0392b;
+        box-shadow: 0 0 5px rgba(192, 57, 43, 0.4);
     }
 
     /* ======= RESPONSIVE (Versión móvil) ======= */
@@ -124,6 +145,10 @@
             text-align: center;
             justify-content: center;
         }
+
+        .search-box {
+            text-align: center;
+        }
     }
 
     @media (max-width: 400px) {
@@ -147,13 +172,19 @@
                         <i class="fas fa-ban"></i> Lista de Solicitudes Rechazadas
                     </div>
                     <div class="card-body table-responsive">
+
+                        <!-- 🔍 Buscador -->
+                        <div class="search-box">
+                            <input type="text" id="buscador" placeholder="Buscar por ID Recurso, Recurso o Fecha Solicitud...">
+                        </div>
+
                         {% if solicitudes %}
-                        <table class="table table-bordered table-hover align-middle mb-0">
+                        <table class="table table-bordered table-hover align-middle mb-0" id="tablaSolicitudes">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Recurso</th>
                                     <th>ID Recurso</th>
+                                    <th>Recurso</th>
                                     <th>Fecha Solicitud</th>
                                     <th>Fecha Devolución</th>
                                     <th>Estado</th>
@@ -185,4 +216,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    // 🔍 Filtro dinámico
+    document.getElementById("buscador").addEventListener("keyup", function() {
+        const valorBusqueda = this.value.toLowerCase();
+        const filas = document.querySelectorAll("#tablaSolicitudes tbody tr");
+
+        filas.forEach(fila => {
+            const idRecurso = fila.cells[1].textContent.toLowerCase();
+            const recurso = fila.cells[2].textContent.toLowerCase();
+            const fechaSolicitud = fila.cells[3].textContent.toLowerCase();
+
+            if (
+                idRecurso.includes(valorBusqueda) ||
+                recurso.includes(valorBusqueda) ||
+                fechaSolicitud.includes(valorBusqueda)
+            ) {
+                fila.style.display = "";
+            } else {
+                fila.style.display = "none";
+            }
+        });
+    });
+</script>
 {% endblock %}

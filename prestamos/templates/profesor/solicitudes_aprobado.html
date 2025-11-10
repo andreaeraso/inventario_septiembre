@@ -32,6 +32,25 @@
         gap: 10px;
     }
 
+    .search-bar {
+        margin-bottom: 1.5rem;
+        text-align: right;
+    }
+
+    .search-bar input {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 0.5rem 1rem;
+        width: 250px;
+        transition: all 0.3s ease;
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: #0c7c3c;
+        box-shadow: 0 0 6px rgba(12, 124, 60, 0.3);
+    }
+
     .solicitudes-card {
         border-radius: 14px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -125,6 +144,9 @@
             font-size: 0.8rem;
             padding: 0.3rem 0.5rem;
         }
+        .search-bar input {
+            width: 100%;
+        }
     }
 </style>
 
@@ -141,8 +163,14 @@
                         <i class="fas fa-clipboard-check"></i> Lista de Solicitudes Aprobadas
                     </div>
                     <div class="card-body table-responsive">
+
+                        <!-- 🔍 Barra de búsqueda -->
+                        <div class="search-bar">
+                            <input type="text" id="buscador" placeholder="Buscar por recurso o ID...">
+                        </div>
+
                         {% if solicitudes %}
-                        <table class="table table-bordered table-hover align-middle mb-0">
+                        <table class="table table-bordered table-hover align-middle mb-0" id="tablaSolicitudes">
                             <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -157,7 +185,7 @@
                                 {% for solicitud in solicitudes %}
                                 <tr>
                                     <td data-label="ID">{{ solicitud.id }}</td>
-                                     <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td>
+                                    <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td>
                                     <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
                                     <td data-label="Fecha Solicitud">{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
                                     <td data-label="Fecha Devolución">{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>
@@ -171,9 +199,9 @@
                             </tbody>
                         </table>
                         {% else %}
-                            <div class="text-center text-muted py-3">
-                                <i class='bx bx-info-circle'></i> No tienes solicitudes aprobadas.
-                            </div>
+                        <div class="text-center text-muted py-3">
+                            <i class='bx bx-info-circle'></i> No tienes solicitudes aprobadas.
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -181,4 +209,18 @@
         </div>
     </div>
 </div>
+
+<!-- ✅ Script buscador -->
+<script>
+    document.getElementById("buscador").addEventListener("keyup", function () {
+        const valor = this.value.toLowerCase();
+        const filas = document.querySelectorAll("#tablaSolicitudes tbody tr");
+
+        filas.forEach(fila => {
+            const textoFila = fila.innerText.toLowerCase();
+            fila.style.display = textoFila.includes(valor) ? "" : "none";
+        });
+    });
+</script>
+
 {% endblock %}
