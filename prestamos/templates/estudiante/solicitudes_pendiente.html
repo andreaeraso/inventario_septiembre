@@ -147,6 +147,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
+                                        <th>ID Recurso</th> <!-- 👈 Nueva columna -->
                                         <th>Recurso</th>
                                         <th>Fecha de Solicitud</th>
                                         <th>Fecha de Devolución</th>
@@ -157,6 +158,7 @@
                                     {% for solicitud in solicitudes %}
                                     <tr>
                                         <td data-label="ID">{{ solicitud.id }}</td>
+                                        <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td> <!-- 👈 Nueva celda -->
                                         <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
                                         <td data-label="Fecha de Solicitud">{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
                                         <td data-label="Fecha de Devolución">{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>

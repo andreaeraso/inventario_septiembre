@@ -153,6 +153,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Recurso</th>
+                                    <th>ID Recurso</th>
                                     <th>Fecha Solicitud</th>
                                     <th>Fecha Devolución</th>
                                     <th>Estado</th>
@@ -162,6 +163,7 @@
                                 {% for solicitud in solicitudes %}
                                 <tr>
                                     <td data-label="ID">{{ solicitud.id }}</td>
+                                    <td data-label="ID Recurso">{{ solicitud.recurso.id }}</td>
                                     <td data-label="Recurso">{{ solicitud.recurso.nombre }}</td>
                                     <td data-label="Fecha Solicitud">{{ solicitud.fecha_solicitud|date:"d/m/Y" }}</td>
                                     <td data-label="Fecha Devolución">{{ solicitud.fecha_devolucion|date:"d/m/Y" }}</td>

@@ -1017,16 +1017,26 @@ def solicitudes_por_estado(request, estado):
 
     # Filtrar según el rol del usuario
     if request.user.rol == "admin":
-        solicitudes = SolicitudPrestamo.objects.filter(
-            recurso__dependencia=request.user.dependencia_administrada,
-            estado=estado_map[estado]
+        solicitudes = (
+            SolicitudPrestamo.objects
+            .filter(
+                recurso__dependencia=request.user.dependencia_administrada,
+                estado=estado_map[estado]
+            )
+            .select_related('recurso', 'usuario')   # 🔹 Optimiza las consultas
+            .order_by('-fecha_solicitud')           # 🔹 Orden descendente
         )
         template = f'admin/solicitudes_{estado}.html'
 
     elif request.user.rol in ["estudiante", "profesor"]:
-        solicitudes = SolicitudPrestamo.objects.filter(
-            usuario=request.user,
-            estado=estado_map[estado]
+        solicitudes = (
+            SolicitudPrestamo.objects
+            .filter(
+                usuario=request.user,
+                estado=estado_map[estado]
+            )
+            .select_related('recurso')              # 🔹 Optimiza para cargar el nombre del recurso
+            .order_by('-fecha_solicitud')           # 🔹 Más recientes primero
         )
         template = f'{request.user.rol}/solicitudes_{estado}.html'
 
@@ -1034,6 +1044,7 @@ def solicitudes_por_estado(request, estado):
         return redirect('inicio')
 
     return render(request, template, {'solicitudes': solicitudes})
+
 
 
 @login_required
