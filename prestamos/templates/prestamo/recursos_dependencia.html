@@ -68,6 +68,35 @@
         background-color: #14a34d;
     }
 
+    /* NUEVO BOTÓN DE AYUDA */
+    .btn-ayuda {
+        width: 36px;
+        height: 36px;
+        margin-left: 10px;
+        border-radius: 50%;
+        padding: 0;
+        border: none;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: #0c7c3c;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 900;
+
+        box-shadow: 0 4px 10px rgba(12, 124, 60, 0.35);
+        transition: all 0.25s ease;
+        cursor: pointer;
+    }
+
+    .btn-ayuda:hover {
+        background-color: #14a34d;
+        transform: scale(1.12);
+        box-shadow: 0 6px 16px rgba(12, 124, 60, 0.45);
+    }
+
     .card-recurso {
         background-color: #ffffff;
         border: 1px solid #0c7c3c;
@@ -158,13 +187,13 @@
     }
 
     .card-recurso {
-        padding: 0.6rem;              /* menos padding */
-        font-size: 0.85rem;           /* texto más pequeño */
-        border-radius: 8px;           /* esquinas un poco menos redondeadas */
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        border-radius: 8px;
     }
 
     .card-recurso h5 {
-        font-size: 1rem;              /* título más pequeño */
+        font-size: 1rem;
         margin-bottom: 0.3rem;
     }
 
@@ -174,9 +203,16 @@
     }
 </style>
 
-<!-- Título de la dependencia -->
 <div class="inventario-header">
-    <h3><i class='bx bxs-home'></i> Recursos de {{ dependencia.nombre }}</h3>
+    <h3>
+        <i class='bx bxs-home'></i>
+        Recursos de {{ dependencia.nombre }}
+
+        <button type="button"
+            class="btn-ayuda"
+            data-video="dQw4w9WgXcQ"
+            title="¿Cómo solicitar un recurso?">?</button>
+    </h3>
 </div>
 
 {% if recursos %}
@@ -273,6 +309,56 @@
 {% else %}
     <p class="text-muted">No hay recursos disponibles en esta dependencia.</p>
 {% endif %}
+
+
+<div class="modal fade" id="modalAyuda" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Video de ayuda</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="videoAyuda"
+        width="100%"
+        height="420"
+        src=""
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+</iframe>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ayudaButtons = document.querySelectorAll(".btn-ayuda");
+    const iframe = document.getElementById("videoAyuda");
+    const modalElement = document.getElementById("modalAyuda");
+    const modal = new bootstrap.Modal(modalElement);
+
+    ayudaButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const video = this.getAttribute("data-video");
+            iframe.src = "https://www.youtube.com/embed/" + video + "?autoplay=1&rel=0";
+            modal.show();
+        });
+    });
+
+    modalElement.addEventListener("hidden.bs.modal", function () {
+        iframe.src = "";
+    });
+
+});
+</script>
+
+
 {% endblock %}
 
 {% block extra_js %}

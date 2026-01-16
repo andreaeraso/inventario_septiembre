@@ -5,6 +5,8 @@
 
 {% block content %}
 <div class="container-fluid mt-4 px-3">
+<div class="stats-panel">
+
     <!-- ENCABEZADO -->
     <div class="text-center mb-5">
         <h2 class="fw-bold text-success" style="font-size: 2rem;">
@@ -13,37 +15,43 @@
         <p class="text-muted">Monitoreo inteligente del sistema de préstamos e inventario</p>
     </div>
 
-    <!-- KPIs PRINCIPALES -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-green text-center p-3 rounded-4 shadow-sm">
-                <i class="bx bx-cube-alt fs-1 mb-2"></i>
-                <h6>Recursos Disponibles</h6>
-                <h2 class="fw-bold">{{ recursos_disponibles }}</h2>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-blue text-center p-3 rounded-4 shadow-sm">
-                <i class="bx bx-transfer fs-1 mb-2"></i>
-                <h6>Recursos Prestados</h6>
-                <h2 class="fw-bold">{{ recursos_prestados }}</h2>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-yellow text-center p-3 rounded-4 shadow-sm">
-                <i class="bx bx-list-check fs-1 mb-2"></i>
-                <h6>Total de Préstamos</h6>
-                <h2 class="fw-bold">{{ prestamos_total }}</h2>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="card kpi-card kpi-purple text-center p-3 rounded-4 shadow-sm">
-                <i class="bx bx-calendar-event fs-1 mb-2"></i>
-                <h6>Préstamos este Mes</h6>
-                <h2 class="fw-bold">{{ prestamos_mes }}</h2>
-            </div>
+<!-- KPIs PRINCIPALES -->
+<div class="row g-4 mb-5">
+
+    <div class="col-lg-3 col-md-6">
+        <div class="kpi-card kpi-green text-center">
+            <i class="bx bx-cube-alt fs-1 mb-2"></i>
+            <h6>Recursos Disponibles</h6>
+            <h2>{{ recursos_disponibles }}</h2>
         </div>
     </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="kpi-card kpi-blue text-center">
+            <i class="bx bx-transfer fs-1 mb-2"></i>
+            <h6>Recursos Prestados</h6>
+            <h2>{{ recursos_prestados }}</h2>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="kpi-card kpi-yellow text-center">
+            <i class="bx bx-list-check fs-1 mb-2"></i>
+            <h6>Total de Préstamos</h6>
+            <h2>{{ prestamos_total }}</h2>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="kpi-card kpi-purple text-center">
+            <i class="bx bx-calendar-event fs-1 mb-2"></i>
+            <h6>Préstamos este Mes</h6>
+            <h2>{{ prestamos_mes }}</h2>
+        </div>
+    </div>
+
+</div>
+
 
     <!-- NUEVAS MÉTRICAS DE RENDIMIENTO -->
     <div class="row g-4 mb-5">
@@ -73,7 +81,7 @@
     <!-- GRÁFICOS DE ACTIVIDAD -->
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
+            <div class="card chart-card">
                 <div class="card-header bg-white border-0 d-flex align-items-center">
                     <i class="bx bx-package text-primary fs-4 me-2"></i>
                     <h5 class="fw-semibold mb-0 text-primary">Recursos más prestados</h5>
@@ -85,7 +93,7 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
+            <div class="card chart-card">
                 <div class="card-header bg-white border-0 d-flex align-items-center">
                     <i class="bx bx-building text-success fs-4 me-2"></i>
                     <h5 class="fw-semibold mb-0 text-success">Dependencias más activas</h5>
@@ -100,7 +108,7 @@
     <!-- NUEVO GRÁFICO DE DEMANDA SEMANAL -->
     <div class="row g-4 mt-4">
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
+            <div class="card chart-card">
                 <div class="card-header bg-white border-0 d-flex align-items-center">
                     <i class="bx bx-calendar-week text-warning fs-4 me-2"></i>
                     <h5 class="fw-semibold mb-0 text-warning">Demanda de préstamos por día</h5>
@@ -112,7 +120,7 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
+            <div class="card chart-card">
                 <div class="card-header bg-white border-0 d-flex align-items-center">
                     <i class="bx bx-user-circle text-danger fs-4 me-2"></i>
                     <h5 class="fw-semibold mb-0 text-danger">Usuarios más activos</h5>
@@ -123,18 +131,75 @@
             </div>
         </div>
     </div>
+    </div>
 </div>
 
 <!-- ESTILOS -->
 <style>
-    body { background-color: #f8f9fa !important; }
-    .kpi-card { color: #fff; transition: transform 0.25s, box-shadow 0.25s; }
-    .kpi-card:hover { transform: translateY(-6px); box-shadow: 0 6px 18px rgba(0,0,0,0.1); }
-    .kpi-green { background: linear-gradient(135deg, #00b894, #55efc4); }
-    .kpi-blue { background: linear-gradient(135deg, #0984e3, #74b9ff); }
-    .kpi-yellow { background: linear-gradient(135deg, #fdcb6e, #ffeaa7); color: #333; }
-    .kpi-purple { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
+body{background:#f4f7f6!important;font-family:'Segoe UI',sans-serif}
+
+/* PANEL */
+.stats-panel{
+    background:#fff;
+    padding:2.2rem;
+    border-radius:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,.06);
+}
+
+/* KPI */
+.kpi-card{
+    border-radius:18px;
+    color:white;
+    padding:1.6rem;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 8px 25px rgba(0,0,0,.15);
+    transition:.3s;
+}
+.kpi-card:hover{transform:translateY(-8px) scale(1.02)}
+
+.kpi-card:after{
+    content:'';
+    position:absolute;
+    right:-40px;top:-40px;
+    width:140px;height:140px;
+    background:rgba(255,255,255,.12);
+    border-radius:50%;
+}
+
+.kpi-green{background:linear-gradient(135deg,#0c7c3c,#20d57a)}
+.kpi-blue{background:linear-gradient(135deg,#2e86de,#74b9ff)}
+.kpi-yellow{background:linear-gradient(135deg,#f6b93b,#feca57);color:#333}
+.kpi-purple{background:linear-gradient(135deg,#6c5ce7,#a29bfe)}
+
+.kpi-card h2{font-size:2.4rem}
+
+/* TARJETAS GRAFICOS */
+.chart-card{
+    border-radius:18px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+.chart-card .card-header{
+    background:#fff;
+    border-bottom:2px solid #0c7c3c;
+    color:#0c7c3c;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.chart-card .card-body{padding:1.4rem}
+
+/* TITULO */
+.stats-title{
+    color:#0c7c3c;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+.stats-sub{color:#888}
 </style>
+
 
 <!-- CHARTS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

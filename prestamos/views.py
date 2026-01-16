@@ -159,7 +159,9 @@ from collections import defaultdict, OrderedDict
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.decorators.clickjacking import xframe_options_exempt
 
+@xframe_options_exempt
 @login_required
 def inventario(request):
     if request.user.rol != 'admin':
@@ -170,25 +172,24 @@ def inventario(request):
         dependencia=request.user.dependencia_administrada
     )
 
-    # Agrupar por tipo
+    total_recursos = recursos_queryset.count()
+
     recursos_agrupados = defaultdict(list)
     for recurso in recursos_queryset:
         recursos_agrupados[recurso.tipo].append(recurso)
 
-    # Ordenar los recursos dentro de cada tipo
     for tipo in recursos_agrupados:
-        recursos_agrupados[tipo] = sorted(
-            recursos_agrupados[tipo], key=lambda r: r.nombre.lower()
-        )
+        recursos_agrupados[tipo] = sorted(recursos_agrupados[tipo], key=lambda r: r.nombre.lower())
 
-    # ✅ Ordenar los tipos de recurso por nombre
     recursos_ordenados = OrderedDict(
         sorted(recursos_agrupados.items(), key=lambda item: item[0].nombre.lower())
     )
 
     return render(request, 'admin/inventario/lista.html', {
-        'recursos': recursos_ordenados
+        'recursos': recursos_ordenados,
+        'total_recursos': total_recursos
     })
+
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -281,52 +282,60 @@ def subir_foto(request):
 
     return redirect('perfil_usuario')
 
-
+from django.contrib import messages
+from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, render
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 
 @login_required
 def guardar_cedula_telefono(request):
     usuario = request.user
-    error_cedula = None
 
     if request.method == 'POST':
         cedula = request.POST.get('cedula')
         telefono = request.POST.get('telefono')
 
-        # Validar si la cédula ya existe en otro usuario
+        # VALIDAR CÉDULA DUPLICADA
         if cedula:
-            existente = User.objects.filter(cedula=cedula).exclude(id=usuario.id).exists()
-            if existente:
-                error_cedula = "Esta cédula ya está registrada. Por favor ingrese otra."
-            else:
-                usuario.cedula = cedula
+            existe = User.objects.filter(cedula=cedula).exclude(id=usuario.id).exists()
+            if existe:
+                messages.error(
+                    request,
+                    "Esta cédula ya está registrada por otro usuario.",
+                    extra_tags='error'
+                )
+                return redirect('perfil_usuario')
 
-        # Solo guardar si no hay error
-        if not error_cedula:
+        try:
+            if cedula:
+                usuario.cedula = cedula
             if telefono:
                 usuario.telefono = telefono
+
             usuario.save()
-            messages.success(request, "Información actualizada correctamente.", extra_tags='update_success')
+
+            messages.success(
+                request,
+                "Información actualizada correctamente.",
+                extra_tags='update_success'
+            )
             return redirect('perfil_usuario')
 
-    # Seleccionar plantilla según rol del usuario
-    rol = getattr(usuario, 'rol', None)
-    if rol == 'admin':
-        template = 'admin/perfil.html'
-    elif rol == 'profesor':
-        template = 'profesor/perfil.html'
-    elif rol == 'estudiante':
-        template = 'estudiante/perfil.html'
-    else:
-        template = 'perfil.html'  # por defecto
+        except IntegrityError:
+            # 🔒 Seguridad extra por unique=True
+            messages.error(
+                request,
+                "No se pudo guardar: la cédula ya existe en el sistema.",
+                extra_tags='error'
+            )
+            return redirect('perfil_usuario')
 
-    # 🔥 Siempre devolver el usuario en el contexto
-    return render(request, template, {
-        'usuario': usuario,
-        'error_cedula': error_cedula
-    })
+    return redirect('perfil_usuario')
+
 
 @login_required
 def agregar_recurso(request):

@@ -2,109 +2,273 @@
 
 {% block content %}
 <style>
-    .dependencias-wrapper {
-        background-color: #ffffff;
-        padding: 2rem;
-        border-radius: 12px;
-        color: #333;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
+:root{
+    --primary:#0c7c3c;
+    --primary-soft:rgba(12,124,60,0.08);
+    --text-main:#1f2933;
+    --text-muted:#6b7280;
+    --bg-card:#ffffff;
+    --bg-page:#f4f7f6;
+    --radius:16px;
+}
 
-    .dependencias-header {
-        border-bottom: 3px solid #0c7c3c;
-        padding-bottom: 0.5rem;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
+/* ===== CONTENEDOR GENERAL ===== */
+.dependencias-wrapper{
+    background:linear-gradient(120deg,#ffffff,#f8faf9);
+    padding:2.5rem;
+    border-radius:20px;
+    color:var(--text-main);
+    box-shadow:0 25px 45px rgba(0,0,0,0.08);
+    max-width:1400px;
+}
 
-    .dependencias-header h3 {
-        color: #0c7c3c;
-        font-weight: bold;
-    }
+/* ===== HEADER ===== */
+.dependencias-header{
+    text-align:center;
+    margin-bottom:3rem;
+}
 
-    .dependency-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
+.dependencias-header h3{
+    font-size:1.8rem;
+    font-weight:800;
+    color:var(--primary);
+    letter-spacing:.3px;
+}
 
-    .dependency-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
-    }
+.section-subtitle{
+    color:var(--text-muted);
+    font-size:.95rem;
+    max-width:520px;
+    margin:.5rem auto 0;
+}
 
-    .card-img-top {
-        height: 180px;
-        object-fit: cover;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-    }
+/* ===== GRID TARJETAS ===== */
+.dependency-card{
+    background:var(--bg-card);
+    border-radius:18px;
+    border:1px solid #eef1ef;
+    box-shadow:0 10px 25px rgba(0,0,0,.06);
+    transition:all .35s ease;
+    overflow:hidden;
+}
 
-    .dependency-card .card-body {
-        min-height: 230px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 1.2rem;
-    }
+.dependency-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(0,0,0,.12);
+}
 
-    .card-title {
-        font-weight: bold;
-        color: #0c7c3c;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
+/* ===== IMAGEN ===== */
+.card-img-top{
+    height:180px;
+    object-fit:cover;
+    background:#f0f2f1;
+}
 
-    .card-text {
-        color: #666;
-        font-size: 0.95rem;
-        margin-top: 0.5rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 6;
-        -webkit-box-orient: vertical;
-    }
+/* ===== BODY TARJETA ===== */
+.dependency-card .card-body{
+    padding:1.6rem;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
 
-    .btn-ver-recursos {
-        background-color: #0c7c3c;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 0.5rem;
-        font-weight: 500;
-        transition: background 0.3s ease;
-        width: 100%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-    }
+.card-title{
+    font-size:1.1rem;
+    font-weight:700;
+    color:var(--primary);
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
 
-    .btn-ver-recursos:hover {
-        background-color: #095b2c;
-        color: #fff;
-    }
+.card-title i{
+    font-size:1.1rem;
+    opacity:.85;
+}
 
-    .no-data-alert {
-        background-color: #f9f9f9;
-        border-left: 4px solid #0c7c3c;
-        padding: 1.5rem;
-        text-align: center;
-        border-radius: 8px;
-        font-weight: 500;
-        color: #555;
+.card-text{
+    margin-top:.6rem;
+    font-size:.92rem;
+    color:var(--text-muted);
+    line-height:1.55;
+}
+
+/* ===== BOTÓN ===== */
+.btn-ver-recursos{
+    margin-top:1.4rem;
+    background:var(--primary-soft);
+    color:var(--primary);
+    border:none;
+    border-radius:10px;
+    padding:.65rem 1rem;
+    font-weight:600;
+    font-size:.9rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:.3s ease;
+}
+
+.btn-ver-recursos:hover{
+    background:rgba(12,124,60,0.15);
+    transform:translateY(-2px);
+}
+
+/* ===== SIN DATOS ===== */
+.no-data-alert{
+    background:#ffffff;
+    border-left:6px solid var(--primary);
+    border-radius:14px;
+    padding:2rem;
+    text-align:center;
+    color:var(--text-muted);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    font-weight:500;
+}
+
+.no-data-alert i{
+    font-size:1.6rem;
+    color:var(--primary);
+    display:block;
+    margin-bottom:.6rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+    .dependencias-wrapper{
+        padding:1.8rem;
     }
+}
+
+/* =========================
+   MICRO-ANIMACIONES FUTURISTAS
+   ========================= */
+
+/* Animación de entrada suave */
+@keyframes fadeFloat {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Glow sutil */
+@keyframes softGlow {
+    0% {
+        box-shadow: 0 0 0 rgba(12,124,60,0);
+    }
+    50% {
+        box-shadow: 0 0 18px rgba(12,124,60,0.12);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(12,124,60,0);
+    }
+}
+
+/* ===== CONTENEDOR ===== */
+.dependencias-wrapper {
+    animation: fadeFloat .7s ease both;
+}
+
+/* ===== TARJETAS ===== */
+.dependency-card {
+    position: relative;
+    animation: fadeFloat .6s ease both;
+}
+
+/* Línea futurista superior */
+.dependency-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20%;
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(12,124,60,0.45),
+        transparent
+    );
+    opacity: 0;
+    transition: opacity .4s ease;
+}
+
+.dependency-card:hover::before {
+    opacity: 1;
+}
+
+/* Glow suave al hover */
+.dependency-card:hover {
+    animation: softGlow 1.4s ease-in-out;
+}
+
+/* ===== IMAGEN ===== */
+.card-img-top {
+    transition: transform .6s ease, filter .6s ease;
+}
+
+.dependency-card:hover .card-img-top {
+    transform: scale(1.04);
+    filter: saturate(1.05);
+}
+
+/* ===== TÍTULO ===== */
+.card-title {
+    position: relative;
+}
+
+/* ===== BOTÓN ===== */
+.btn-ver-recursos {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-ver-recursos::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(12,124,60,0.12),
+        transparent
+    );
+    transform: translateX(-100%);
+    transition: transform .6s ease;
+}
+
+.btn-ver-recursos:hover::after {
+    transform: translateX(100%);
+}
+
+/* Elevación sutil */
+.btn-ver-recursos:hover {
+    box-shadow: 0 10px 20px rgba(12,124,60,0.15);
+}
+
+/* ===== SIN DATOS ===== */
+.no-data-alert {
+    animation: fadeFloat .8s ease both;
+}
+
 </style>
+
 
 <div class="container-fluid mt-4 px-2">
     <div class="dependencias-wrapper mx-auto">
         <div class="dependencias-header">
-            <h3><i class="bi bi-diagram-3-fill"></i> Dependencias Académicas</h3>
-        </div>
+    <h3>Dependencias Académicas</h3>
+    <p class="section-subtitle">
+        Selecciona una dependencia para consultar los recursos disponibles
+    </p>
+</div>
+
 
         {% if dependencias %}
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">

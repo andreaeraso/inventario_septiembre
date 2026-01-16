@@ -1,20 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Estilos -->
 <style>
     body {
         background-color: #ffffff;
     }
 
+    /* ===== HEADER ===== */
     .inventario-header {
         background-color: #ffffff;
-        padding: 1rem 1.5rem;
+        padding: 1.2rem 1.5rem;
         border-bottom: 3px solid #0c7c3c;
-        margin-bottom: 2rem;
+        margin: 1.5rem 0 1.5rem 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .inventario-header h3 {
@@ -27,29 +29,28 @@
         gap: 8px;
     }
 
-    .accordion-button {
-        background-color: #0c7c3c;
-        color: #ffffff;
+    /* ===== CONTADOR ===== */
+    .contador-recursos {
+        background-color: #e8f7ee;
+        color: #0c7c3c;
         font-weight: bold;
-        transition: background 0.3s ease;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        border: 1px solid #0c7c3c;
+        white-space: nowrap;
     }
 
-    .accordion-button:not(.collapsed) {
-        background-color: #14a34d;
-        color: #ffffff;
+    /* ===== FILTROS ===== */
+    .filtros-recursos {
+        margin-bottom: 2rem;
+    }
+    .filtros-recursos {
+    margin-bottom: 2rem;
+    padding: 0 1.5rem;   /* 👈 separación de las paredes */
     }
 
-    .accordion-body {
-        background-color: #f9f9f9;
-        color: #333;
-        animation: fadeIn 0.5s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
+    /* ===== BOTONES ===== */
     .btn-success {
         background-color: #0c7c3c;
         border: none;
@@ -58,7 +59,6 @@
         padding: 6px 12px;
         font-size: 0.875rem;
         border-radius: 6px;
-        transition: background-color 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -68,101 +68,102 @@
         background-color: #14a34d;
     }
 
-    .btn-primary {
-        background-color: #00b7ff;
-        border-color: #0099cc;
-        font-size: 0.8rem;
-        padding: 4px 10px;
-    }
-
+    .btn-primary,
     .btn-danger {
-        background-color: #ff4d4d;
-        border-color: #cc0000;
         font-size: 0.8rem;
         padding: 4px 10px;
     }
 
+    /* ===== ACCORDION ===== */
+    .accordion-button {
+        background-color: #0c7c3c;
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #14a34d;
+        color: #ffffff;
+    }
+
+    .accordion-body {
+        background-color: #f9f9f9;
+    }
+
+    /* ===== TARJETAS ===== */
     .card-recurso {
         background-color: #ffffff;
         border: 1px solid #0c7c3c;
-        border-radius: 10px;
-        padding: 0.8rem;
+        border-radius: 8px;
+        padding: 0.7rem;
         height: 100%;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-        font-size: 0.92rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        font-size: 0.85rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .card-recurso:hover {
-        transform: scale(1.02);
+        transform: translateY(-3px);
         box-shadow: 0 4px 12px rgba(0, 128, 0, 0.2);
         background-color: #f4fff4;
     }
 
+    .card-recurso h5 {
+        font-size: 1rem;
+        margin-bottom: 0.3rem;
+        color: #0c7c3c;
+        font-weight: bold;
+    }
+
+    .card-recurso p {
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+    }
+
+    /* ===== IMAGEN ===== */
     .recurso-imagen-overlay {
         position: relative;
         width: 100%;
         aspect-ratio: 4 / 3;
         overflow: hidden;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 128, 0, 0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .recurso-imagen-overlay:hover {
-        transform: scale(1.03);
-        box-shadow: 0 6px 16px rgba(0, 128, 0, 0.3);
+        border-radius: 8px;
+        margin-bottom: 6px;
     }
 
     .img-recurso {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        display: block;
     }
 
     .overlay-text {
         position: absolute;
         bottom: 0;
         width: 100%;
-        background: rgba(12, 124, 60, 0.7);
-        color: #fff;
-        padding: 8px;
+        background: rgba(12, 124, 60, 0.75);
+        color: #ffffff;
+        padding: 6px;
         font-weight: bold;
         text-align: center;
-        font-size: 0.95rem;
-        backdrop-filter: blur(4px);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        font-size: 0.9rem;
     }
 
-    .recurso-imagen-overlay:hover .overlay-text {
-        opacity: 1;
-    }
-
+    /* ===== BUSCADOR ===== */
     .search-input {
-        background-color: #ffffff;
-        border: 1px solid #ccc;
-        color: #333;
         border-radius: 8px;
         padding: 8px 12px;
         font-size: 0.95rem;
+        margin-bottom: 1rem;
     }
 
-    .search-input::placeholder {
-        color: #888;
-    }
-
+    /* ===== PAGINACIÓN ===== */
     .pagination li a {
         background: #0c7c3c;
-        border: none;
         color: white;
+        border-radius: 5px;
         margin: 0 2px;
         padding: 6px 12px;
-        border-radius: 5px;
         font-size: 0.9rem;
     }
 
@@ -171,102 +172,356 @@
         font-weight: bold;
     }
 
-    .card-recurso {
-        padding: 0.6rem;              /* menos padding */
-        font-size: 0.85rem;           /* texto más pequeño */
-        border-radius: 8px;           /* esquinas un poco menos redondeadas */
-    }
+    .btn-ayuda{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-left:10px;
+    background:#0c7c3c;
+    color:#fff;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 4px 10px rgba(12,124,60,.35);
+    transition:.25s;
+}
+.btn-ayuda:hover{
+    background:#14a34d;
+    transform:scale(1.12);
+}
+/* ===== MICRO LOADER FUTURISTA ===== */
+.micro-loader {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,.65);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
 
-    .card-recurso h5 {
-        font-size: 1rem;              /* título más pequeño */
-        margin-bottom: 0.3rem;
-    }
+.loader-ring {
+    width: 46px;
+    height: 46px;
+    border: 4px solid rgba(12,124,60,.2);
+    border-top-color: #0c7c3c;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+}
 
-    .card-recurso p {
-        margin-bottom: 0.25rem;
-        line-height: 1.3;
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+/* ===== SKELETON LOADING ===== */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #eaeaea 25%,
+        #f5f5f5 37%,
+        #eaeaea 63%
+    );
+    background-size: 400% 100%;
+    animation: skeleton 1.4s ease infinite;
+    border-radius: 6px;
+}
+
+@keyframes skeleton {
+    0% { background-position: 100% 0 }
+    100% { background-position: -100% 0 }
+}
+
+.skeleton-card {
+    height: 220px;
+    margin-bottom: 1rem;
+}
+/* ===== ACORDEÓN iOS STYLE ===== */
+.accordion-collapse {
+    transition: height .45s cubic-bezier(.25,.8,.25,1);
+}
+/* ===== DASHBOARD PREMIUM ===== */
+.inventario-header,
+.filtros-recursos {
+    backdrop-filter: blur(6px);
+}
+
+.accordion-item {
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeUp .45s ease both;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-recurso {
+    transition:
+        transform .25s cubic-bezier(.2,.8,.2,1),
+        box-shadow .25s ease;
+}
+
+.card-recurso:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 14px 30px rgba(12,124,60,.25);
+}
+
 </style>
 
-<!-- Título del Inventario -->
 <div class="inventario-header">
-    <h3><i class='bx bxs-box'></i> Inventario de Recursos</h3>
+    <h3>
+        <i class='bx bxs-box'></i>
+        Inventario de Recursos
+
+        <button type="button"
+            class="btn-ayuda"
+            data-video="dQw4w9WgXcQ"
+            title="¿Cómo gestionar el inventario?">?</button>
+    </h3>
+
+    <div id="contadorRecursos" class="contador-recursos">
+        Total: {{ total_recursos }}
+    </div>
+</div>
+
+
+<!-- ===== FILTROS + BOTÓN AGREGAR (MISMA ALTURA) ===== -->
+<div class="filtros-recursos d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div class="d-flex gap-2">
+        <button class="btn btn-success filtro" data-filtro="todos">Todos</button>
+        <button class="btn btn-outline-success filtro" data-filtro="disponibles">Disponibles</button>
+        <button class="btn btn-outline-success filtro" data-filtro="prestados">Prestados</button>
+    </div>
+
     <a href="{% url 'agregar_recurso' %}" class="btn btn-success">
         <i class='bx bx-plus'></i> Agregar Recurso
     </a>
 </div>
 
-<!-- Contenido de Recursos -->
 {% if recursos %}
-    <div class="accordion" id="inventarioAccordion">
-        {% for tipo, recursos_por_tipo in recursos.items %}
-        <div class="accordion-item mb-3">
-            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#collapseTipo{{ forloop.counter }}" aria-expanded="false"
-                        aria-controls="collapseTipo{{ forloop.counter }}">
-                    <strong>{{ tipo }}</strong>
-                </button>
-            </h2>
-            <div id="collapseTipo{{ forloop.counter }}" class="accordion-collapse collapse"
-                 aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#inventarioAccordion">
-                <div class="accordion-body">
-                    <div id="listaRecursos{{ forloop.counter }}">
-                        <input class="search search-input form-control mb-3" placeholder="🔍 Buscar por nombre o ID..." />
-                        <div class="row list">
-                            {% for recurso in recursos_por_tipo %}
-                            <div class="col-md-3 mb-4 recurso-item">
-                                <div class="card-recurso h-100">
-                                    {% if recurso.foto %}
-                                    <div class="recurso-imagen-overlay mb-2">
-                                        <img src="{{ recurso.foto.url }}" alt="{{ recurso.nombre }}" class="img-recurso">
-                                        <div class="overlay-text">{{ recurso.nombre }}</div>
-                                    </div>
-                                    {% endif %}
-                                    <h5 class="mb-1 name">{{ recurso.nombre }}</h5>
-                                    <p class="mb-1"><strong>ID:</strong> <span class="id">{{ recurso.id }}</span></p>
-                                    <p class="mb-1"><strong>Descripción:</strong> {{ recurso.descripcion }}</p>
-                                    <p class="mb-2"><strong>Disponible:</strong> {{ recurso.disponible|yesno:"Sí,No" }}</p>
+<div class="accordion" id="inventarioAccordion">
+{% for tipo, recursos_por_tipo in recursos.items %}
+<div class="accordion-item mb-3">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseTipo{{ forloop.counter }}">
+            {{ tipo }}
+        </button>
+    </h2>
 
-                                    <div class="mt-auto">
-                                        <a href="{% url 'editar_recurso' recurso.id %}" class="btn btn-primary btn-sm me-1">
-                                            <i class="fas fa-edit"></i> Editar
-                                        </a>
-                                        <form action="{% url 'eliminar_recurso' recurso.id %}" method="POST" class="d-inline">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                    onclick="return confirm('¿Estás seguro de eliminar este recurso?')">
-                                                <i class="fas fa-trash-alt"></i> Eliminar
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+    <div id="collapseTipo{{ forloop.counter }}" class="accordion-collapse collapse">
+        <div class="accordion-body">
+            <div id="listaRecursos{{ forloop.counter }}">
+                <input class="search search-input form-control"
+                       placeholder="🔍 Buscar por nombre o ID..." />
+
+                <div class="row list">
+                {% for recurso in recursos_por_tipo %}
+                    <div class="col-md-3 mb-4 recurso-item"
+                         data-disponible="{{ recurso.disponible|yesno:'true,false' }}">
+                        <div class="card-recurso">
+
+                            {% if recurso.foto %}
+                            <div class="recurso-imagen-overlay">
+                                <img src="{{ recurso.foto.url }}" class="img-recurso">
+                                <div class="overlay-text">{{ recurso.nombre }}</div>
                             </div>
-                            {% empty %}
-                            <p class="text-muted">No hay recursos en esta categoría.</p>
-                            {% endfor %}
+                            {% endif %}
+
+                            <h5 class="name">{{ recurso.nombre }}</h5>
+                            <p><strong>ID:</strong> <span class="id">{{ recurso.id }}</span></p>
+                            <p><strong>Descripción:</strong> {{ recurso.descripcion }}</p>
+                            <p><strong>Disponible:</strong> {{ recurso.disponible|yesno:"Sí,No" }}</p>
+
+                            <div class="mt-auto pt-2">
+                                <a href="{% url 'editar_recurso' recurso.id %}" class="btn btn-primary btn-sm me-1">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+
+                                <form action="{% url 'eliminar_recurso' recurso.id %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('¿Estás seguro de eliminar este recurso?')">
+                                        <i class="fas fa-trash-alt"></i> Eliminar
+                                    </button>
+                                </form>
+                            </div>
+
                         </div>
-                        <ul class="pagination d-flex justify-content-center mt-3"></ul>
                     </div>
+                {% endfor %}
                 </div>
+
+                <ul class="pagination d-flex justify-content-center mt-3"></ul>
             </div>
         </div>
-        {% endfor %}
     </div>
-{% else %}
-    <p class="text-muted">No hay recursos en el inventario.</p>
+</div>
+{% endfor %}
+</div>
 {% endif %}
+<div class="modal fade" id="modalAyuda" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Video de ayuda</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="videoAyuda"
+ width="100%"
+ height="420"
+ src=""
+ frameborder="0"
+ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+ referrerpolicy="strict-origin-when-cross-origin"
+ allowfullscreen>
+</iframe>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="microLoader" class="micro-loader">
+    <div class="loader-ring"></div>
+</div>
+
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
+
 <script>
+    let listas = [];
+
     {% for tipo, recursos_por_tipo in recursos.items %}
-    new List('listaRecursos{{ forloop.counter }}', {
+    listas.push(new List('listaRecursos{{ forloop.counter }}', {
         valueNames: ['name', 'id'],
         page: 6,
         pagination: true
-    });
+    }));
     {% endfor %}
+
+    function aplicarFiltro(filtro) {
+        let totalVisible = 0;
+
+        document.querySelectorAll('.recurso-item').forEach(item => {
+            const disponible = item.dataset.disponible === "true";
+
+            let mostrar =
+                filtro === 'todos' ||
+                (filtro === 'disponibles' && disponible) ||
+                (filtro === 'prestados' && !disponible);
+
+            item.style.display = mostrar ? '' : 'none';
+            if (mostrar) totalVisible++;
+        });
+
+        document.getElementById('contadorRecursos').innerText =
+            filtro === 'todos' ? `Total: ${totalVisible}` :
+            filtro === 'disponibles' ? `Disponibles: ${totalVisible}` :
+            `Prestados: ${totalVisible}`;
+    }
+
+    document.querySelectorAll('.filtro').forEach(btn => {
+    btn.addEventListener('click', () => {
+
+        // 🔥 MICRO-LOADER FUTURISTA
+        showLoader();
+        setTimeout(hideLoader, 400);
+
+        document.querySelectorAll('.filtro').forEach(b => {
+            b.classList.remove('btn-success');
+            b.classList.add('btn-outline-success');
+        });
+
+        btn.classList.remove('btn-outline-success');
+        btn.classList.add('btn-success');
+
+        aplicarFiltro(btn.dataset.filtro);
+    });
+});
+
+
+    aplicarFiltro('todos');
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ayudaButtons = document.querySelectorAll(".btn-ayuda");
+    const iframe = document.getElementById("videoAyuda");
+    const modalElement = document.getElementById("modalAyuda");
+    const modal = new bootstrap.Modal(modalElement);
+
+    ayudaButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const video = this.getAttribute("data-video");
+            iframe.src = "https://www.youtube.com/embed/" + video + "?autoplay=1&rel=0";
+            modal.show();
+        });
+    });
+
+    modalElement.addEventListener("hidden.bs.modal", function () {
+        iframe.src = "";
+    });
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".list").forEach(list => {
+        const skeletons = [];
+        for (let i = 0; i < 4; i++) {
+            const sk = document.createElement("div");
+            sk.className = "col-md-3 skeleton skeleton-card";
+            skeletons.push(sk);
+            list.prepend(sk);
+        }
+
+        setTimeout(() => {
+            skeletons.forEach(s => s.remove());
+        }, 600);
+    });
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.querySelectorAll('.accordion-collapse').forEach(acc => {
+        acc.addEventListener('show.bs.collapse', () => {
+            const list = acc.querySelector('.list');
+            if (!list) return;
+
+            const skeletons = [];
+            for (let i = 0; i < 4; i++) {
+                const sk = document.createElement("div");
+                sk.className = "col-md-3 skeleton skeleton-card";
+                skeletons.push(sk);
+                list.prepend(sk);
+            }
+
+            setTimeout(() => {
+                skeletons.forEach(s => s.remove());
+            }, 500);
+        });
+    });
+
+});
+</script>
+
 {% endblock %}

@@ -2,360 +2,296 @@
 {% block content %}
 
 <style>
-    /* ==== ANIMACIONES Y TRANSICIONES ELEGANTES ==== */
+:root{
+    --primary:#0c7c3c;
+    --primary-light:#16a34a;
+    --bg-soft:#f4f7f6;
+    --glass:rgba(255,255,255,0.85);
+    --text-dark:#1f2933;
+    --radius:18px;
+}
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+/* ===== FONDO ===== */
+body{
+    background: linear-gradient(120deg,#eef5f1,#ffffff);
+    color: var(--text-dark);
+}
 
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(40px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+/* ===== CONTENEDOR ===== */
+.perfil-container{
+    max-width:1200px;
+    margin:auto;
+    padding:2.5rem;
+    background:var(--glass);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius);
+    box-shadow:0 25px 50px rgba(0,0,0,.12);
+    animation:fadeUp .8s ease;
+}
 
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-6px); }
-        100% { transform: translateY(0px); }
-    }
+/* ===== HEADER ===== */
+.perfil-header{
+    text-align:center;
+    margin-bottom:2.5rem;
+}
+.perfil-header h2{
+    font-weight:800;
+    color:var(--primary);
+}
+.perfil-header p{
+    color:#4b5563;
+    margin-top:.3rem;
+}
 
-    /* ==== CONTENEDOR PRINCIPAL ==== */
-    .perfil-wrapper {
-        background-color: #ffffff;
-        padding: 2.5rem;
-        border-radius: 16px;
-        color: #333;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-        width: 100%;
-        max-width: 1200px;
-        min-height: 600px;
-        transition: all 0.3s ease-in-out;
-        animation: fadeIn 0.8s ease-in-out;
-    }
+/* ===== TARJETAS ===== */
+.card-glass{
+    background:#ffffff;
+    border-radius:16px;
+    padding:1.6rem;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    transition:.3s;
+}
+.card-glass:hover{
+    transform:translateY(-4px);
+}
 
-    .perfil-wrapper:hover {
-        box-shadow: 0 12px 40px rgba(12, 124, 60, 0.15);
-        transform: scale(1.01);
-    }
+/* ===== FOTO ===== */
+.avatar-wrapper{
+    position:relative;
+    display:inline-block;
+}
+.avatar{
+    width:190px;
+    height:190px;
+    object-fit:cover;
+    border-radius:50%;
+    border:4px solid var(--primary);
+    box-shadow:0 0 30px rgba(12,124,60,.35);
+}
+.avatar-ring{
+    position:absolute;
+    inset:-8px;
+    border-radius:50%;
+    border:2px dashed var(--primary-light);
+    animation:spin 16s linear infinite;
+}
 
-    /* ==== ENCABEZADO ==== */
-    .perfil-header {
-        border-bottom: 3px solid #0c7c3c;
-        padding-bottom: 0.8rem;
-        margin-bottom: 1.8rem;
-        text-align: center;
-        animation: fadeIn 1s ease-in-out;
-    }
+/* ===== INFO ===== */
+.info-line{
+    display:flex;
+    justify-content:space-between;
+    padding:.6rem 0;
+    border-bottom:1px dashed #e5e7eb;
+    font-size:.95rem;
+}
+.info-line strong{
+    color:var(--primary);
+}
 
-    .perfil-header h3 {
-        color: #0c7c3c;
-        font-weight: 700;
-        font-size: 1.8rem;
-        margin: 0;
-        letter-spacing: 0.5px;
-        position: relative;
-    }
+/* ===== BOTONES ===== */
+.btn-wow{
+    background:linear-gradient(90deg,var(--primary),var(--primary-light));
+    border:none;
+    color:#ffffff;
+    padding:.7rem 1.4rem;
+    border-radius:12px;
+    font-weight:600;
+    transition:.3s;
+    width:100%;
+}
+.btn-wow:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 20px rgba(12,124,60,.35);
+}
 
-    .perfil-header h3::after {
-        content: "";
-        display: block;
-        width: 80px;
-        height: 3px;
-        background: linear-gradient(90deg, #0c7c3c, #16a34a);
-        margin: 8px auto 0;
-        border-radius: 4px;
-    }
+/* ===== INPUTS ===== */
+.form-control{
+    border-radius:10px;
+    padding:.55rem .9rem;
+    color:#1f2933;
+}
 
-    /* ==== FOTO ==== */
-    .perfil-foto {
-        width: 180px;
-        height: 180px;
-        object-fit: cover;
-        border-radius: 50%;
-        border: 3px solid #0c7c3c;
-        box-shadow: 0 0 20px rgba(12, 124, 60, 0.3);
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
-        animation: fadeInUp 1s ease-in-out;
-    }
+/* ===== FIRMA ===== */
+.firma-img{
+    max-height:110px;
+    background:#fff;
+    padding:8px;
+    border-radius:10px;
+    box-shadow:0 6px 15px rgba(0,0,0,.15);
+}
 
-    .perfil-foto:hover {
-        transform: scale(1.08);
-        box-shadow: 0 0 25px rgba(12, 124, 60, 0.4);
-    }
+/* ===== OVERLAY ===== */
+.overlay-loading{
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.9);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+.spinner{
+    width:60px;
+    height:60px;
+    border:6px solid #ddd;
+    border-top:6px solid var(--primary);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
 
-    /* ==== LÍNEAS DE DATOS ==== */
-    .perfil-linea {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 6px;
-        font-size: 1rem;
-        margin-bottom: 0.6rem;
-        transition: all 0.2s ease-in-out;
-    }
+/* ===== ANIMACIONES ===== */
+@keyframes fadeUp{
+    from{opacity:0; transform:translateY(25px)}
+    to{opacity:1; transform:none}
+}
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
 
-    .perfil-linea:hover {
-        transform: translateX(4px);
-        color: #0c7c3c;
-    }
-
-    .perfil-linea strong {
-        color: #0c7c3c;
-        font-weight: 600;
-        margin-right: 4px;
-    }
-
-    .perfil-info-box {
-        background-color: #f8f8f8;
-        padding: 1.2rem 1.5rem;
-        border-radius: 12px;
-        margin-bottom: 1.2rem;
-        border-left: 5px solid #0c7c3c;
-        transition: all 0.3s ease-in-out;
-        animation: fadeInUp 1.1s ease-in-out;
-    }
-
-    .perfil-info-box:hover {
-        background-color: #f2fdf6;
-        transform: translateY(-3px);
-        box-shadow: 0 4px 15px rgba(12, 124, 60, 0.1);
-    }
-
-    /* ==== BOTONES ==== */
-    .btn-success {
-        background: linear-gradient(90deg, #0c7c3c, #16a34a);
-        border: none;
-        color: white !important;
-        font-size: 0.95rem;
-        padding: 10px 16px;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%;
-        font-weight: 600;
-        box-shadow: 0 4px 10px rgba(12, 124, 60, 0.2);
-    }
-
-    .btn-success:hover {
-        background: linear-gradient(90deg, #0a6a34, #12813e);
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(12, 124, 60, 0.3);
-    }
-
-    .btn-success:active {
-        transform: scale(0.98);
-    }
-
-    /* ==== EFECTOS PARA IMÁGENES ==== */
-    .firma-box img {
-        max-height: 100px;
-        background-color: #fff;
-        padding: 8px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-        transition: transform 0.3s ease;
-    }
-
-    .firma-box img:hover {
-        transform: scale(1.05);
-    }
-
-    /* ==== SPINNER ==== */
-    .overlay-loading {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(255,255,255,0.9);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        display: none;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .spinner {
-        border: 6px solid #ddd;
-        border-top: 6px solid #0c7c3c;
-        border-radius: 50%;
-        width: 55px;
-        height: 55px;
-        animation: spin 0.9s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    .loading-text {
-        margin-top: 10px;
-        color: #0c7c3c;
-        font-weight: bold;
-    }
-
-    /* ==== RESPONSIVE ==== */
-    @media screen and (max-width: 768px) {
-        .perfil-wrapper {
-            padding: 1.5rem;
-        }
-        .perfil-foto {
-            width: 140px;
-            height: 140px;
-        }
-        .perfil-linea {
-            flex-wrap: wrap;
-        }
-        .btn-success {
-            width: 100%;
-        }
-    }
-
-    @media screen and (max-width: 480px) {
-        .perfil-foto {
-            width: 100px;
-            height: 100px;
-        }
-    }
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+    .avatar{width:140px;height:140px;}
+}
 </style>
 
-<!-- Overlay de carga -->
-<div class="overlay-loading" id="overlay-loading">
+<!-- OVERLAY -->
+<div class="overlay-loading" id="overlay">
     <div class="text-center">
         <div class="spinner"></div>
-        <div class="loading-text">Subiendo imagen...</div>
+        <p class="mt-3 fw-bold" style="color:#0c7c3c;">Procesando...</p>
     </div>
 </div>
 
-<div class="container-fluid mt-4 px-2">
-    <div class="perfil-wrapper mx-auto">
-        <!-- Encabezado -->
+<div class="container my-5">
+    <div class="perfil-container">
+
         <div class="perfil-header">
-            <h3><i class='bx bxs-user-account'></i> Perfil de Usuario</h3>
+            <h2>Perfil de Usuario</h2>
+            <p>Gestiona tu información personal</p>
         </div>
 
-        <div class="row g-4 align-items-start">
-            <!-- Foto y firma -->
-            <div class="col-lg-4 col-md-5 col-sm-12 text-center">
-                {% if usuario.foto %}
-                    <img src="{{ usuario.foto.url }}" alt="Foto de perfil" class="perfil-foto img-fluid mb-3">
-                {% else %}
-                    <img src="/static/img/default-user.png" alt="Foto de perfil" class="perfil-foto img-fluid mb-3">
-                {% endif %}
+        <div class="row g-4">
+            <!-- IZQUIERDA -->
+            <div class="col-lg-4 text-center">
+                <div class="card-glass">
 
-                {% if puede_editar %}
-                <form action="{% url 'subir_foto' %}" method="post" enctype="multipart/form-data" id="form-foto">
-                    {% csrf_token %}
-                    <input type="file" name="foto" accept="image/*" id="input-foto" hidden required>
-                    <button type="button" class="btn btn-success mt-2" onclick="document.getElementById('input-foto').click();">
-                        <i class='bx bx-upload'></i> {% if usuario.foto %}Cambiar Foto{% else %}Subir Foto{% endif %}
-                    </button>
-                </form>
-                {% endif %}
+                    <div class="avatar-wrapper mb-3">
+                        <div class="avatar-ring"></div>
+                        <img src="{% if usuario.foto %}{{ usuario.foto.url }}{% else %}/static/img/default-user.png{% endif %}" class="avatar">
+                    </div>
 
-                <!-- Firma -->
-                <div class="mt-4">
-                    {% if not usuario.firma %}
-                        {% if puede_editar %}
-                        <form action="{% url 'subir_firma' %}" method="post" enctype="multipart/form-data" class="perfil-info-box" id="form-firma">
-                            {% csrf_token %}
-                            <div class="perfil-linea"><strong><i class='bx bxs-pen'></i> Subir firma (PNG):</strong></div>
-                            <input type="file" name="firma" id="input-firma" accept="image/png" hidden required>
-                            <button type="button" class="btn btn-success mt-2" onclick="document.getElementById('input-firma').click();">
-                                <i class='bx bx-upload'></i> Subir firma
-                            </button>
-                        </form>
-                        {% endif %}
-                    {% else %}
-                        <div class="perfil-info-box firma-box text-center">
-                            <div class="perfil-linea justify-content-center">
-                                <strong><i class='bx bxs-pen'></i> Firma registrada:</strong>
-                            </div>
-                            <img src="{{ usuario.firma.url }}" alt="Firma del usuario" class="img-fluid mt-2">
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Datos -->
-            <div class="col-lg-8 col-md-7 col-sm-12">
-                <div class="perfil-info-box">
-                    <div class="perfil-linea"><strong>Nombre:</strong> <span>{{ usuario.first_name }} {{ usuario.last_name }}</span></div>
-                    <div class="perfil-linea"><strong>Código:</strong> <span>{{ usuario.codigo }}</span></div>
-                    <div class="perfil-linea"><strong>Rol:</strong> <span>{{ usuario.get_rol_display }}</span></div>
-                    <div class="perfil-linea"><strong>Programa:</strong> <span>{{ usuario.programa|default:"No especificado" }}</span></div>
-                </div>
-
-                {% if puede_editar %}
-                <div class="perfil-info-box">
-                    <form method="post" action="{% url 'guardar_cedula_telefono' %}" class="w-100">
+                    {% if puede_editar %}
+                    <form method="post" enctype="multipart/form-data" action="{% url 'subir_foto' %}" id="form-foto">
                         {% csrf_token %}
-                        <div class="perfil-linea mb-2">
-                            <strong>Cédula:</strong>
-                            {% if usuario.cedula %}
-                                <span>{{ usuario.cedula }}</span>
-                            {% else %}
-                                <input type="text" name="cedula" id="cedula" class="form-control" required placeholder="Ingrese su cédula" value="{{ request.POST.cedula }}">
-                                {% if error_cedula %}
-                                    <small class="text-danger">{{ error_cedula }}</small>
-                                {% endif %}
-                            {% endif %}
-                        </div>
-
-                        <div class="perfil-linea mt-3">
-                            <strong>Teléfono:</strong>
-                            {% if usuario.telefono %}
-                                <span>{{ usuario.telefono }}</span>
-                            {% else %}
-                                <input type="text" name="telefono" class="form-control" required placeholder="Ingrese su teléfono" value="{{ request.POST.telefono }}">
-                            {% endif %}
-                        </div>
-
-                        {% if not usuario.cedula or not usuario.telefono %}
-                            <div class="mt-3">
-                                <button type="submit" class="btn btn-success">
-                                    <i class='bx bx-save'></i> Guardar
-                                </button>
-                            </div>
-                        {% endif %}
+                        <input type="file" name="foto" id="input-foto" hidden>
+                        <button type="button" class="btn-wow" id="btn-foto">
+    <i class='bx bx-upload'></i> Cambiar foto
+</button>
                     </form>
+                    {% endif %}
+
+                    <div class="mt-4">
+                        {% if usuario.firma %}
+                            <img src="{{ usuario.firma.url }}" class="firma-img img-fluid">
+                        {% elif puede_editar %}
+                            <form method="post" enctype="multipart/form-data" action="{% url 'subir_firma' %}" id="form-firma">
+                                {% csrf_token %}
+                                <input type="file" name="firma" id="input-firma" hidden>
+                                <button type="button" class="btn-wow mt-2" onclick="inputFirma.click()">
+                                    Subir firma
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+
                 </div>
-                {% else %}
-                <div class="perfil-info-box">
-                    <div class="perfil-linea"><strong>Cédula:</strong> <span>{{ usuario.cedula|default:"No registrada" }}</span></div>
-                    <div class="perfil-linea"><strong>Teléfono:</strong> <span>{{ usuario.telefono|default:"No registrado" }}</span></div>
+            </div>
+
+            <!-- DERECHA -->
+            <div class="col-lg-8">
+                <div class="card-glass mb-4">
+                    <div class="info-line"><strong>Nombre</strong><span>{{ usuario.first_name }} {{ usuario.last_name }}</span></div>
+                    <div class="info-line"><strong>Código</strong><span>{{ usuario.codigo }}</span></div>
+                    <div class="info-line"><strong>Rol</strong><span>{{ usuario.get_rol_display }}</span></div>
+                    <div class="info-line"><strong>Programa</strong><span>{{ usuario.programa|default:"No especificado" }}</span></div>
                 </div>
-                {% endif %}
+
+<div class="card-glass">
+
+    <!-- INFO SIEMPRE VISIBLE -->
+    <div class="info-line">
+        <strong>Cédula</strong>
+        <span>{{ usuario.cedula|default:"No registrada" }}</span>
+    </div>
+
+    <div class="info-line">
+        <strong>Teléfono</strong>
+        <span>{{ usuario.telefono|default:"No registrado" }}</span>
+    </div>
+
+    {% if puede_editar and not usuario.cedula or puede_editar and not usuario.telefono %}
+    <hr>
+
+    <!-- FORMULARIO SOLO LA PRIMERA VEZ -->
+    <form method="post" action="{% url 'guardar_cedula_telefono' %}">
+        {% csrf_token %}
+
+        {% if not usuario.cedula %}
+        <input
+            class="form-control mb-3"
+            name="cedula"
+            placeholder="Ingrese su cédula"
+            required
+        >
+        {% endif %}
+
+        {% if not usuario.telefono %}
+        <input
+            class="form-control mb-3"
+            name="telefono"
+            placeholder="Ingrese su teléfono"
+            required
+        >
+        {% endif %}
+
+        <button class="btn-wow">
+            <i class='bx bx-save'></i> Guardar datos
+        </button>
+    </form>
+    {% endif %}
+
+</div>
             </div>
         </div>
+
     </div>
 </div>
 
 <script>
-    const overlay = document.getElementById('overlay-loading');
-    const inputFoto = document.getElementById('input-foto');
-    const inputFirma = document.getElementById('input-firma');
+const overlay = document.getElementById('overlay');
+const inputFoto = document.getElementById('input-foto');
+const btnFoto = document.getElementById('btn-foto');
+const inputFirma = document.getElementById('input-firma');
 
-    inputFoto?.addEventListener('change', () => {
-        if (inputFoto.files.length > 0) {
-            overlay.style.display = 'flex';
-            document.getElementById('form-foto').submit();
-        }
-    });
+btnFoto?.addEventListener('click', () => {
+    inputFoto.click();
+});
 
-    inputFirma?.addEventListener('change', () => {
-        if (inputFirma.files.length > 0) {
-            overlay.style.display = 'flex';
-            document.getElementById('form-firma').submit();
-        }
-    });
+inputFoto?.addEventListener('change', () => {
+    if (inputFoto.files.length > 0) {
+        overlay.style.display = 'flex';
+        document.getElementById('form-foto').submit();
+    }
+});
+
+inputFirma?.addEventListener('change', () => {
+    if (inputFirma.files.length > 0) {
+        overlay.style.display = 'flex';
+        document.getElementById('form-firma').submit();
+    }
+});
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>

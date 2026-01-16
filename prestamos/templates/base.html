@@ -19,13 +19,15 @@
     <!-- Boxicons y Bootstrap Icons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
 
     {% block extra_css %}
+
 <style>
     body {
-        background-color: #111;
-        color: #f0f0f0;
-    }
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+                 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
 
     .main-sidebar {
         background-color: #0c7c3c;
@@ -284,6 +286,188 @@
     }
 }
 
+/* =========================
+   BRANDING EDUCATIVO PREMIUM
+   ========================= */
+
+.edu-brand {
+    padding: 0.8rem 1.1rem;
+    background: linear-gradient(135deg, #0c7c3c, #14a34d);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.edu-brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.edu-brand-icon {
+    font-size: 1.6rem;              /* 🔹 más pequeño que el financiero */
+    color: #c8ffe2;
+    text-shadow: 0 0 10px rgba(200,255,226,0.5);
+    flex-shrink: 0;
+}
+
+.edu-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    overflow: hidden;
+}
+
+.edu-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.edu-subtitle {
+    font-size: 0.7rem;
+    color: #d6ffe8;
+    opacity: 0.85;
+    white-space: nowrap;
+}
+
+/* Hover institucional */
+.edu-brand:hover {
+    background: linear-gradient(135deg, #0f8f45, #18b35a);
+}
+
+/* Sidebar colapsado (AdminLTE) */
+.sidebar-collapse .edu-brand-text {
+    display: none;
+}
+
+.sidebar-collapse .edu-brand-wrap {
+    justify-content: center;
+}
+
+/* =========================
+   🌗 TOGGLE TEMA CLARO / OSCURO
+   ========================= */
+.theme-toggle {
+    width: 56px;
+    height: 28px;
+    background: #222;
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px;
+    transition: background 0.3s ease;
+}
+
+.theme-toggle i {
+    font-size: 0.75rem;
+    z-index: 2;
+}
+
+.theme-toggle .sun {
+    color: #f5c542;
+}
+
+.theme-toggle .moon {
+    color: #cfd8dc;
+}
+
+.theme-toggle .toggle-ball {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    left: 4px;
+    transition: all 0.3s ease;
+}
+/* 🌙 Toggle activo en oscuro */
+body.dark-mode .theme-toggle {
+    background: #222;
+}
+
+body.dark-mode .theme-toggle .toggle-ball {
+    left: 32px;
+}
+
+/* =========================
+   🌙 TEMA OSCURO GLOBAL (REAL)
+   ========================= */
+
+body.dark-mode {
+    background-color: #0f1115;
+    color: #e4e6eb;
+}
+
+/* Navbar */
+body.dark-mode .main-header {
+    background: #161a22 !important;
+    border-bottom: 1px solid #2a2f3a;
+}
+
+body.dark-mode .main-header .nav-link {
+    color: #e4e6eb !important;
+}
+
+/* Sidebar */
+body.dark-mode .main-sidebar {
+    background: #111827 !important;
+}
+
+body.dark-mode .brand-link {
+    background: #111827 !important;
+}
+
+/* Contenido */
+body.dark-mode .content-wrapper {
+    background: #0f1115 !important;
+}
+
+/* Cards, tablas, dropdowns */
+body.dark-mode .card,
+body.dark-mode .dropdown-menu,
+body.dark-mode .modal-content,
+body.dark-mode .table {
+    background-color: #161a22;
+    color: #e4e6eb;
+}
+
+body.dark-mode .dropdown-item {
+    color: #e4e6eb;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: #2a2f3a;
+}
+
+/* Footer */
+body.dark-mode .main-footer {
+    background: #111827;
+    border-top: 1px solid #2a2f3a;
+    color: #bfc5d2;
+}
+
+body.dark-mode #noti-list {
+    background: #161a22 !important;
+}
+
+body.dark-mode #noti-list .dropdown-item {
+    background: #1f2533 !important;
+    color: #e4e6eb !important;
+}
+
+body.dark-mode #noti-list .dropdown-item:hover {
+    background: #2a2f3a !important;
+}
+
+body.dark-mode #noti-list small {
+    color: #9aa4b2 !important;
+}
 
 
 </style>
@@ -319,6 +503,14 @@
                         <li><span class="dropdown-header">No tienes notificaciones</span></li>
                     </ul>
                 </li>
+<!-- 🌗 Toggle Claro / Oscuro -->
+<li class="nav-item d-flex align-items-center">
+    <div class="theme-toggle" id="themeToggle" title="Cambiar tema">
+        <i class="fas fa-sun sun"></i>
+        <div class="toggle-ball"></div>
+        <i class="fas fa-moon moon"></i>
+    </div>
+</li>
 
                 <!-- 🔒 Cerrar sesión -->
                 <li class="nav-item">
@@ -331,9 +523,18 @@
 
         <!-- Sidebar -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="{% url 'inicio' %}" class="brand-link">
-                <span class="brand-text font-weight-light">Sistema de Préstamos</span>
-            </a>
+            <a href="{% url 'inicio' %}" class="brand-link edu-brand">
+    <div class="edu-brand-wrap">
+        <i class="fas fa-book-open edu-brand-icon"></i>
+        <div class="edu-brand-text">
+            <span class="edu-title">Sistema de Préstamos</span>
+            <small class="edu-subtitle">Recursos educativos</small>
+        </div>
+    </div>
+</a>
+
+
+
 
             <div class="sidebar">
                 <!-- User panel -->
@@ -579,6 +780,32 @@ if ('serviceWorker' in navigator) {
 </script>
 
     {% block extra_js %}{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+    const toggle = document.getElementById("themeToggle");
+    const body = document.body;
+
+    // Cargar tema guardado
+    if (localStorage.getItem("theme") === "dark") {
+        body.classList.add("dark-mode");
+    }
+
+    toggle.addEventListener("click", function () {
+        body.classList.toggle("dark-mode");
+
+        if (body.classList.contains("dark-mode")) {
+            localStorage.setItem("theme", "dark");
+        } else {
+            localStorage.removeItem("theme");
+        }
+    });
+})();
+</script>
+
+
+
 </body>
 
 </html>

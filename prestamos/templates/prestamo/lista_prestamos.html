@@ -5,197 +5,233 @@
 
 {% block content %}
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* ===== BASE ===== */
+body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:#f6f8f7;
+}
+
+/* ===== PANEL ===== */
+.panel-wrapper{
+    background:rgba(255,255,255,.93);
+    backdrop-filter:blur(6px);
+    padding:2.6rem 2.2rem;
+    border-radius:20px;
+    box-shadow:0 12px 40px rgba(0,0,0,.1);
+    animation:fadeUp .45s ease both;
+}
+
+/* ===== HEADER ===== */
+.panel-header{
+    border-bottom:3px solid #0c7c3c;
+    padding-bottom:1.1rem;
+    margin-bottom:2.2rem;
+    text-align:center;
+}
+
+.panel-header h3{
+    color:#0c7c3c;
+    font-weight:800;
+    font-size:2rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+/* ===== CARD ===== */
+.prestamos-card{
+    border-radius:18px;
+    border:none;
+    overflow:hidden;
+    box-shadow:0 10px 32px rgba(0,0,0,.12);
+}
+
+.prestamos-card .card-header{
+    background:#0c7c3c;
+    color:#fff;
+    font-weight:700;
+    font-size:1.1rem;
+    padding:1rem 1.6rem;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+/* ===== BUSCADOR ===== */
+.buscador-container{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:1.2rem;
+    flex-wrap:wrap;
+}
+
+.buscador-input{
+    padding:.65rem 1.1rem;
+    border:1px solid #dcdcdc;
+    border-radius:12px;
+    width:320px;
+    max-width:100%;
+    font-size:.95rem;
+    transition:.25s ease;
+}
+
+.buscador-input:focus{
+    border-color:#0c7c3c;
+    outline:none;
+    box-shadow:0 0 0 3px rgba(12,124,60,.18);
+}
+
+/* ===== TABLE ===== */
+.table th,
+.table td{
+    vertical-align:middle!important;
+    text-align:center;
+    font-size:.95rem;
+}
+
+.table-hover tbody tr{
+    transition:.25s ease;
+}
+
+.table-hover tbody tr:hover{
+    background:#f3fff7;
+}
+
+/* ===== BADGES ===== */
+.badge-success,
+.badge-warning{
+    padding:.45rem .75rem;
+    border-radius:10px;
+    font-size:.85rem;
+    font-weight:600;
+}
+
+.badge-success{
+    background:#0c7c3c;
+    color:#fff;
+}
+
+.badge-warning{
+    background:#ffc107;
+    color:#222;
+}
+
+/* ===== BOTONES ACCIÓN ===== */
+.btn-accion{
+    border:1px solid #0c7c3c;
+    background:#fff;
+    color:#0c7c3c;
+    padding:.35rem .65rem;
+    border-radius:10px;
+    font-size:.85rem;
+    font-weight:500;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin:2px;
+    transition:.25s ease;
+    text-wrap:nowrap;
+}
+
+.btn-accion:hover{
+    background:#0c7c3c;
+    color:#fff;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+    text-decoration:none;
+}
+
+/* ===== BOTÓN AYUDA ===== */
+.btn-ayuda{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:#fff;
+    color:#0c7c3c;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,.25);
+    transition:.25s ease;
+}
+
+.btn-ayuda:hover{
+    background:#14a34d;
+    color:#fff;
+    transform:scale(1.15) rotate(8deg);
+}
+
+/* ===== MENSAJE VACÍO ===== */
+.mensaje-vacio{
+    text-align:center;
+    padding:1.4rem;
+    color:#999;
+    font-size:1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:992px){
+
+    .table thead{display:none;}
+
+    .table,
+    .table tbody,
+    .table tr,
+    .table td{
+        display:block;
+        width:100%;
     }
 
-    .panel-wrapper {
-        background-color: #ffffff;
-        padding: 2.5rem 2rem;
-        border-radius: 16px;
-        color: #333;
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-        width: 100%;
+    .table tr{
+        margin-bottom:1.2rem;
+        border:1px solid #e0e0e0;
+        border-radius:16px;
+        box-shadow:0 4px 14px rgba(0,0,0,.08);
+        padding:.9rem;
+        background:#fff;
     }
 
-    .panel-header {
-        border-bottom: 3px solid #0c7c3c;
-        padding-bottom: 1rem;
-        margin-bottom: 2rem;
-        text-align: center;
+    .table td{
+        text-align:left;
+        padding:.6rem .8rem;
+        border:none;
+        position:relative;
     }
 
-    .panel-header h3 {
-        color: #0c7c3c;
-        font-weight: bold;
-        font-size: 1.9rem;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
+    .table td::before{
+        content:attr(data-label);
+        font-weight:600;
+        color:#0c7c3c;
+        display:block;
+        margin-bottom:.25rem;
+        font-size:.9rem;
     }
 
-    /* 📋 Tarjeta contenedora */
-    .prestamos-card {
-        border-radius: 14px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        border: none;
-        overflow: hidden;
+    .buscador-container{justify-content:center;}
+    .panel-wrapper{padding:1.3rem;}
+    .panel-header h3{font-size:1.55rem;}
+    .prestamos-card .card-header{
+        justify-content:center;
+        font-size:1rem;
     }
+}
 
-    .prestamos-card .card-header {
-        background-color: #0c7c3c;
-        color: white;
-        border-top-left-radius: 14px;
-        border-top-right-radius: 14px;
-        font-weight: bold;
-        font-size: 1.1rem;
-        padding: 1rem 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+@media(max-width:400px){
+    .buscador-input{width:100%;}
+}
 
-    .buscador-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 1rem;
-        flex-wrap: wrap;
-    }
-
-    .buscador-input {
-        padding: 0.6rem 1rem;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        width: 300px;
-        max-width: 100%;
-        transition: all 0.3s ease;
-    }
-
-    .buscador-input:focus {
-        border-color: #0c7c3c;
-        outline: none;
-        box-shadow: 0 0 6px rgba(12, 124, 60, 0.4);
-    }
-
-    .table th,
-    .table td {
-        vertical-align: middle !important;
-        text-align: center;
-        font-size: 0.95rem;
-    }
-
-    .badge-success {
-        background-color: #0c7c3c;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    .badge-warning {
-        background-color: #ffc107;
-        color: #333;
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    .btn-accion {
-        border: 1px solid #0c7c3c;
-        color: #0c7c3c;
-        background-color: #fff;
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        margin: 2px;
-        text-wrap: nowrap;
-    }
-
-    .btn-accion:hover {
-        background-color: #0c7c3c;
-        color: #fff;
-        text-decoration: none;
-    }
-
-    .mensaje-vacio {
-        text-align: center;
-        padding: 1.2rem;
-        color: #999;
-        font-size: 1rem;
-    }
-
-    /* ✅ Estilos responsive */
-    @media (max-width: 992px) {
-        .table thead {
-            display: none;
-        }
-
-        .table,
-        .table tbody,
-        .table tr,
-        .table td {
-            display: block;
-            width: 100%;
-        }
-
-        .table tr {
-            margin-bottom: 1.2rem;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 0.8rem;
-        }
-
-        .table td {
-            text-align: left;
-            padding: 0.6rem 0.8rem;
-            position: relative;
-            border: none;
-        }
-
-        .table td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: #0c7c3c;
-            display: block;
-            margin-bottom: 0.25rem;
-            font-size: 0.9rem;
-        }
-
-        .buscador-container {
-            justify-content: center;
-        }
-
-        .panel-wrapper {
-            padding: 1.2rem;
-        }
-
-        .panel-header h3 {
-            font-size: 1.5rem;
-        }
-
-        .prestamos-card .card-header {
-            font-size: 1rem;
-            text-align: center;
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 400px) {
-        .buscador-input {
-            width: 100%;
-        }
-    }
+/* ===== ANIMACIÓN ===== */
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:none;}
+}
 </style>
+
 
 <div class="container-fluid mt-4 px-2">
     <div class="panel-wrapper mx-auto">
@@ -210,9 +246,16 @@
 
         <!-- 📋 Tabla dentro de tarjeta -->
         <div class="card prestamos-card">
-            <div class="card-header">
-                <i class="fas fa-clipboard-list"></i> Lista de Préstamos
-            </div>
+            <div class="card-header d-flex align-items-center gap-2">
+    <i class="fas fa-clipboard-list"></i>
+    <span>Lista de Préstamos</span>
+
+    <button type="button"
+        class="btn-ayuda ms-2"
+        data-video="dQw4w9WgXcQ"
+        title="¿Cómo funciona la gestión de préstamos?">?</button>
+</div>
+
             <div class="card-body table-responsive">
                 {% if prestamos %}
                 <table class="table table-bordered table-hover align-middle mb-0" id="tablaPrestamos">
@@ -309,6 +352,28 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalAyuda" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Video de ayuda</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="videoAyuda"
+         width="100%"
+         height="420"
+         src=""
+         frameborder="0"
+         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+         referrerpolicy="strict-origin-when-cross-origin"
+         allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
@@ -358,6 +423,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const ayudaButtons = document.querySelectorAll(".btn-ayuda");
+    const iframe = document.getElementById("videoAyuda");
+    const modalElement = document.getElementById("modalAyuda");
+    const modal = new bootstrap.Modal(modalElement);
+
+    ayudaButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const video = this.dataset.video;
+            iframe.src = "https://www.youtube.com/embed/" + video + "?autoplay=1&rel=0";
+            modal.show();
+        });
+    });
+
+    modalElement.addEventListener("hidden.bs.modal", function () {
+        iframe.src = "";
     });
 });
 </script>

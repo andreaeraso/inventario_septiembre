@@ -2,192 +2,244 @@
 
 {% block content %}
 <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* ===== BASE ===== */
+body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:#f6f8f7;
+}
+
+/* ===== CONTENEDOR PERFIL ===== */
+.perfil-wrapper{
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(6px);
+    padding:2.4rem 2.2rem;
+    border-radius:20px;
+    box-shadow:0 12px 38px rgba(0,0,0,.1);
+    animation:fadeUp .45s ease both;
+}
+
+/* ===== HEADER ===== */
+.perfil-header{
+    border-bottom:3px solid #0c7c3c;
+    padding-bottom:.7rem;
+    margin-bottom:1.8rem;
+    text-align:center;
+}
+
+.perfil-header h3{
+    color:#0c7c3c;
+    font-weight:800;
+    font-size:1.85rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+/* ===== BUSCADOR ===== */
+.buscador-container{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:1.2rem;
+}
+
+.buscador-input{
+    padding:.65rem 1.1rem;
+    border:1px solid #dcdcdc;
+    border-radius:12px;
+    width:320px;
+    max-width:100%;
+    font-size:.95rem;
+    transition:.25s ease;
+}
+
+.buscador-input:focus{
+    border-color:#0c7c3c;
+    outline:none;
+    box-shadow:0 0 0 3px rgba(12,124,60,.18);
+}
+
+/* ===== INFO BOX ===== */
+.perfil-info-box{
+    background:#f9fbfa;
+    padding:1.2rem;
+    border-radius:14px;
+    border-left:5px solid #0c7c3c;
+    box-shadow:0 4px 14px rgba(0,0,0,.05);
+}
+
+/* ===== TABLA ===== */
+.tabla-solicitudes{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.tabla-solicitudes thead{
+    background:#0c7c3c;
+    color:#fff;
+}
+
+.tabla-solicitudes th,
+.tabla-solicitudes td{
+    padding:12px;
+    border:1px solid #e1e1e1;
+    text-align:center;
+    font-size:.95rem;
+}
+
+.tabla-solicitudes tbody tr{
+    transition:.25s ease;
+}
+
+.tabla-solicitudes tbody tr:nth-child(even){
+    background:#f5f7f6;
+}
+
+.tabla-solicitudes tbody tr:hover{
+    background:#eefaf3;
+}
+
+/* ===== BADGES ===== */
+.badge-pendiente,
+.badge-aprobado,
+.badge-rechazado,
+.badge-otro{
+    padding:.45rem .75rem;
+    border-radius:10px;
+    font-weight:600;
+    font-size:.85rem;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.badge-pendiente{background:#ffc107;color:#333;}
+.badge-aprobado{background:#28a745;color:#fff;}
+.badge-rechazado{background:#dc3545;color:#fff;}
+.badge-otro{background:#6c757d;color:#fff;}
+
+/* ===== BOTONES ===== */
+.btn-accion{
+    border-radius:10px;
+    padding:.4rem .75rem;
+    font-size:.85rem;
+    font-weight:600;
+    transition:.25s ease;
+}
+
+.btn-accion:hover{
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+/* ===== MENSAJE VACÍO ===== */
+.mensaje-vacio{
+    text-align:center;
+    padding:1.3rem;
+    color:#999;
+    font-size:1rem;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:992px){
+
+    .tabla-solicitudes thead{display:none;}
+
+    .tabla-solicitudes,
+    .tabla-solicitudes tbody,
+    .tabla-solicitudes tr,
+    .tabla-solicitudes td{
+        display:block;
+        width:100%;
     }
 
-    .perfil-wrapper {
-        background-color: #ffffff;
-        padding: 2rem;
-        border-radius: 12px;
-        color: #333;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        width: 100%;
+    .tabla-solicitudes tr{
+        margin-bottom:1.2rem;
+        border:1px solid #e0e0e0;
+        border-radius:16px;
+        box-shadow:0 4px 14px rgba(0,0,0,.08);
+        padding:.9rem;
+        background:#fff;
     }
 
-    .perfil-header {
-        border-bottom: 3px solid #0c7c3c;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
+    .tabla-solicitudes td{
+        text-align:left;
+        padding:.6rem .8rem;
+        border:none;
+        position:relative;
     }
 
-    .perfil-header h3 {
-        color: #0c7c3c;
-        font-weight: bold;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
+    .tabla-solicitudes td::before{
+        content:attr(data-label);
+        font-weight:600;
+        color:#0c7c3c;
+        display:block;
+        margin-bottom:.25rem;
+        font-size:.9rem;
     }
 
-    .buscador-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 1rem;
+    .buscador-container{justify-content:center;}
+}
+
+@media(max-width:400px){
+    .buscador-input{width:100%;}
+}
+
+/* ===== ANIMACIÓN ===== */
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:none;}
+}
+
+/* ===== FIX VISIBILIDAD TEXTO (CRÍTICO) ===== */
+
+/* Texto general siempre oscuro */
+.tabla-solicitudes td{
+    color:#2c2c2c;
+}
+
+/* Labels en responsive (data-label) */
+.tabla-solicitudes td::before{
+    color:#0c7c3c;
+    font-weight:700;
+}
+
+/* Filas en móvil */
+@media(max-width:992px){
+
+    .tabla-solicitudes tr{
+        background:#ffffff !important;
     }
 
-    .buscador-input {
-        padding: 0.6rem 1rem;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        width: 300px;
-        max-width: 100%;
-        transition: all 0.3s ease;
+    .tabla-solicitudes td{
+        background:transparent;
+        color:#2c2c2c !important;
     }
+}
 
-    .buscador-input:focus {
-        border-color: #0c7c3c;
-        outline: none;
-        box-shadow: 0 0 6px rgba(12, 124, 60, 0.4);
-    }
+/* Links dentro de tabla */
+.tabla-solicitudes a{
+    color:#0c7c3c;
+    font-weight:600;
+}
 
-    .perfil-info-box {
-        background-color: #f8f8f8;
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #0c7c3c;
-    }
+.tabla-solicitudes a:hover{
+    color:#087233;
+    text-decoration:underline;
+}
 
-    .tabla-solicitudes {
-        width: 100%;
-        border-collapse: collapse;
-    }
+/* Badges NO heredan colores raros */
+.badge-pendiente,
+.badge-aprobado,
+.badge-rechazado,
+.badge-otro{
+    color:#fff;
+}
 
-    .tabla-solicitudes thead {
-        background-color: #0c7c3c;
-        color: white;
-    }
+.badge-pendiente{color:#333;}
 
-    .tabla-solicitudes th,
-    .tabla-solicitudes td {
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-        font-size: 0.95rem;
-    }
-
-    .tabla-solicitudes tbody tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    .tabla-solicitudes tbody tr:hover {
-        background-color: #e6f5ea;
-    }
-
-    /* BADGES */
-    .badge-pendiente {
-        background-color: #ffc107;
-        color: #333;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .badge-aprobado {
-        background-color: #28a745;
-        color: #fff;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .badge-rechazado {
-        background-color: #dc3545;
-        color: #fff;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    .badge-otro {
-        background-color: #6c757d;
-        color: #fff;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: 500;
-    }
-
-    /* BOTONES */
-    .btn-accion {
-        border-radius: 6px;
-        padding: 6px 12px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: 0.2s ease-in-out;
-    }
-
-    .btn-accion:hover {
-        transform: scale(1.05);
-    }
-
-    .mensaje-vacio {
-        text-align: center;
-        padding: 1rem;
-        color: #999;
-    }
-
-    /* ✅ RESPONSIVE */
-    @media (max-width: 992px) {
-        .tabla-solicitudes thead {
-            display: none;
-        }
-
-        .tabla-solicitudes,
-        .tabla-solicitudes tbody,
-        .tabla-solicitudes tr,
-        .tabla-solicitudes td {
-            display: block;
-            width: 100%;
-        }
-
-        .tabla-solicitudes tr {
-            margin-bottom: 1.2rem;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            padding: 0.8rem;
-            background-color: #f5fff7;
-        }
-
-        .tabla-solicitudes td {
-            text-align: left;
-            padding: 0.6rem 0.8rem;
-            position: relative;
-            border: none;
-        }
-
-        .tabla-solicitudes td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: #0c7c3c;
-            display: block;
-            margin-bottom: 0.25rem;
-            font-size: 0.9rem;
-        }
-
-        .buscador-container {
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 400px) {
-        .buscador-input {
-            width: 100%;
-        }
-    }
 </style>
+
 
 <div class="container-fluid mt-4 px-2">
     <div class="perfil-wrapper mx-auto">

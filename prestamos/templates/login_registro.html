@@ -85,6 +85,39 @@
     transition: all 0.3s 
 ease;
 }
+.registro-header {
+    align-items: center;
+    justify-content: center;
+}
+
+.registro-titulo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0a7735;
+}
+
+.registro-header .ayuda-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-box-borde .ayuda-btn {
+    position: absolute;
+    top: -20px;      /* 🔼 baja o sube */
+    right: 34px;    /* ⬅️ mueve a la izquierda */
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
 
 /* Texto */
 .install-text {
@@ -190,7 +223,9 @@ ease;
             object-fit: contain;
             }
 
-
+.register-box-borde .input-box:last-of-type {
+    margin-bottom: 10px;
+}
 .login-box-borde {
     padding: 90px 70px;            /* 🔹 Aumenta el tamaño interno (más grande) */
     margin-top: 50px;              /* 🔹 Lo empuja hacia abajo */
@@ -245,7 +280,7 @@ ease;
             align-items: center;
             color: #333;
             text-align: center;
-            padding: 40px;
+            padding: 24px 29px 28px 26px;
             z-index: 1;
             transition: .6s ease-in-out 1.2s, visibility 0s 1s;
         }
@@ -270,7 +305,7 @@ ease;
 
         .input-box input {
             width: 100%;
-            padding: 6px 28px 6px 10px; /* 🔸 Menos alto */
+            padding: 2px 28px 6px 10px; /* 🔸 Menos alto */
             font-size: 12px;            /* 🔸 Letra más pequeña */
             background: #f2f2f2;
             border-radius: 5px;
@@ -408,7 +443,7 @@ ease;
 
         .input-box {
             position: relative;
-            margin: 15px 0 25px;
+            margin: 15px 0 10px;
             /* deja espacio para el mensaje */
         }
 
@@ -531,6 +566,41 @@ ease;
     margin-right: auto;
 }
 
+.login-box-borde .ayuda-btn {
+    position: absolute;
+    top: 7px;      /* 🔼 baja o sube */
+    right: 8px;    /* ⬅️ mueve a la izquierda */
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+.register-box-borde .input-box:last-of-type {
+    margin-bottom: 10px;
+}
+.registro-header {
+    margin-top: 5px;
+    margin-bottom: 3px;
+    padding-top: 3px;
+}
+
+.registro-titulo {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0a7735;
+}
+
+.registro-header .ayuda-btn {
+    width: 25px;
+    height: 25px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
             .container {
                 height: calc(100vh - 100px);
@@ -761,7 +831,8 @@ ease;
     font-weight: 700;
     color: #0a7735;
     text-align: center;
-    margin-bottom: 20px;
+    margin-top: 30px;   
+    margin-bottom: 30px;
     letter-spacing: 0.5px;
 }
 
@@ -789,20 +860,7 @@ ease;
     transition: background 0.3s 
 ease, transform 0.2s 
 ease;
-}
-
-
-
-
-
-
-    }
-
-
-
-
-
-
+}  }
     </style>
     
 </head>
@@ -826,9 +884,24 @@ ease;
         <input type="hidden" name="form_type" value="login">
       
 
-        <!-- CUADRO VERDE -->
-<div class="login-box-borde">
-    <p class="titulo-login">Sistema de Préstamo de Equipos Académicos de la Universidad de Nariño</p>
+<div class="login-box-borde position-relative">
+
+    <!-- HEADER LOGIN -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+
+                <!-- BOTÓN AYUDA LOGIN -->
+        <button type="button"
+            class="btn btn-outline-success btn-sm rounded-circle ayuda-btn"
+            data-video="kzUVJOzYboU"
+            title="¿Cómo iniciar sesión?">
+            <i class="fas fa-question"></i>
+        </button>
+    </div>
+
+
+        <p class="titulo-login ">
+            Sistema de Préstamo de Equipos Académicos de la Universidad de Nariño
+        </p>
 
     <div class="input-login">
         <input type="text" name="codigo" placeholder="Código" required>
@@ -875,7 +948,22 @@ ease;
         <input type="hidden" name="form_type" value="registro">
 
         <!-- CUADRO VERDE -->
-        <div class="register-box-borde">
+        <div class="register-box-borde position-relative">
+
+            <!-- HEADER REGISTRO -->
+<div class="registro-header d-flex align-items-center justify-content-between ">
+    <h4 class="registro-titulo ">
+       Formulario de Registro
+    </h4>
+
+    <button type="button"
+        class="btn btn-outline-success btn-sm rounded-circle ayuda-btn"
+        data-video="dQw4w9WgXcQ"
+        title="¿Cómo registrarse?">
+        <i class="fas fa-question"></i>
+    </button>
+</div>
+
 
             <!-- Nombre y Apellido en fila -->
             <div class="form-row">
@@ -951,6 +1039,8 @@ ease;
             {% endif %}
             {% endfor %}
             {% endif %}
+
+
 
             <button type="submit" class="btn">Registrarse</button>
         </div> <!-- 🔰 cierre del cuadro verde -->
@@ -1063,7 +1153,7 @@ ease;
     <script src="{% static 'adminlte/plugins/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'adminlte/js/adminlte.min.js' %}"></script>
 
-    <!-- Service Worker (de tu compañera) -->
+    <!-- Service Worker  -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
@@ -1265,6 +1355,48 @@ ease;
             font-weight: 600 !important;
         }
     </style>
+
+<div class="modal fade" id="modalAyuda" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Video de ayuda</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="videoAyuda"
+        width="100%"
+        height="420"
+        src=""
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+</iframe>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+$('.ayuda-btn').click(function () {
+    let video = $(this).data('video');
+
+    let url = `https://www.youtube.com/embed/${video}?rel=0&modestbranding=1&playsinline=1`;
+
+    $('#videoAyuda').attr('src', url);
+    $('#modalAyuda').modal('show');
+});
+
+$('#modalAyuda').on('hidden.bs.modal', function () {
+    $('#videoAyuda').attr('src', '');
+});
+</script>
+
+
 
 </body>
 

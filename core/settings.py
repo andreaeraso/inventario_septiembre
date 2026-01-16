@@ -31,6 +31,9 @@ ALLOWED_HOSTS = [
     'www.sisprestamos.udenar.edu.co',
     'localhost',
     '127.0.0.1',
+    '192.168.1.15', 
+    'localhost', 
+    '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -173,3 +176,14 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'sisprestamosudenar@gmail.com'
 EMAIL_HOST_PASSWORD = 'begz opsl apqy vein'  # generada en el paso 3
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+CSP_FRAME_SRC = (
+    "'self'",
+    "https://www.youtube.com",
+    "https://www.youtube-nocookie.com",
+)
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
+
