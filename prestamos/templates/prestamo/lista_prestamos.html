@@ -252,7 +252,7 @@ body{
 
     <button type="button"
         class="btn-ayuda ms-2"
-        data-video="dQw4w9WgXcQ"
+        data-video="CuYg4FGzrgw"
         title="¿Cómo funciona la gestión de préstamos?">?</button>
 </div>
 
@@ -300,34 +300,16 @@ body{
                                             <i class="fas fa-check"></i> Devolver
                                         </button>
                                     </form>
-                                    <button type="button" class="btn-accion" data-bs-toggle="modal" data-bs-target="#extenderModal{{ p.id }}">
+                                    <button type="button"
+                                    class="btn-accion"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#extenderModal{{ p.id }}"
+                                    data-bs-container="body">
                                         <i class="fas fa-clock"></i> Extender
                                     </button>
 
                                     <!-- Modal -->
-                                    <div class="modal fade" id="extenderModal{{ p.id }}" tabindex="-1" aria-labelledby="extenderModalLabel{{ p.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <form action="{% url 'extender_prestamo' p.id %}" method="post">
-                                                    {% csrf_token %}
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="extenderModalLabel{{ p.id }}">
-                                                            <i class="fas fa-clock"></i> Extender Préstamo
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <label for="nueva_fecha_{{ p.id }}" class="form-label">Nueva fecha de devolución</label>
-                                                        <input type="date" name="nueva_fecha" id="nueva_fecha_{{ p.id }}" class="form-control" required min="{{ p.fecha_devolucion|date:'Y-m-d' }}">
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                        <button type="submit" class="btn btn-success">Aceptar</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                 {% endif %}
 
                                 {% if p.contrato_prestamo %}
@@ -448,6 +430,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
+{% for p in prestamos %}
+<div class="modal fade" id="extenderModal{{ p.id }}" tabindex="-1"
+ aria-labelledby="extenderModalLabel{{ p.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form action="{% url 'extender_prestamo' p.id %}" method="post">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="extenderModalLabel{{ p.id }}">
+            <i class="fas fa-clock"></i> Extender Préstamo
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">Nueva fecha de devolución</label>
+          <input type="date"
+           name="nueva_fecha"
+           class="form-control"
+           required
+           min="{{ p.fecha_devolucion|date:'Y-m-d' }}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-success">
+            Aceptar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
 
 {% endblock %}
 
