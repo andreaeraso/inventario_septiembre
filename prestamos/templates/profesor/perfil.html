@@ -152,6 +152,21 @@ body{
 @media(max-width:768px){
     .avatar{width:140px;height:140px;}
 }
+
+/* ===== FIX DARK MODE PERFIL ===== */
+body.dark-mode .card-glass {
+    background: #ffffff !important;
+    color: #1f2933 !important;
+}
+
+body.dark-mode .info-line span,
+body.dark-mode .info-line strong {
+    color: #1f2933 !important;
+}
+
+body.dark-mode .perfil-header p {
+    color: #4b5563 !important;
+}
 </style>
 
 <!-- OVERLAY -->
@@ -290,6 +305,8 @@ inputFirma?.addEventListener('change', () => {
         document.getElementById('form-firma').submit();
     }
 });
+
+
 </script>
 
 
